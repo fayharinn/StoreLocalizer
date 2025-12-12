@@ -448,6 +448,53 @@ export async function testApiConnection(config) {
   }
 }
 
+// Simple text completion for ASO keyword generation and similar tasks
+export async function translateText(prompt, sourceLocale, targetLocale, config) {
+  const { provider, apiKey, model, region } = config
+
+  const systemMessage = "You are a helpful assistant. Follow the user's instructions precisely and respond with only the requested output."
+
+  try {
+    let content
+    switch (provider) {
+      case 'openai':
+        // Direct OpenAI call without JSON response format
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemMessage },
+              { role: 'user', content: prompt }
+            ],
+          })
+        })
+        const openaiResult = await openaiResponse.json()
+        if (openaiResult.error) throw new Error(openaiResult.error.message)
+        content = openaiResult.choices[0].message.content
+        break
+      case 'bedrock':
+        content = await callBedrock(apiKey, model, region, systemMessage, prompt)
+        break
+      default:
+        throw new Error(`Unknown provider: ${provider}`)
+    }
+
+    // Clean up response
+    let result = content.trim()
+    if (result.startsWith('```')) {
+      result = result.replace(/^```\w*\n?/, '').replace(/```$/, '').trim()
+    }
+    return result
+  } catch (error) {
+    throw new Error(error.message || 'Translation failed')
+  }
+}
+
 export async function translateStrings(xcstringsData, targetLanguages, config, protectedWords = [], onProgress, concurrency = DEFAULT_CONCURRENT_REQUESTS, batchSize = DEFAULT_TEXTS_PER_BATCH) {
   const data = JSON.parse(JSON.stringify(xcstringsData)) // Deep clone
   const strings = data.strings || {}
