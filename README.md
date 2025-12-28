@@ -73,7 +73,7 @@ Configure your AI provider in the sidebar:
 4. Download the `.p8` private key file
 5. Enter credentials in the sidebar and upload the `.p8` file
 
-> **Note:** The private key is never saved to localStorage for security. You'll need to upload it each session.
+> **Note:** The private key can be saved encrypted and stored in localStorage to prevent clear-text persistence. All cryptographic operations happen locally in the browser; no key material is ever transmitted. Security relies on the browser environment and the strength of your password.
 
 ## Development
 
@@ -207,7 +207,6 @@ Contributions are welcome! Here's how to get started:
 - [ ] Dark/light theme toggle
 - [ ] Export translation reports
 - [ ] Keyboard shortcuts
-- [ ] Offline support with service workers
 
 ## License
 
