@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image } from 'lucide-react'
+import { useState } from 'react'
+import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor } from 'lucide-react'
+import { useTheme } from './ThemeProvider'
 import {
   Sidebar,
   SidebarContent,
@@ -47,6 +48,7 @@ export function AppSidebar({
   ascCredentials,
   onAscCredentialsChange
 }) {
+  const { theme, setTheme } = useTheme()
   const [isDraggingKey, setIsDraggingKey] = useState(false)
   const [aiSettingsOpen, setAiSettingsOpen] = useState(true)
   const [ascSettingsOpen, setAscSettingsOpen] = useState(true)
@@ -691,7 +693,47 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/50 bg-gradient-to-t from-sidebar to-transparent">
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 space-y-4">
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-between p-2 rounded-xl bg-muted/30">
+            <span className="text-xs font-medium text-muted-foreground">Theme</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setTheme('light')}
+                className={`p-2 rounded-lg transition-all ${
+                  theme === 'light' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+                title="Light mode"
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`p-2 rounded-lg transition-all ${
+                  theme === 'dark' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+                title="Dark mode"
+              >
+                <Moon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setTheme('system')}
+                className={`p-2 rounded-lg transition-all ${
+                  theme === 'system' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+                title="System theme"
+              >
+                <Monitor className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          
           <div className="flex items-center justify-center gap-2">
             <span className="text-xs text-muted-foreground">Crafted with</span>
             <span className="text-red-500">♥</span>

@@ -139,10 +139,10 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
   const scopedCss = useMemo(() => scopeCss(appscreenCss, '.appscreen-root'), [])
   const aiPayload = useMemo(() => {
     if (!aiConfig) return null
-    const apiKey = aiConfig.apiKeys?.openai || ''
-    const model = aiConfig.models?.openai || ''
-    const provider = aiConfig.provider === 'openai' ? 'openai' : ''
-    if (!apiKey && !model && !provider) return null
+    const provider = aiConfig.provider || 'openai'
+    const apiKey = aiConfig.apiKeys?.[provider] || ''
+    const model = aiConfig.models?.[provider] || ''
+    if (!apiKey && !model) return null
     return { apiKey, model, provider }
   }, [aiConfig])
 

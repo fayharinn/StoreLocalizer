@@ -97,3 +97,11 @@ function generateModelOptions(provider, selectedModel = null) {
         `<option value="${model.id}"${model.id === selected ? ' selected' : ''}>${model.name}</option>`
     ).join('\n');
 }
+
+// Expose functions globally for use in app.js
+window.llmProviders = llmProviders;
+window.getSelectedModel = getSelectedModel;
+window.getSelectedProvider = getSelectedProvider;
+window.getApiKey = getApiKey;
+window.validateApiKeyFormat = validateApiKeyFormat;
+window.generateModelOptions = generateModelOptions;

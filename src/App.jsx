@@ -20,6 +20,7 @@ import AppStoreConnect from './components/AppStoreConnect'
 import { AppSidebar } from './components/AppSidebar'
 import ScreenshotMaker from './components/ScreenshotMaker'
 import { Languages, Store, Upload, Sparkles, FileText, Download, Search, Edit3, Shield, Zap, Terminal, CheckCircle2, AlertCircle, Clock, X, Plus, ChevronLeft, ChevronRight, Image } from 'lucide-react'
+import { ThemeToggle } from './components/ThemeToggle'
 
 const PROVIDER_CONFIG_KEY = 'xcstrings-localizer-provider-config'
 const ASC_CONFIG_KEY = 'asc-localizer-config'
@@ -483,7 +484,7 @@ function App() {
   }
 
   return (
-    <div className="dark min-h-svh bg-background">
+    <div className="min-h-svh bg-background">
       <Toaster position="top-right" richColors closeButton />
       <SidebarProvider>
         <AppSidebar
@@ -541,6 +542,7 @@ function App() {
             </div>
 
             <div className="ml-auto flex items-center gap-3">
+              <ThemeToggle variant="compact" />
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs font-medium text-emerald-500">Local-first</span>

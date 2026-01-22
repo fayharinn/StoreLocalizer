@@ -95,6 +95,11 @@ appscreenBridge._ready = appscreenBridge._ready || false;
 appscreenBridge._initialized = appscreenBridge._initialized || false;
 window.AppscreenBridge = appscreenBridge;
 
+// Get the modal container - use .appscreen-root if embedded, otherwise document.body
+function getModalContainer() {
+    return document.querySelector('.appscreen-root') || document.body;
+}
+
 function runWhenBridgeReady(fn) {
     if (appscreenBridge._ready) {
         fn();
@@ -2783,45 +2788,87 @@ function applyLocalizationData(payload = {}) {
 function applyAiConfig(payload = {}) {
     const apiKey = payload.apiKey || '';
     const model = payload.model || '';
-    const provider = payload.provider || '';
+    const provider = payload.provider || 'openai';
 
-    if (apiKey) {
-        localStorage.setItem('openaiApiKey', apiKey);
-    }
-    if (model) {
-        localStorage.setItem('openaiModel', model);
-    }
-    if (provider === 'openai') {
-        localStorage.setItem('aiProvider', 'openai');
-    }
-
-    const input = document.getElementById('settings-api-key-openai');
-    if (input && apiKey) {
-        input.value = apiKey;
-        input.type = 'password';
-    }
-
-    const status = document.getElementById('settings-key-status-openai');
-    if (status) {
+    // Store config for the specified provider
+    const providerConfig = llmProviders[provider];
+    if (providerConfig) {
         if (apiKey) {
-            status.textContent = '✓ API key is saved';
-            status.className = 'settings-key-status success';
-        } else {
-            status.textContent = '';
-            status.className = 'settings-key-status';
+            localStorage.setItem(providerConfig.storageKey, apiKey);
         }
-    }
+        if (model) {
+            localStorage.setItem(providerConfig.modelStorageKey, model);
+        }
+        localStorage.setItem('aiProvider', provider);
 
-    const modelSelect = document.getElementById('settings-model-openai');
-    if (modelSelect && model) {
-        modelSelect.value = model;
-    }
+        // Update UI for the provider
+        const input = document.getElementById(`settings-api-key-${provider}`);
+        if (input && apiKey) {
+            input.value = apiKey;
+            input.type = 'password';
+        }
 
-    if (provider === 'openai') {
+        const status = document.getElementById(`settings-key-status-${provider}`);
+        if (status) {
+            if (apiKey) {
+                status.textContent = '✓ API key is saved';
+                status.className = 'settings-key-status success';
+            } else {
+                status.textContent = '';
+                status.className = 'settings-key-status';
+            }
+        }
+
+        const modelSelect = document.getElementById(`settings-model-${provider}`);
+        if (modelSelect && model) {
+            modelSelect.value = model;
+        }
+
+        // Update provider radio buttons
         document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
-            radio.checked = radio.value === 'openai';
+            radio.checked = radio.value === provider;
         });
-        updateProviderSection('openai');
+        updateProviderSection(provider);
+    } else {
+        // Fallback for legacy openai-only config
+        if (apiKey) {
+            localStorage.setItem('openaiApiKey', apiKey);
+        }
+        if (model) {
+            localStorage.setItem('openaiModel', model);
+        }
+        if (provider === 'openai') {
+            localStorage.setItem('aiProvider', 'openai');
+        }
+
+        const input = document.getElementById('settings-api-key-openai');
+        if (input && apiKey) {
+            input.value = apiKey;
+            input.type = 'password';
+        }
+
+        const status = document.getElementById('settings-key-status-openai');
+        if (status) {
+            if (apiKey) {
+                status.textContent = '✓ API key is saved';
+                status.className = 'settings-key-status success';
+            } else {
+                status.textContent = '';
+                status.className = 'settings-key-status';
+            }
+        }
+
+        const modelSelect = document.getElementById('settings-model-openai');
+        if (modelSelect && model) {
+            modelSelect.value = model;
+        }
+
+        if (provider === 'openai') {
+            document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
+                radio.checked = radio.value === 'openai';
+            });
+            updateProviderSection('openai');
+        }
     }
 }
 
@@ -3271,7 +3318,7 @@ function showAppAlert(message, type = 'info') {
                 </div>
             </div>
         `;
-        document.body.appendChild(overlay);
+        getModalContainer().appendChild(overlay);
 
         const okBtn = overlay.querySelector('.modal-btn-confirm');
         const close = () => {
@@ -3304,7 +3351,7 @@ function showAppConfirm(message, confirmText = 'Confirm', cancelText = 'Cancel')
                 </div>
             </div>
         `;
-        document.body.appendChild(overlay);
+        getModalContainer().appendChild(overlay);
 
         const confirmBtn = overlay.querySelector('.modal-btn-confirm');
         const cancelBtn = overlay.querySelector('.modal-btn-cancel');
@@ -3396,7 +3443,7 @@ function showTranslateConfirmDialog(providerName) {
             </div>
         `;
 
-        document.body.appendChild(overlay);
+        getModalContainer().appendChild(overlay);
 
         const select = document.getElementById('translate-source-lang');
         const countEl = document.getElementById('translate-text-count');
@@ -3518,7 +3565,7 @@ async function translateAllText() {
             }
         </style>
     `;
-    document.body.appendChild(progressOverlay);
+    getModalContainer().appendChild(progressOverlay);
 
     const progressText = document.getElementById('translate-progress-text');
     const progressDetail = document.getElementById('translate-progress-detail');
@@ -4553,12 +4600,12 @@ function replaceScreenshot(index) {
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
     fileInput.style.display = 'none';
-    document.body.appendChild(fileInput);
+    getModalContainer().appendChild(fileInput);
 
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) {
-            document.body.removeChild(fileInput);
+            fileInput.remove();
             return;
         }
 
@@ -4592,7 +4639,7 @@ function replaceScreenshot(index) {
         };
         reader.readAsDataURL(file);
 
-        document.body.removeChild(fileInput);
+        fileInput.remove();
     });
 
     // Trigger file dialog
