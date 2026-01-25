@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor } from 'lucide-react'
+import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 import {
   Sidebar,
@@ -282,6 +282,24 @@ export function AppSidebar({
                   <Image className={`h-5 w-5 ${activePage === 'screenshots' ? 'text-primary' : ''}`} />
                   <span>Screenshots</span>
                   {activePage === 'screenshots' && (
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={activePage === 'subscriptions'}
+                  onClick={() => onPageChange('subscriptions')}
+                  tooltip="Subscription Pricing & Translations"
+                  className={`rounded-xl h-11 px-3 transition-all duration-200 ${
+                    activePage === 'subscriptions'
+                      ? 'bg-primary/10 text-primary font-medium shadow-sm'
+                      : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <DollarSign className={`h-5 w-5 ${activePage === 'subscriptions' ? 'text-primary' : ''}`} />
+                  <span>Subscriptions</span>
+                  {activePage === 'subscriptions' && (
                     <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
                   )}
                 </SidebarMenuButton>

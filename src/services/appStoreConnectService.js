@@ -290,19 +290,41 @@ export async function getVersionLocalizations(credentials, versionId) {
   }))
 }
 
+// App Info states that allow editing
+const EDITABLE_APP_INFO_STATES = [
+  'PREPARE_FOR_SUBMISSION',
+  'DEVELOPER_REJECTED',
+  'REJECTED',
+  'METADATA_REJECTED',
+  'WAITING_FOR_REVIEW',
+  'INVALID_BINARY',
+]
+
 // Get app info localizations (name, subtitle)
 export async function getAppInfoLocalizations(credentials, appId) {
   const { keyId, issuerId, privateKey } = credentials
   const token = await generateToken(keyId, issuerId, privateKey)
 
-  // First get the app info
-  const appInfoData = await apiRequest(`/apps/${appId}/appInfos?limit=1`, token)
+  // Fetch all appInfos with their state to find the editable one
+  const appInfoData = await apiRequest(
+    `/apps/${appId}/appInfos?fields[appInfos]=appStoreState&limit=50`,
+    token
+  )
 
   if (!appInfoData.data || appInfoData.data.length === 0) {
     return { appInfoId: null, localizations: [] }
   }
 
-  const appInfoId = appInfoData.data[0].id
+  // Find an appInfo in an editable state, fallback to first one
+  const editableAppInfo = appInfoData.data.find(
+    info => EDITABLE_APP_INFO_STATES.includes(info.attributes?.appStoreState)
+  )
+  const appInfoId = editableAppInfo?.id || appInfoData.data[0].id
+  
+  console.log('[ASC] AppInfos found:', appInfoData.data.map(i => ({
+    id: i.id,
+    state: i.attributes?.appStoreState
+  })), 'Selected:', appInfoId)
 
   // Then get localizations
   const locData = await apiRequest(

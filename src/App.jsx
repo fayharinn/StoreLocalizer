@@ -19,7 +19,8 @@ import { parseXCStrings, generateXCStrings, getTranslationStats } from './utils/
 import AppStoreConnect from './components/AppStoreConnect'
 import { AppSidebar } from './components/AppSidebar'
 import ScreenshotMaker from './components/ScreenshotMaker'
-import { Languages, Store, Upload, Sparkles, FileText, Download, Search, Edit3, Shield, Zap, Terminal, CheckCircle2, AlertCircle, Clock, X, Plus, ChevronLeft, ChevronRight, Image } from 'lucide-react'
+import SubscriptionManager from './components/SubscriptionManager'
+import { Languages, Store, Upload, Sparkles, FileText, Download, Search, Edit3, Shield, Zap, Terminal, CheckCircle2, AlertCircle, Clock, X, Plus, ChevronLeft, ChevronRight, Image, DollarSign } from 'lucide-react'
 import { ThemeToggle } from './components/ThemeToggle'
 
 const PROVIDER_CONFIG_KEY = 'xcstrings-localizer-provider-config'
@@ -539,6 +540,19 @@ function App() {
                 <Image className="h-4 w-4" />
                 <span className="hidden sm:inline">Screenshots</span>
               </button>
+              <button
+                onClick={() => setActivePage('subscriptions')}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                  ${activePage === 'subscriptions'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                  }
+                `}
+              >
+                <DollarSign className="h-4 w-4" />
+                <span className="hidden sm:inline">Subscriptions</span>
+              </button>
             </div>
 
             <div className="ml-auto flex items-center gap-3">
@@ -573,6 +587,15 @@ function App() {
                   active={activePage === 'screenshots'}
                 />
               </div>
+
+              {/* Subscriptions Page */}
+              {activePage === 'subscriptions' && (
+                <SubscriptionManager 
+                  aiConfig={providerConfig} 
+                  ascCredentials={ascCredentials}
+                  onCredentialsChange={setAscCredentials}
+                />
+              )}
 
               {/* XCStrings Page */}
               {activePage === 'xcstrings' && (

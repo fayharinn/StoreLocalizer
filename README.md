@@ -1,106 +1,89 @@
-# iOS xcstrings & App Store Connect Localizer
+# 🚀 App Store Toolkit
 
 [![GitHub Stars](https://img.shields.io/github/stars/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/issues)
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-yellow.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
 [![Last Commit](https://img.shields.io/github/last-commit/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/commits/main)
 
-A modern web application for translating iOS/macOS `.xcstrings` files, App Store Connect metadata, and building polished App Store screenshots with AI-assisted workflows.
+**The all-in-one toolkit to grow your iOS app globally.** Localize your App Store listing, optimize subscription pricing by country, and generate stunning screenshots — all connected directly to App Store Connect.
 
-## Preview
+🌐 **Try it now:** [localizer.fayhe.com](https://localizer.fayhe.com/)
 
-![Welcome Screen](.github/welcome.png)
+---
 
-![ASO Keywords](.github/aso.png)
+## Why App Store Toolkit?
+
+Expanding your app internationally is painful:
+- Translating metadata manually takes forever
+- Pricing subscriptions fairly across 175 countries is guesswork
+- Creating localized screenshots for every language is tedious
+
+**App Store Toolkit solves all of this in one place.**
+
+---
+
+## ✨ Features
+
+### 🌍 AI-Powered Localization
+
+![App Store Connect](.github/aso.png)
+
+Translate your entire App Store listing to 40+ languages in minutes, not days.
+
+- One-click translation of app name, subtitle, description, keywords, and what's new
+- AI-powered with OpenAI or AWS Bedrock (Claude)
+- Protected words to keep brand names untranslated
+- Direct sync with App Store Connect — no copy-paste needed
+
+### 💰 Smart Subscription Pricing
+
+![Price Optimization](.github/priceoptimization.png)
+
+Stop leaving money on the table. Set fair prices based on each country's purchasing power.
+
+- GDP-adjusted pricing recommendations for 40+ countries
+- See current vs recommended prices at a glance
+- One-click price updates directly to App Store Connect
+- Automatic currency conversion and price point matching
+
+### 📱 Screenshot Generator
+
+![Screenshot Maker](.github/screenshots.png)
+
+Create professional App Store screenshots with device mockups in seconds.
+
+- 2D and 3D device frames (iPhone, Android)
+- Multi-language headlines with AI translation
+- Custom backgrounds, shadows, and layouts
+- Batch export all languages as ZIP
+
+---
+
+## 🚀 Quick Start
+
+### Online (Recommended)
+Just visit **[localizer.fayhe.com](https://localizer.fayhe.com/)** — no installation needed.
+
+### Self-Hosted
+```bash
+git clone https://github.com/fayharinn/iOS-App-Distribution-Localizer.git
+cd iOS-App-Distribution-Localizer
+npm install
+npm run dev
+```
+
+---
+
+## 🔐 Security First
+
+Your credentials never leave your browser:
+- `.p8` private keys are encrypted locally with your password
+- JWT tokens are generated client-side
+- No data is sent to any third-party server
+- Open source — audit the code yourself
 
 <details>
-<summary>More screenshots</summary>
-
-| App Store Connect | XCStrings Editor |
-|:-:|:-:|
-| ![App Store Connect](.github/preview-asc.png) | ![XCStrings Editor](.github/preview-xcstrings.png) |
-
-</details>
-
-## Quick Start
-
-### Try it Online
-Visit the live demo: **https://localizer.fayhe.com/**
-
-### Run Locally
-```bash
-git clone https://github.com/yourusername/xcstrings-localizer.git
-cd xcstrings-localizer
-npm install
-npm run dev
-```
-
-
-## Features
-
-### XCStrings Translation
-- Upload and parse `.xcstrings` localization files
-- Translate to 35+ languages using AI (OpenAI, AWS Bedrock)
-- Protected words that won't be translated (brand names, app names)
-- Batch processing with configurable concurrency
-- View and edit translations in a table editor
-- Export translated files
-
-### App Store Connect Integration
-- Connect to App Store Connect API with your credentials
-- Browse apps and versions
-- Auto-translate app metadata (description, what's new, keywords, promotional text)
-- Create new app versions
-- Edit localizations directly
-
-### Screenshot Maker
-- Build App Store-ready screenshots with 2D + 3D device mockups
-- Per-screenshot layouts: background, shadows, frames, and positioning
-- Multi-language headlines/subheadlines with AI translation
-- Inline formatting for emphasis (`*bold*`) and line breaks (`<br>`)
-- Batch export as ZIP per language
-
-## Tech Stack
-
-- **React 18** + **Vite**
-- **Tailwind CSS** + **shadcn/ui**
-- **jose** for JWT signing (App Store Connect API auth)
-- **Three.js** + Canvas for screenshot rendering
-
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/xcstrings-localizer.git
-cd xcstrings-localizer
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-## Configuration
-
-### AI Provider
-
-Configure your AI provider in the sidebar:
-
-| Provider | API Key Format | Models |
-|----------|---------------|--------|
-| OpenAI | `sk-...` | GPT-5-mini, GPT-5-nano |
-| AWS Bedrock | `ACCESS_KEY:SECRET_KEY` | Claude Haiku/Sonnet/Opus 4.5 |
-
-### App Store Connect
-
-1. Go to [App Store Connect > API Keys](https://appstoreconnect.apple.com/access/integrations/api)
-2. Create a new API key with appropriate permissions
-3. Note your **Key ID** and **Issuer ID**
-4. Download the `.p8` private key file
-5. Enter credentials in the sidebar and upload the `.p8` file
-
-#### Authentication Flow
+<summary>View authentication flow diagram</summary>
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -137,80 +120,70 @@ Configure your AI provider in the sidebar:
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Security notes:**
-- The `.p8` private key is **never** stored in plain text
-- Optional encryption with your password stores the key in localStorage
-- Only the JWT token (valid ~19 min) is cached in sessionStorage
-- On page reload: if JWT is still valid, auto-reconnects without needing the `.p8` key
-- All cryptographic operations happen locally in the browser
-- No key material is ever transmitted to any server
+</details>
 
+---
 
+## ⚙️ Setup
 
-### Project Structure
+### App Store Connect API
+1. Go to [App Store Connect > API Keys](https://appstoreconnect.apple.com/access/integrations/api)
+2. Create a key with Admin or App Manager role
+3. Note your **Key ID** and **Issuer ID**
+4. Download the `.p8` file
+5. Enter credentials in the app sidebar
 
-```
-src/
-├── components/
-│   ├── ui/              # shadcn/ui components
-│   ├── AppSidebar.jsx   # Main sidebar with configuration
-│   └── AppStoreConnect.jsx  # ASC page
-├── services/
-│   ├── translationService.js    # AI translation logic
-│   └── appStoreConnectService.js # ASC API client
-├── utils/
-│   └── xcstringsParser.js  # .xcstrings file parser
-├── hooks/
-│   └── use-mobile.js    # Responsive hook
-├── lib/
-│   └── utils.js         # Utility functions
-└── App.jsx              # Main application
-```
+### AI Translation
+Configure in the sidebar:
+| Provider | API Key Format |
+|----------|---------------|
+| OpenAI | `sk-...` |
+| AWS Bedrock | `ACCESS_KEY:SECRET_KEY` |
 
-## Production Deployment
+---
 
-### CORS Issue
+## 🛠 Tech Stack
 
-The App Store Connect API doesn't support CORS. In localhost you'll not have issue, but if you want to upload it online, here is the recommended option:
+- **React 19** + **Vite** — Fast, modern frontend
+- **Tailwind CSS** + **shadcn/ui** — Beautiful UI components
+- **Three.js** — 3D device mockups
+- **jose** — JWT signing for App Store Connect
 
+---
 
-#### Option 1: Cloudflare (Recommended)
+## 🌐 Deployment
 
-Deploy both the site and API proxy to Cloudflare:
+The App Store Connect API doesn't support CORS. For production, deploy with Cloudflare:
 
 ```bash
-# Install Wrangler CLI
-npm install -g wrangler
-wrangler login
-
-# 1. Deploy the API proxy (worker/)
+# Deploy API proxy
 wrangler deploy -c wrangler.proxy.jsonc
-# Note the URL: https://xcstrings-localizer-proxy.YOUR_ACCOUNT.workers.dev
 
-# 2. Set the proxy URL for production build
-echo "VITE_ASC_PROXY_URL=https://xcstrings-localizer-proxy.YOUR_ACCOUNT.workers.dev" > .env.production
+# Set proxy URL
+echo "VITE_ASC_PROXY_URL=https://your-proxy.workers.dev" > .env.production
 
-# 3. Build and deploy the site
+# Deploy site
 npm run build
-wrangler pages deploy dist --project-name=xcstrings-localizer
+wrangler pages deploy dist
 ```
 
-Your site will be live at `https://xcstrings-localizer.pages.dev`
+---
 
+## 🤝 Contributing
 
-## Contributing
+Contributions welcome! Feel free to open issues or submit PRs.
 
-Contributions are welcome!
+---
 
+## 📄 License
 
-## License
+GNU AGPLv3 — Free to use, modify, and distribute with attribution.
 
-Licensed under the GNU AGPLv3: https://www.gnu.org/licenses/agpl-3.0.html
+---
 
+## 🙏 Credits
 
-## Acknowledgments
-
-Screenshot generator forked from https://github.com/YUZU-Hub/appscreen by Stefan from yuzuhub.com
+Screenshot generator based on [appscreen](https://github.com/YUZU-Hub/appscreen) by Stefan from yuzuhub.com
 
 ---
 
