@@ -143,7 +143,8 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     const apiKey = aiConfig.apiKeys?.[provider] || ''
     const model = aiConfig.models?.[provider] || ''
     if (!apiKey && !model) return null
-    return { apiKey, model, provider }
+    const endpoint = provider === 'azure' ? aiConfig.endpoint : undefined
+    return { apiKey, model, provider, endpoint }
   }, [aiConfig])
 
   useEffect(() => {
