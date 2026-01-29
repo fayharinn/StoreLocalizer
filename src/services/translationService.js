@@ -45,6 +45,11 @@ export const PROVIDERS = {
     defaultModel: 'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-haiku-4-5-20251001-v1:0',
     needsRegion: true,
   },
+  github: {
+    name: 'GitHub Models',
+    models: ['gpt-4o', 'gpt-4.1'],
+    defaultModel: 'gpt-4o',
+  },
 }
 
 const LANG_NAMES = {
@@ -304,6 +309,31 @@ async function callBedrock(apiKey, model, region, systemMessage, userMessage) {
   return result.output.message.content[0].text
 }
 
+// GitHub Models API
+async function callGitHubModels(apiKey, model, systemMessage, userMessage) {
+  const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: userMessage }
+      ]
+    })
+  })
+
+  const result = await response.json()
+  if (result.error) throw new Error(result.error.message)
+  if (!result.choices?.[0]?.message?.content) {
+    throw new Error(`Invalid API response: ${JSON.stringify(result).slice(0, 200)}`)
+  }
+  return result.choices[0].message.content
+}
+
 async function translateSingleText(text, targetLangs, config, protectedWords = []) {
   const { provider, apiKey, model, region, endpoint } = config
   const { systemMessage, userMessage } = buildPrompt(text, targetLangs, protectedWords)
@@ -319,6 +349,9 @@ async function translateSingleText(text, targetLangs, config, protectedWords = [
         break
       case 'bedrock':
         content = await callBedrock(apiKey, model, region, systemMessage, userMessage)
+        break
+      case 'github':
+        content = await callGitHubModels(apiKey, model, systemMessage, userMessage)
         break
       default:
         throw new Error(`Unknown provider: ${provider}`)
@@ -360,6 +393,9 @@ async function translateBatch(texts, targetLangs, config, protectedWords = []) {
         break
       case 'bedrock':
         content = await callBedrock(apiKey, model, region, systemMessage, userMessage)
+        break
+      case 'github':
+        content = await callGitHubModels(apiKey, model, systemMessage, userMessage)
         break
       default:
         throw new Error(`Unknown provider: ${provider}`)
@@ -480,6 +516,21 @@ export async function testApiConnection(config) {
         })
         break
 
+      case 'github':
+        response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 20,
+            messages: [{ role: 'user', content: testMessage }]
+          })
+        })
+        break
+
       default:
         throw new Error(`Unknown provider: ${provider}`)
     }
@@ -537,6 +588,9 @@ export async function translateText(prompt, sourceLocale, targetLocale, config) 
         break
       case 'bedrock':
         content = await callBedrock(apiKey, model, region, systemMessage, prompt)
+        break
+      case 'github':
+        content = await callGitHubModels(apiKey, model, systemMessage, prompt)
         break
       default:
         throw new Error(`Unknown provider: ${provider}`)
