@@ -1029,6 +1029,8 @@ Respond with ONLY the keywords, nothing else:`
           keywords: editDialog.localization.keywords,
           promotionalText: editDialog.localization.promotionalText,
           whatsNew: editDialog.localization.whatsNew,
+          supportUrl: editDialog.localization.supportUrl,
+          marketingUrl: editDialog.localization.marketingUrl,
         })
       } else {
         await updateAppInfoLocalization(credentials, editDialog.localization.id, {
@@ -1047,6 +1049,49 @@ Respond with ONLY the keywords, nothing else:`
     }
 
     setEditDialog({ open: false, locale: '', localization: null, type: 'version' })
+  }
+
+  // Copy Support URL from source locale to all other locales
+  const [isCopyingSupportUrl, setIsCopyingSupportUrl] = useState(false)
+  
+  const handleCopySupportUrl = async () => {
+    const sourceLoc = versionLocalizations.find(l => l.locale === sourceLocale)
+    if (!sourceLoc?.supportUrl) {
+      addLog(`No Support URL found in source locale (${sourceLocale})`, 'error')
+      return
+    }
+
+    setIsCopyingSupportUrl(true)
+    let copiedCount = 0
+    let errorCount = 0
+
+    for (const loc of versionLocalizations) {
+      if (loc.locale === sourceLocale) continue // Skip source
+      if (loc.supportUrl === sourceLoc.supportUrl) continue // Already same
+
+      try {
+        await updateVersionLocalization(credentials, loc.id, {
+          supportUrl: sourceLoc.supportUrl
+        })
+        copiedCount++
+      } catch (error) {
+        errorCount++
+        addLog(`Failed to copy Support URL to ${loc.locale}: ${error.message}`, 'error')
+      }
+    }
+
+    if (copiedCount > 0) {
+      addLog(`Copied Support URL to ${copiedCount} locale(s)`, 'success')
+      // Reload localizations
+      const versionLocs = await getVersionLocalizations(credentials, selectedVersion.id)
+      setVersionLocalizations(versionLocs)
+    }
+
+    if (errorCount > 0) {
+      addLog(`${errorCount} error(s) while copying Support URL`, 'error')
+    }
+
+    setIsCopyingSupportUrl(false)
   }
 
   // Handle inline app info field change
@@ -1564,10 +1609,34 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
 
                 {/* Version Localizations Table */}
                 <div>
-                  <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                    <Layers className="h-4 w-4 text-muted-foreground" />
-                    Version Content
-                  </h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold flex items-center gap-2">
+                      <Layers className="h-4 w-4 text-muted-foreground" />
+                      Version Content
+                    </h4>
+                    {/* Copy Support URL button */}
+                    {versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleCopySupportUrl}
+                        disabled={isCopyingSupportUrl}
+                        className="gap-2"
+                      >
+                        {isCopyingSupportUrl ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Copying...
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" />
+                            Copy Support URL to all
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                   <div className="rounded-xl border border-border/50 overflow-hidden">
                     <Table>
                       <TableHeader>
@@ -2694,6 +2763,32 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                 <span className="text-xs text-muted-foreground">
                   {editDialog.localization.keywords?.length || 0}/100
                 </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Support URL</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://example.com/support"
+                    value={editDialog.localization.supportUrl || ''}
+                    onChange={(e) => setEditDialog(prev => ({
+                      ...prev,
+                      localization: { ...prev.localization, supportUrl: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Marketing URL</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://example.com"
+                    value={editDialog.localization.marketingUrl || ''}
+                    onChange={(e) => setEditDialog(prev => ({
+                      ...prev,
+                      localization: { ...prev.localization, marketingUrl: e.target.value }
+                    }))}
+                  />
+                </div>
               </div>
             </div>
           )}
