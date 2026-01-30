@@ -443,6 +443,27 @@ export function AppSidebar({
                   )}
                 </div>
 
+                {/* Service Tier for OpenAI */}
+                {PROVIDERS[providerConfig.provider]?.serviceTiers && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Service Tier</Label>
+                    <select
+                      value={providerConfig.serviceTier || 'auto'}
+                      onChange={(e) => onProviderConfigChange(prev => ({ ...prev, serviceTier: e.target.value }))}
+                      className="w-full h-9 rounded-lg bg-muted/30 border border-border/50 px-3 text-sm focus:border-primary/50 focus:outline-none transition-colors"
+                    >
+                      {PROVIDERS[providerConfig.provider].serviceTiers.map(tier => (
+                        <option key={tier} value={tier}>
+                          {tier === 'auto' ? 'Auto (default)' : tier === 'priority' ? 'Priority (faster)' : tier === 'flex' ? 'Flex (cheaper)' : tier.charAt(0).toUpperCase() + tier.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-muted-foreground">
+                      Priority = faster, Flex = cheaper batch processing
+                    </p>
+                  </div>
+                )}
+
                 {/* Endpoint URL for Azure */}
                 {PROVIDERS[providerConfig.provider]?.needsEndpoint && (
                   <div className="space-y-2">

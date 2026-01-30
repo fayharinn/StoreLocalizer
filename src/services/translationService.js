@@ -24,8 +24,10 @@ export const SUPPORTED_LANGUAGES = [
 export const PROVIDERS = {
   openai: {
     name: 'OpenAI',
-    models: ['gpt-5-mini', 'gpt-5-nano-2025-08-07'],
-    defaultModel: 'gpt-5-mini',
+    models: ['gpt-4.1-nano', 'gpt-5-mini'],
+    defaultModel: 'gpt-4.1-nano',
+    serviceTiers: ['auto', 'default', 'flex', 'priority'],
+    defaultServiceTier: 'auto',
   },
   azure: {
     name: 'Azure OpenAI',
@@ -179,21 +181,28 @@ ${protectedList ? `Protected words (keep as-is): ${protectedList}\n\n` : ''}Resp
 }
 
 // OpenAI API
-async function callOpenAI(apiKey, model, systemMessage, userMessage) {
+async function callOpenAI(apiKey, model, systemMessage, userMessage, serviceTier = 'auto') {
+  const body = {
+    model,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: systemMessage },
+      { role: 'user', content: userMessage }
+    ]
+  }
+
+  // Add service_tier if not 'auto' (auto is the default behavior)
+  if (serviceTier && serviceTier !== 'auto') {
+    body.service_tier = serviceTier
+  }
+
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: systemMessage },
-        { role: 'user', content: userMessage }
-      ]
-    })
+    body: JSON.stringify(body)
   })
 
   const result = await response.json()
@@ -335,14 +344,14 @@ async function callGitHubModels(apiKey, model, systemMessage, userMessage) {
 }
 
 async function translateSingleText(text, targetLangs, config, protectedWords = []) {
-  const { provider, apiKey, model, region, endpoint } = config
+  const { provider, apiKey, model, region, endpoint, serviceTier } = config
   const { systemMessage, userMessage } = buildPrompt(text, targetLangs, protectedWords)
 
   try {
     let content
     switch (provider) {
       case 'openai':
-        content = await callOpenAI(apiKey, model, systemMessage, userMessage)
+        content = await callOpenAI(apiKey, model, systemMessage, userMessage, serviceTier)
         break
       case 'azure':
         content = await callAzure(apiKey, model, endpoint, systemMessage, userMessage)
@@ -379,14 +388,14 @@ async function translateSingleText(text, targetLangs, config, protectedWords = [
 
 // Translate multiple texts in a single API call
 async function translateBatch(texts, targetLangs, config, protectedWords = []) {
-  const { provider, apiKey, model, region, endpoint } = config
+  const { provider, apiKey, model, region, endpoint, serviceTier } = config
   const { systemMessage, userMessage } = buildBatchPrompt(texts, targetLangs, protectedWords)
 
   try {
     let content
     switch (provider) {
       case 'openai':
-        content = await callOpenAI(apiKey, model, systemMessage, userMessage)
+        content = await callOpenAI(apiKey, model, systemMessage, userMessage, serviceTier)
         break
       case 'azure':
         content = await callAzure(apiKey, model, endpoint, systemMessage, userMessage)
@@ -443,26 +452,31 @@ async function translateBatch(texts, targetLangs, config, protectedWords = []) {
 
 // Test API connection
 export async function testApiConnection(config) {
-  const { provider, apiKey, model, region, endpoint } = config
+  const { provider, apiKey, model, region, endpoint, serviceTier } = config
   const testMessage = "Say 'API connection successful' in exactly those words."
 
   try {
     let response
     switch (provider) {
-      case 'openai':
+      case 'openai': {
+        const body = {
+          model,
+          max_completion_tokens: 20,
+          messages: [{ role: 'user', content: testMessage }]
+        }
+        if (serviceTier && serviceTier !== 'auto') {
+          body.service_tier = serviceTier
+        }
         response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            model,
-            max_completion_tokens: 20,
-            messages: [{ role: 'user', content: testMessage }]
-          })
+          body: JSON.stringify(body)
         })
         break
+      }
 
       case 'anthropic':
         response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -553,7 +567,7 @@ export async function testApiConnection(config) {
 
 // Simple text completion for ASO keyword generation and similar tasks
 export async function translateText(prompt, sourceLocale, targetLocale, config) {
-  const { provider, apiKey, model, region, endpoint } = config
+  const { provider, apiKey, model, region, endpoint, serviceTier } = config
 
   const systemMessage = "You are a helpful assistant. Follow the user's instructions precisely and respond with only the requested output."
 
@@ -561,19 +575,23 @@ export async function translateText(prompt, sourceLocale, targetLocale, config) 
     let content
     switch (provider) {
       case 'openai': {
+        const body = {
+          model,
+          messages: [
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: prompt }
+          ],
+        }
+        if (serviceTier && serviceTier !== 'auto') {
+          body.service_tier = serviceTier
+        }
         const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemMessage },
-              { role: 'user', content: prompt }
-            ],
-          })
+          body: JSON.stringify(body)
         })
         const openaiResult = await openaiResponse.json()
         if (openaiResult.error) throw new Error(openaiResult.error.message)
