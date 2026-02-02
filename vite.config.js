@@ -25,6 +25,12 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/appstoreconnect/, ''),
         secure: true,
       },
+      '/api/googleplay': {
+        target: 'https://androidpublisher.googleapis.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/googleplay/, ''),
+        secure: true,
+      },
     },
   },
 })

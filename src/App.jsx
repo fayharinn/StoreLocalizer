@@ -17,14 +17,16 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/s
 import { translateStrings, testApiConnection, SUPPORTED_LANGUAGES, PROVIDERS, DEFAULT_CONCURRENT_REQUESTS, DEFAULT_TEXTS_PER_BATCH } from './services/translationService'
 import { parseXCStrings, generateXCStrings, getTranslationStats } from './utils/xcstringsParser'
 import AppStoreConnect from './components/AppStoreConnect'
+import GooglePlayConnect from './components/GooglePlayConnect'
 import { AppSidebar } from './components/AppSidebar'
 import ScreenshotMaker from './components/ScreenshotMaker'
 import SubscriptionManager from './components/SubscriptionManager'
-import { Languages, Store, Upload, Sparkles, FileText, Download, Search, Edit3, Shield, Zap, Terminal, CheckCircle2, AlertCircle, Clock, X, Plus, ChevronLeft, ChevronRight, Image, DollarSign } from 'lucide-react'
+import { Languages, Store, Upload, Sparkles, FileText, Download, Search, Edit3, Shield, Zap, Terminal, CheckCircle2, AlertCircle, Clock, X, Plus, ChevronLeft, ChevronRight, Image, DollarSign, Play } from 'lucide-react'
 import { ThemeToggle } from './components/ThemeToggle'
 
 const PROVIDER_CONFIG_KEY = 'xcstrings-localizer-provider-config'
 const ASC_CONFIG_KEY = 'asc-localizer-config'
+const GP_CONFIG_KEY = 'gp-localizer-config'
 const PROTECTED_WORDS_KEY = 'xcstrings-localizer-protected-words'
 const ACTIVE_PAGE_KEY = 'xcstrings-localizer-active-page'
 const WELCOME_SHOWN_KEY = 'xcstrings-localizer-welcome-shown'
@@ -87,6 +89,12 @@ function App() {
     }
     
     return creds
+  })
+
+  // Google Play Credentials state
+  // Note: serviceAccountJson is NOT persisted for security
+  const [gpCredentials, setGpCredentials] = useState(() => {
+    return { serviceAccountJson: '' }
   })
 
   // Helper to get current provider's API key
@@ -501,6 +509,8 @@ function App() {
           onProviderConfigChange={setProviderConfig}
           ascCredentials={ascCredentials}
           onAscCredentialsChange={setAscCredentials}
+          gpCredentials={gpCredentials}
+          onGpCredentialsChange={setGpCredentials}
         />
         <SidebarInset>
           <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border/50 bg-background/80 px-6 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
@@ -531,7 +541,20 @@ function App() {
                 `}
               >
                 <Store className="h-4 w-4" />
-                <span className="hidden sm:inline">App Store Connect</span>
+                <span className="hidden sm:inline">App Store</span>
+              </button>
+              <button
+                onClick={() => setActivePage('googleplay')}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                  ${activePage === 'googleplay'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                  }
+                `}
+              >
+                <Play className="h-4 w-4" />
+                <span className="hidden sm:inline">Google Play</span>
               </button>
               <button
                 onClick={() => setActivePage('screenshots')}
@@ -585,6 +608,15 @@ function App() {
                 />
               )}
 
+              {/* Google Play Page */}
+              {activePage === 'googleplay' && (
+                <GooglePlayConnect
+                  credentials={gpCredentials}
+                  onCredentialsChange={setGpCredentials}
+                  aiConfig={providerConfig}
+                />
+              )}
+
               {/* Screenshots Page */}
               <div className={activePage === 'screenshots' ? 'space-y-6' : 'hidden'}>
                 <ScreenshotMaker
@@ -617,7 +649,7 @@ function App() {
                       </div>
                       <div>
                         <h1 className="text-2xl font-bold tracking-tight text-foreground">Localizer <span className="text-muted-foreground font-normal text-lg">by Fayhe</span></h1>
-                        <p className="text-sm text-muted-foreground">AI-powered translation for iOS & macOS</p>
+                        <p className="text-sm text-muted-foreground">AI-powered translation for iOS, macOS & Android</p>
                       </div>
                     </div>
                     <p className="text-muted-foreground max-w-xl">

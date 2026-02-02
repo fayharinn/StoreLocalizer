@@ -61,7 +61,7 @@ export default function WelcomeOverlay({ onGetStarted }) {
         {/* Title with gradient */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
           <span className="bg-gradient-to-r from-white via-[#E8DEF8] to-[#D0BCFF] bg-clip-text text-transparent">
-            iOS App Distribution
+            App Store & Play Store
           </span>
           <br />
           <span
@@ -82,7 +82,7 @@ export default function WelcomeOverlay({ onGetStarted }) {
           Superboost your app's global launch.
         </p>
         <p className="text-base md:text-lg mb-8" style={textStrokeStyle}>
-          Translate to 35+ languages in minutes, not weeks.
+          Translate to 40+ languages in minutes, not weeks.
         </p>
 
         {/* CTA Button - Material Design 3 style */}
@@ -124,7 +124,7 @@ export default function WelcomeOverlay({ onGetStarted }) {
       <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-4 px-6">
         {/* Feature badges */}
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {['Open Source', 'AI-Powered', '35+ Languages', 'App Store Ready'].map(
+          {['Open Source', 'AI-Powered', '40+ Languages', 'iOS & Android'].map(
             (badge) => (
               <span
                 key={badge}

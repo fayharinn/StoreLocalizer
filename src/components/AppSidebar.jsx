@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign } from 'lucide-react'
+import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 import {
   Sidebar,
@@ -46,12 +46,16 @@ export function AppSidebar({
   providerConfig,
   onProviderConfigChange,
   ascCredentials,
-  onAscCredentialsChange
+  onAscCredentialsChange,
+  gpCredentials,
+  onGpCredentialsChange
 }) {
   const { theme, setTheme } = useTheme()
   const [isDraggingKey, setIsDraggingKey] = useState(false)
+  const [isDraggingGpKey, setIsDraggingGpKey] = useState(false)
   const [aiSettingsOpen, setAiSettingsOpen] = useState(true)
   const [ascSettingsOpen, setAscSettingsOpen] = useState(true)
+  const [gpSettingsOpen, setGpSettingsOpen] = useState(false)
 
   // Encrypted key state
   const [hasStoredKey, setHasStoredKey] = useState(() => {
@@ -221,7 +225,7 @@ export function AppSidebar({
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight">Localizer</span>
-            <span className="text-xs text-muted-foreground">iOS & macOS Translation</span>
+            <span className="text-xs text-muted-foreground">App Store & Play Store</span>
           </div>
         </div>
       </SidebarHeader>
@@ -264,6 +268,24 @@ export function AppSidebar({
                   <Store className={`h-5 w-5 ${activePage === 'appstore' ? 'text-primary' : ''}`} />
                   <span>App Store Connect</span>
                   {activePage === 'appstore' && (
+                    <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={activePage === 'googleplay'}
+                  onClick={() => onPageChange('googleplay')}
+                  tooltip="Google Play Console"
+                  className={`rounded-xl h-11 px-3 transition-all duration-200 ${
+                    activePage === 'googleplay'
+                      ? 'bg-primary/10 text-primary font-medium shadow-sm'
+                      : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <Play className={`h-5 w-5 ${activePage === 'googleplay' ? 'text-primary' : ''}`} />
+                  <span>Google Play</span>
+                  {activePage === 'googleplay' && (
                     <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
                   )}
                 </SidebarMenuButton>
@@ -353,6 +375,47 @@ export function AppSidebar({
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-logs')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Terminal className="h-3.5 w-3.5" />
+                  <span>Activity Log</span>
+                </button>
+              </div>
+            )}
+
+            {/* Google Play Quick Nav - only show when on googleplay page */}
+            {activePage === 'googleplay' && (
+              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1">
+                <button
+                  onClick={() => document.getElementById('gp-connection')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Link2 className="h-3.5 w-3.5" />
+                  <span>Connection</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('gp-app')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <AppWindow className="h-3.5 w-3.5" />
+                  <span>App Package</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('gp-listings')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Layers className="h-3.5 w-3.5" />
+                  <span>Listings</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('gp-translation')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>AI Translation</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('gp-logs')?.scrollIntoView({ behavior: 'smooth' })}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Terminal className="h-3.5 w-3.5" />
@@ -746,6 +809,138 @@ export function AppSidebar({
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => onAscCredentialsChange({ keyId: '', issuerId: '', privateKey: '' })}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Clear
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
+
+        <SidebarSeparator className="my-4 opacity-50" />
+
+        {/* Google Play Settings */}
+        <Collapsible open={gpSettingsOpen} onOpenChange={setGpSettingsOpen}>
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-500/10">
+                    <Play className="h-4 w-4 text-green-500" />
+                  </div>
+                  <span className="font-medium">Google Play</span>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent className="px-2 pt-3 space-y-4">
+                {/* Link to create service account */}
+                <a
+                  href="https://developers.google.com/android-publisher/getting_started"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 text-green-500 text-xs font-medium hover:bg-green-500/20 transition-colors"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  <span>Setup Guide</span>
+                </a>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Service Account JSON</Label>
+                  <Input
+                    type="file"
+                    accept=".json"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        const content = await file.text()
+                        onGpCredentialsChange(prev => ({ ...prev, serviceAccountJson: content }))
+                      }
+                    }}
+                    className="hidden"
+                    id="sidebar-gp-json-input"
+                  />
+                  <label
+                    htmlFor="sidebar-gp-json-input"
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingGpKey(true) }}
+                    onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingGpKey(false) }}
+                    onDrop={async (e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setIsDraggingGpKey(false)
+                      const file = e.dataTransfer.files[0]
+                      if (file?.name.endsWith('.json')) {
+                        const content = await file.text()
+                        onGpCredentialsChange(prev => ({ ...prev, serviceAccountJson: content }))
+                      }
+                    }}
+                    className={`
+                      flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 text-xs
+                      ${isDraggingGpKey
+                        ? 'border-green-500 bg-green-500/10 text-green-500 scale-[1.02]'
+                        : gpCredentials?.serviceAccountJson
+                          ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-500'
+                          : 'border-border/50 hover:border-green-500/50 hover:bg-muted/30 text-muted-foreground'
+                      }
+                    `}
+                  >
+                    {isDraggingGpKey ? (
+                      <>
+                        <Key className="h-5 w-5 mb-1 animate-bounce" />
+                        <span className="font-medium">Drop JSON here</span>
+                      </>
+                    ) : gpCredentials?.serviceAccountJson ? (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 mb-1" />
+                        <span className="font-medium">Service account loaded</span>
+                      </>
+                    ) : (
+                      <>
+                        <Key className="h-5 w-5 mb-1 opacity-50" />
+                        <span className="font-medium">Drop .json file here</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+
+                {/* Status & Clear */}
+                <div className="flex items-center justify-between pt-2">
+                  {gpCredentials?.serviceAccountJson ? (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 flex-1">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-xs font-medium">Ready to connect</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-muted-foreground flex-1">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-xs font-medium">Upload service account</span>
+                    </div>
+                  )}
+                  {gpCredentials?.serviceAccountJson && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Clear Google Play Credentials?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will clear your service account JSON. You'll need to upload it again to connect.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => onGpCredentialsChange({ serviceAccountJson: '' })}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
                             Clear

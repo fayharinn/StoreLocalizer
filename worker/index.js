@@ -1,9 +1,10 @@
 /**
- * Cloudflare Worker to proxy App Store Connect API requests
+ * Cloudflare Worker to proxy App Store Connect and Google Play API requests
  * This bypasses CORS restrictions in production
  */
 
 const ASC_API_BASE = 'https://api.appstoreconnect.apple.com'
+const GP_API_BASE = 'https://androidpublisher.googleapis.com'
 
 // Allowed origins
 const ALLOWED_ORIGINS = [
@@ -47,10 +48,6 @@ export default {
           'Access-Control-Allow-Origin': corsOrigin,
           'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          // NOTE: 'Access-Control-Allow-Credentials' is only needed if your frontend uses
-          // fetch() with { credentials: 'include' }. Currently not required for this app.
-          // Uncomment if you get CORS errors when saving to App Store Connect:
-          // 'Access-Control-Allow-Credentials': 'true',
           'Access-Control-Max-Age': '86400',
         }
       })
@@ -65,20 +62,28 @@ export default {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': corsOrigin,
-          // 'Access-Control-Allow-Credentials': 'true',
         }
       })
     }
 
     const path = url.pathname
-    const targetUrl = `${ASC_API_BASE}${path}${url.search}`
+    let targetUrl
+
+    // Route to appropriate API based on path
+    if (path.startsWith('/androidpublisher/')) {
+      // Google Play API
+      targetUrl = `${GP_API_BASE}${path}${url.search}`
+    } else {
+      // Default to App Store Connect API
+      targetUrl = `${ASC_API_BASE}${path}${url.search}`
+    }
 
     try {
       const response = await fetch(targetUrl, {
         method: request.method,
         headers: {
           'Authorization': request.headers.get('Authorization'),
-          'Content-Type': 'application/json',
+          'Content-Type': request.headers.get('Content-Type') || 'application/json',
         },
         body: request.method !== 'GET' && request.method !== 'HEAD'
           ? await request.text()
@@ -91,7 +96,6 @@ export default {
         headers: {
           'Content-Type': response.headers.get('Content-Type') || 'application/json',
           'Access-Control-Allow-Origin': corsOrigin,
-          // 'Access-Control-Allow-Credentials': 'true',
         },
       })
     } catch (error) {
@@ -100,7 +104,6 @@ export default {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': corsOrigin,
-          // 'Access-Control-Allow-Credentials': 'true',
         }
       })
     }

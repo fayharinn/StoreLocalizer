@@ -1,24 +1,25 @@
-# 🚀 App Store Toolkit
+# 🚀 App Store & Play Store Localizer
 
 [![GitHub Stars](https://img.shields.io/github/stars/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/issues)
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-yellow.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
 [![Last Commit](https://img.shields.io/github/last-commit/fayharinn/iOS-App-Distribution-Localizer.svg?style=flat)](https://github.com/fayharinn/iOS-App-Distribution-Localizer/commits/main)
 
-**The all-in-one toolkit to grow your iOS app globally.** Localize your App Store listing, optimize subscription pricing by country, and generate stunning screenshots — all connected directly to App Store Connect.
+**The all-in-one toolkit to grow your app globally.** Localize your App Store and Google Play listings, optimize subscription pricing by country, and generate stunning screenshots — all connected directly to App Store Connect and Google Play Console.
 
 🌐 **Try it now:** [localizer.fayhe.com](https://localizer.fayhe.com/)
 
 ---
 
-## Why App Store Toolkit?
+## Why App Store & Play Store Localizer?
 
 Expanding your app internationally is painful:
 - Translating metadata manually takes forever
 - Pricing subscriptions fairly across 175 countries is guesswork
 - Creating localized screenshots for every language is tedious
+- Managing both iOS and Android stores doubles the work
 
-**App Store Toolkit solves all of this in one place.**
+**App Store & Play Store Localizer solves all of this in one place.**
 
 ---
 
@@ -28,12 +29,13 @@ Expanding your app internationally is painful:
 
 ![App Store Connect](.github/aso.png)
 
-Translate your entire App Store listing to 40+ languages in minutes, not days.
+Translate your entire App Store and Google Play listings to 40+ languages in minutes, not days.
 
 - One-click translation of app name, subtitle, description, keywords, and what's new
 - AI-powered with OpenAI or AWS Bedrock (Claude)
 - Protected words to keep brand names untranslated
-- Direct sync with App Store Connect — no copy-paste needed
+- Direct sync with App Store Connect and Google Play Console — no copy-paste needed
+- Manage screenshots and graphics for both platforms
 
 ### 💰 Smart Subscription Pricing
 
@@ -132,6 +134,14 @@ Your credentials never leave your browser:
 3. Note your **Key ID** and **Issuer ID**
 4. Download the `.p8` file
 5. Enter credentials in the app sidebar
+
+### Google Play Console API
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a service account with Google Play Developer API access
+3. Download the JSON key file
+4. In Play Console → Settings → API access, link the service account
+5. Grant "Admin" or "Release manager" permission for your app
+6. Upload the JSON key in the app sidebar
 
 ### AI Translation
 Configure in the sidebar:
