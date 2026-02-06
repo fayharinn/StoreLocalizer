@@ -3,18 +3,16 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Progress } from '@/components/ui/progress'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose, DialogTrigger } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
   Store, Link2, AppWindow, Layers, Languages, Sparkles, CheckCircle2, AlertCircle,
-  Clock, Terminal, Edit3, Globe, Loader2, ChevronDown, RefreshCw, Upload, X, Save, Image, Trash2
+  Clock, Terminal, Edit3, Globe, Loader2, ChevronDown, RefreshCw, Upload, X, Save, Image, Trash2, ExternalLink, Lock, Unlock
 } from 'lucide-react'
 import {
   testConnection,
@@ -30,10 +28,14 @@ import {
   uploadImage,
   deleteImage,
   deleteAllImages,
+  fetchDeveloperApps,
   GP_LOCALES,
   GP_IMAGE_TYPES,
 } from '@/services/googlePlayService'
 import { PROVIDERS } from '@/services/translationService'
+import { decrypt } from '@/utils/crypto'
+
+const ENCRYPTED_GP_KEY_STORAGE = 'gp-encrypted-service-account'
 
 export default function GooglePlayConnect({ credentials, onCredentialsChange, aiConfig }) {
   // Connection state
@@ -61,6 +63,17 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
   const [packageName, setPackageName] = useState('')
   const [editId, setEditId] = useState(null)
   const [isCreatingEdit, setIsCreatingEdit] = useState(false)
+
+  // Developer profile lookup
+  const [developerUrl, setDeveloperUrl] = useState(() => {
+    // Load saved developer ID from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('gp-developer-id') || ''
+    }
+    return ''
+  })
+  const [developerApps, setDeveloperApps] = useState([])
+  const [isLoadingDevApps, setIsLoadingDevApps] = useState(false)
 
   // Listings
   const [listings, setListings] = useState([])
@@ -99,12 +112,50 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
   // Logs
   const [logs, setLogs] = useState([])
 
+  // Encrypted service account state
+  const [hasStoredGpKey, setHasStoredGpKey] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !!window.localStorage.getItem(ENCRYPTED_GP_KEY_STORAGE)
+  })
+  const [decryptPassword, setDecryptPassword] = useState('')
+  const [isDecrypting, setIsDecrypting] = useState(false)
+  const [decryptError, setDecryptError] = useState('')
+
   const addLog = useCallback((message, type = 'info') => {
     const timestamp = new Date().toLocaleTimeString()
     setLogs(prev => [...prev.slice(-100), { message, type, timestamp }])
     if (type === 'error') toast.error(message)
     else if (type === 'success') toast.success(message)
   }, [])
+
+  // Decrypt stored service account
+  const handleDecryptServiceAccount = async () => {
+    if (!decryptPassword) {
+      setDecryptError('Please enter your password')
+      return
+    }
+
+    const stored = localStorage.getItem(ENCRYPTED_GP_KEY_STORAGE)
+    if (!stored) {
+      setDecryptError('No stored service account found')
+      return
+    }
+
+    setIsDecrypting(true)
+    setDecryptError('')
+
+    const result = await decrypt(stored, decryptPassword)
+
+    if (result.success) {
+      onCredentialsChange(prev => ({ ...prev, serviceAccountJson: result.data }))
+      setDecryptPassword('')
+      addLog('Service account decrypted successfully', 'success')
+    } else {
+      setDecryptError('Wrong password')
+    }
+
+    setIsDecrypting(false)
+  }
 
   // Get current AI config
   const currentAiApiKey = aiConfig.apiKeys[aiConfig.provider] || ''
@@ -151,6 +202,33 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
       addLog(`Error creating edit: ${error.message}`, 'error')
     }
     setIsCreatingEdit(false)
+  }
+
+  // Fetch apps from developer profile
+  const handleFetchDeveloperApps = async () => {
+    if (!developerUrl.trim()) {
+      addLog('Please enter a developer profile URL or ID', 'error')
+      return
+    }
+
+    setIsLoadingDevApps(true)
+    try {
+      const { apps, developerId } = await fetchDeveloperApps(developerUrl.trim())
+      setDeveloperApps(apps)
+      // Save developer ID to localStorage
+      localStorage.setItem('gp-developer-id', developerId)
+      addLog(`Found ${apps.length} app(s) from developer profile`, 'success')
+    } catch (error) {
+      addLog(`Error fetching developer apps: ${error.message}`, 'error')
+      setDeveloperApps([])
+    }
+    setIsLoadingDevApps(false)
+  }
+
+  // Select app from developer list
+  const handleSelectDeveloperApp = (app) => {
+    setPackageName(app.packageName)
+    addLog(`Selected: ${app.name} (${app.packageName})`, 'info')
   }
 
 
@@ -467,105 +545,84 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
       {/* Connection Status */}
       <Card id="gp-connection" className="border-border/50 shadow-sm card-hover scroll-mt-6">
         <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
-              <Link2 className="h-5 w-5 text-green-500" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
+                <Link2 className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Connection</CardTitle>
+                <CardDescription>Service account status</CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-lg">Connect to Google Play</CardTitle>
-              <CardDescription>Verify your service account and API access</CardDescription>
+            <div className="flex items-center gap-2">
+              {credentials.serviceAccountJson ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Ready
+                </div>
+              ) : hasStoredGpKey ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-500 text-xs font-medium">
+                  <Lock className="h-3.5 w-3.5" />
+                  Encrypted
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-500 text-xs font-medium">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  No credentials
+                </div>
+              )}
+              {sessionTimeLeft > 0 && (
+                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium font-mono">
+                  <Clock className="h-3.5 w-3.5" />
+                  {formatTimeLeft(sessionTimeLeft)}
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            {credentials.serviceAccountJson ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Service account loaded
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-500 text-xs font-medium">
-                <AlertCircle className="h-3.5 w-3.5" />
-                No service account
-              </div>
-            )}
-            {connectionStatus?.tokenOnly && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-500 text-xs font-medium">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Token valid
-              </div>
-            )}
-            {sessionTimeLeft > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-medium font-mono">
-                <Clock className="h-3.5 w-3.5" />
-                {formatTimeLeft(sessionTimeLeft)}
-              </div>
-            )}
-          </div>
-
-          {/* Package name for testing */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Package Name (optional for token test)</Label>
-            <Input
-              placeholder="com.example.myapp"
-              value={packageName}
-              onChange={(e) => setPackageName(e.target.value)}
-              className="max-w-md"
-              disabled={!!editId}
-            />
-            <p className="text-xs text-muted-foreground">
-              Without package name: validates service account JSON only. With package name: tests full API access.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            <Button
-              onClick={handleTestConnection}
-              disabled={isConnecting || !canConnect}
-              className={connectionStatus?.success && !connectionStatus?.tokenOnly ? '' : 'bg-green-600 hover:bg-green-700 border-0'}
-            >
-              {isConnecting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Testing...
-                </>
-              ) : packageName.trim() ? 'Test Full Access' : 'Validate Token'}
-            </Button>
-            {connectionStatus && (
-              <div className={`flex items-start gap-2 px-4 py-2 rounded-lg max-w-lg ${connectionStatus.success ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                {connectionStatus.success ? <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" /> : <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />}
-                <span className="text-sm font-medium whitespace-pre-wrap">{connectionStatus.message}</span>
-              </div>
-            )}
-          </div>
-
-          {!canConnect && (
-            <p className="text-sm text-muted-foreground px-4 py-3 rounded-lg bg-muted/30 border border-border/50">
+        {/* Show decrypt UI when we have encrypted key but no loaded credentials */}
+        {hasStoredGpKey && !credentials.serviceAccountJson && (
+          <CardContent className="pt-0">
+            <div className="flex items-center gap-2">
+              <Input
+                type="password"
+                placeholder="Enter password to decrypt"
+                value={decryptPassword}
+                onChange={(e) => { setDecryptPassword(e.target.value); setDecryptError('') }}
+                className="max-w-xs h-9"
+                onKeyDown={(e) => e.key === 'Enter' && handleDecryptServiceAccount()}
+              />
+              <Button
+                size="sm"
+                onClick={handleDecryptServiceAccount}
+                disabled={isDecrypting || !decryptPassword}
+              >
+                {isDecrypting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlock className="h-4 w-4 mr-1.5" />}
+                Decrypt
+              </Button>
+            </div>
+            {decryptError && <p className="text-xs text-red-500 mt-2">{decryptError}</p>}
+          </CardContent>
+        )}
+        {!canConnect && !hasStoredGpKey && (
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
               Upload your Google Cloud service account JSON file in the sidebar to get started.
             </p>
-          )}
-
-          {/* Setup help */}
-          <details className="text-sm">
-            <summary className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
-              Setup requirements
-            </summary>
-            <div className="mt-3 p-4 rounded-lg bg-muted/30 border border-border/50 space-y-2 text-muted-foreground">
-              <p className="font-medium text-foreground">To use Google Play API:</p>
-              <ol className="list-decimal list-inside space-y-1 text-xs">
+            <details className="text-sm mt-3">
+              <summary className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
+                Setup guide
+              </summary>
+              <ol className="mt-2 list-decimal list-inside space-y-1 text-xs text-muted-foreground">
                 <li>Create a service account in Google Cloud Console</li>
                 <li>Download the JSON key file</li>
                 <li>In Play Console → Settings → API access, link the service account</li>
                 <li>Grant "Admin" or "Release manager" permission for your app</li>
               </ol>
-              <p className="text-xs pt-2">
-                Note: Unlike App Store Connect, Google Play API requires a package name for all operations.
-                There is no "list all apps" endpoint.
-              </p>
-            </div>
-          </details>
-        </CardContent>
+            </details>
+          </CardContent>
+        )}
       </Card>
 
       {/* App Selection */}
@@ -583,14 +640,114 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Package Name Entry with Developer Lookup */}
             <div className="flex gap-3">
-              <Input
-                placeholder="com.example.myapp"
-                value={packageName}
-                onChange={(e) => setPackageName(e.target.value)}
-                className="flex-1 max-w-md"
-                disabled={!!editId}
-              />
+              <div className="flex-1 max-w-md relative">
+                <Input
+                  placeholder="com.example.myapp"
+                  value={packageName}
+                  onChange={(e) => setPackageName(e.target.value)}
+                  disabled={!!editId}
+                  list="developer-apps-list"
+                />
+                {developerApps.length > 0 && (
+                  <datalist id="developer-apps-list">
+                    {developerApps.map((app) => (
+                      <option key={app.packageName} value={app.packageName}>
+                        {app.name}
+                      </option>
+                    ))}
+                  </datalist>
+                )}
+              </div>
+              
+              {/* Developer Profile Popover */}
+              {!editId && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="icon" title="Find from developer profile">
+                      <Store className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Find Apps from Developer Profile</DialogTitle>
+                      <DialogDescription>
+                        Enter your Google Play developer profile URL or ID to quickly find your apps.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Developer ID or profile URL"
+                          value={developerUrl}
+                          onChange={(e) => setDeveloperUrl(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={handleFetchDeveloperApps}
+                          disabled={isLoadingDevApps || !developerUrl.trim()}
+                        >
+                          {isLoadingDevApps ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Example: https://play.google.com/store/apps/dev?id=123456789
+                      </p>
+                      
+                      {developerApps.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">{developerApps.length} app(s) found:</p>
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {developerApps.map((app) => (
+                              <DialogClose key={app.packageName} asChild>
+                                <button
+                                  onClick={() => handleSelectDeveloperApp(app)}
+                                  className={`flex items-center gap-3 w-full p-3 rounded-lg border text-left transition-all hover:border-primary/50 hover:bg-muted/50 ${
+                                    packageName === app.packageName ? 'border-primary bg-primary/5' : 'border-border'
+                                  }`}
+                                >
+                                  {app.icon ? (
+                                    <img 
+                                      src={app.icon} 
+                                      alt={app.name} 
+                                      className="h-10 w-10 rounded-lg object-cover"
+                                      onError={(e) => { e.target.style.display = 'none' }}
+                                    />
+                                  ) : (
+                                    <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                                      <AppWindow className="h-5 w-5 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium truncate">{app.name}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{app.packageName}</p>
+                                  </div>
+                                  <a
+                                    href={app.storeUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                  </a>
+                                </button>
+                              </DialogClose>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+
               {!editId ? (
                 <Button
                   onClick={handleCreateEdit}

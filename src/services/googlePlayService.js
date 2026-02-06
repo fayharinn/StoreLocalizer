@@ -582,3 +582,41 @@ export function normalizeLocaleCode(code) {
 
   return mapping[lower] || code
 }
+
+/**
+ * Fetch apps from a developer's public Google Play profile
+ * @param {string} developerUrl - Full URL or just the developer ID
+ * @returns {Promise<{apps: Array<{packageName: string, name: string}>, developerId: string}>}
+ */
+export async function fetchDeveloperApps(developerUrl) {
+  // Extract developer ID from URL or use directly if it's just the ID
+  let developerId = developerUrl
+  
+  // Handle full URLs like https://play.google.com/store/apps/dev?id=1234567890
+  const urlMatch = developerUrl.match(/[?&]id=(\d+)/)
+  if (urlMatch) {
+    developerId = urlMatch[1]
+  } else if (!/^\d+$/.test(developerUrl)) {
+    throw new Error('Invalid developer URL or ID. Expected a URL like "https://play.google.com/store/apps/dev?id=123456" or just the numeric ID.')
+  }
+
+  // Use proxy to fetch the developer page
+  const proxyBase = import.meta.env.VITE_GP_PROXY_URL || '/api/googleplay'
+  const response = await fetch(`${proxyBase}/playstore/dev/${developerId}`)
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}))
+    throw new Error(error.error || `Failed to fetch developer apps: ${response.status}`)
+  }
+
+  const data = await response.json()
+  
+  if (!data.apps || data.apps.length === 0) {
+    throw new Error('No apps found for this developer. Make sure the developer ID is correct and the profile is public.')
+  }
+
+  return {
+    developerId: data.developerId,
+    apps: data.apps
+  }
+}

@@ -68,6 +68,18 @@ export function AppSidebar({
   const [keyError, setKeyError] = useState('')
   const [isSavingKey, setIsSavingKey] = useState(false)
 
+  // Google Play encrypted key state
+  const ENCRYPTED_GP_KEY_STORAGE = 'gp-encrypted-service-account'
+  const [hasStoredGpKey, setHasStoredGpKey] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !!window.localStorage.getItem(ENCRYPTED_GP_KEY_STORAGE)
+  })
+  const [gpKeyPassword, setGpKeyPassword] = useState('')
+  const [showGpPasswordInput, setShowGpPasswordInput] = useState(false)
+  const [gpPasswordMode, setGpPasswordMode] = useState('') // 'save' or 'load'
+  const [gpKeyError, setGpKeyError] = useState('')
+  const [isSavingGpKey, setIsSavingGpKey] = useState(false)
+
   const currentApiKey = providerConfig.apiKeys[providerConfig.provider] || ''
   const currentModel = providerConfig.models[providerConfig.provider] || PROVIDERS[providerConfig.provider]?.defaultModel || ''
 
@@ -214,6 +226,78 @@ export function AppSidebar({
     setKeyPassword('')
     setPasswordMode('')
     setKeyError('')
+  }
+
+  // Google Play: Save service account encrypted with password
+  const handleSaveGpKeyEncrypted = async () => {
+    if (!gpKeyPassword || gpKeyPassword.length < 4) {
+      setGpKeyError('Password must be at least 4 characters')
+      return
+    }
+    if (!gpCredentials?.serviceAccountJson) {
+      setGpKeyError('No service account loaded to save')
+      return
+    }
+
+    setIsSavingGpKey(true)
+    setGpKeyError('')
+
+    try {
+      const encrypted = await encrypt(gpCredentials.serviceAccountJson, gpKeyPassword)
+      localStorage.setItem(ENCRYPTED_GP_KEY_STORAGE, encrypted)
+      setHasStoredGpKey(true)
+      setShowGpPasswordInput(false)
+      setGpKeyPassword('')
+      setGpPasswordMode('')
+    } catch {
+      setGpKeyError('Failed to encrypt service account')
+    }
+
+    setIsSavingGpKey(false)
+  }
+
+  // Google Play: Load service account with password
+  const handleLoadGpKeyEncrypted = async () => {
+    if (!gpKeyPassword) {
+      setGpKeyError('Please enter your password')
+      return
+    }
+
+    const stored = localStorage.getItem(ENCRYPTED_GP_KEY_STORAGE)
+    if (!stored) {
+      setGpKeyError('No stored service account found')
+      return
+    }
+
+    setIsSavingGpKey(true)
+    setGpKeyError('')
+
+    const result = await decrypt(stored, gpKeyPassword)
+
+    if (result.success) {
+      onGpCredentialsChange(prev => ({ ...prev, serviceAccountJson: result.data }))
+      setShowGpPasswordInput(false)
+      setGpKeyPassword('')
+      setGpPasswordMode('')
+    } else {
+      setGpKeyError('Wrong password')
+    }
+
+    setIsSavingGpKey(false)
+  }
+
+  // Google Play: Delete stored encrypted service account
+  const handleDeleteStoredGpKey = () => {
+    localStorage.removeItem(ENCRYPTED_GP_KEY_STORAGE)
+    setHasStoredGpKey(false)
+  }
+
+  // Google Play: Cancel password input
+  const handleCancelGpPassword = () => {
+    setShowGpPasswordInput(false)
+    setGpKeyPassword('')
+    setGpPasswordMode('')
+    setGpKeyError('')
   }
 
   return (
@@ -917,6 +1001,11 @@ export function AppSidebar({
                       <CheckCircle2 className="h-4 w-4" />
                       <span className="text-xs font-medium">Ready to connect</span>
                     </div>
+                  ) : hasStoredGpKey ? (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 text-blue-500 flex-1">
+                      <Lock className="h-4 w-4" />
+                      <span className="text-xs font-medium">Saved (encrypted)</span>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-muted-foreground flex-1">
                       <AlertCircle className="h-4 w-4" />
@@ -950,6 +1039,89 @@ export function AppSidebar({
                     </AlertDialog>
                   )}
                 </div>
+
+                {/* Encrypted Storage for Google Play */}
+                {showGpPasswordInput ? (
+                  <div className="space-y-2 p-3 rounded-xl bg-muted/30 border border-border/50">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      {gpPasswordMode === 'save' ? 'Set password to encrypt' : 'Enter password to decrypt'}
+                    </Label>
+                    <Input
+                      type="password"
+                      placeholder="Password (min 4 chars)"
+                      value={gpKeyPassword}
+                      onChange={(e) => setGpKeyPassword(e.target.value)}
+                      className="h-8 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          gpPasswordMode === 'save' ? handleSaveGpKeyEncrypted() : handleLoadGpKeyEncrypted()
+                        }
+                      }}
+                    />
+                    {gpKeyError && <p className="text-xs text-red-500">{gpKeyError}</p>}
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={gpPasswordMode === 'save' ? handleSaveGpKeyEncrypted : handleLoadGpKeyEncrypted}
+                        disabled={isSavingGpKey}
+                        className="flex-1 h-8 text-xs"
+                      >
+                        {isSavingGpKey ? 'Processing...' : gpPasswordMode === 'save' ? 'Save Encrypted' : 'Decrypt & Load'}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={handleCancelGpPassword} className="h-8 text-xs">
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    {gpCredentials?.serviceAccountJson && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => { setShowGpPasswordInput(true); setGpPasswordMode('save'); setGpKeyError('') }}
+                        className="flex-1 h-8 text-xs"
+                      >
+                        <Save className="h-3.5 w-3.5 mr-1.5" />
+                        Save Encrypted
+                      </Button>
+                    )}
+                    {hasStoredGpKey && !gpCredentials?.serviceAccountJson && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => { setShowGpPasswordInput(true); setGpPasswordMode('load'); setGpKeyError('') }}
+                        className="flex-1 h-8 text-xs"
+                      >
+                        <Unlock className="h-3.5 w-3.5 mr-1.5" />
+                        Load Saved
+                      </Button>
+                    )}
+                    {hasStoredGpKey && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Saved Service Account?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete the encrypted service account from your browser storage.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeleteStoredGpKey} className="bg-destructive text-destructive-foreground">
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
+                )}
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
