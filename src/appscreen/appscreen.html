@@ -21,6 +21,12 @@
                                     </svg>
                                     Edit Languages...
                                 </button>
+                                <button class="language-menu-edit" id="set-default-language-btn">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z"/>
+                                    </svg>
+                                    <span id="set-default-language-label">Set as Default Language</span>
+                                </button>
                                 <div class="language-menu-divider"></div>
                                 <button class="language-menu-edit" id="translate-all-btn">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -30,20 +36,12 @@
                                 </button>
                             </div>
                         </div>
-                        <button class="settings-btn" id="magical-titles-btn" title="Magical Titles - AI-generated headlines">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z"/>
+                        <span class="ai-status-indicator" id="ai-status-indicator" title="AI provider from sidebar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                             </svg>
-                        </button>
-                        <button class="settings-btn" id="about-btn" title="About">
-                            <img src="/appscreen/img/info.svg" width="18" height="18" alt="About">
-                        </button>
-                        <button class="settings-btn" id="settings-btn" title="Settings">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="3"/>
-                                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-                            </svg>
-                        </button>
+                            <span id="ai-status-text">No AI</span>
+                        </span>
                     </div>
                 </div>
                 <div class="project-controls">
@@ -88,6 +86,22 @@
                 <input type="file" id="file-input" multiple accept="image/*" hidden>
                 <div class="screenshot-list" id="screenshot-list">
                     <!-- Screenshots will be added here dynamically, including upload zone -->
+                </div>
+
+                <div class="sidebar-actions">
+                    <button class="action-btn action-btn-magic" id="magical-titles-btn" title="Use AI to generate marketing headlines from your screenshots">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z"/>
+                        </svg>
+                        Generate Magical Titles
+                    </button>
+                    <button class="action-btn action-btn-ghost" id="about-btn" title="About this tool">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                        About
+                    </button>
                 </div>
             </div>
 
@@ -180,6 +194,7 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
                             </svg>
+                            Export
                         </button>
                     </div>
                     <button class="export-btn export-all-btn" id="export-all" title="Export all screenshots as ZIP">
@@ -1038,177 +1053,6 @@
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" id="translate-modal-cancel">Cancel</button>
                 <button class="modal-btn modal-btn-confirm" id="translate-modal-apply" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Apply Translations</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal settings-modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Settings</h3>
-                <button class="modal-close" id="settings-modal-close">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 6L6 18M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="settings-section">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                    AI Translation Provider
-                </h4>
-                <p class="settings-description">Choose which AI provider to use for translations. API keys are stored locally in your browser.</p>
-                <div class="settings-provider-selector">
-                    <label class="settings-provider-option">
-                        <input type="radio" name="ai-provider" value="anthropic" checked>
-                        <span class="provider-label">Anthropic (Claude)</span>
-                    </label>
-                    <label class="settings-provider-option">
-                        <input type="radio" name="ai-provider" value="openai">
-                        <span class="provider-label">OpenAI (GPT)</span>
-                    </label>
-                    <label class="settings-provider-option">
-                        <input type="radio" name="ai-provider" value="google">
-                        <span class="provider-label">Google (Gemini)</span>
-                    </label>
-                    <label class="settings-provider-option">
-                        <input type="radio" name="ai-provider" value="github">
-                        <span class="provider-label">GitHub Models</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="settings-section settings-api-section" id="settings-anthropic" data-provider="anthropic">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                    </svg>
-                    Claude API Key
-                </h4>
-                <div class="settings-input-group">
-                    <input type="password" id="settings-api-key-anthropic" placeholder="sk-ant-api03-..." />
-                    <button class="settings-show-key" data-target="settings-api-key-anthropic" title="Show/hide key">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="settings-key-status" id="settings-key-status-anthropic"></div>
-                <div class="settings-model-group">
-                    <label class="settings-model-label">Model</label>
-                    <select id="settings-model-anthropic" class="settings-model-select">
-                        <!-- Populated dynamically from llm.js -->
-                    </select>
-                </div>
-                <a href="https://console.anthropic.com/settings/keys" target="_blank" class="settings-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                    Get your API key from Anthropic Console
-                </a>
-            </div>
-
-            <div class="settings-section settings-api-section" id="settings-openai" data-provider="openai" style="display: none;">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                    </svg>
-                    OpenAI API Key
-                </h4>
-                <div class="settings-input-group">
-                    <input type="password" id="settings-api-key-openai" placeholder="sk-..." />
-                    <button class="settings-show-key" data-target="settings-api-key-openai" title="Show/hide key">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="settings-key-status" id="settings-key-status-openai"></div>
-                <div class="settings-model-group">
-                    <label class="settings-model-label">Model</label>
-                    <select id="settings-model-openai" class="settings-model-select">
-                        <!-- Populated dynamically from llm.js -->
-                    </select>
-                </div>
-                <a href="https://platform.openai.com/api-keys" target="_blank" class="settings-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                    Get your API key from OpenAI Platform
-                </a>
-            </div>
-
-            <div class="settings-section settings-api-section" id="settings-google" data-provider="google" style="display: none;">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                    </svg>
-                    Google AI API Key
-                </h4>
-                <div class="settings-input-group">
-                    <input type="password" id="settings-api-key-google" placeholder="AIza..." />
-                    <button class="settings-show-key" data-target="settings-api-key-google" title="Show/hide key">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="settings-key-status" id="settings-key-status-google"></div>
-                <div class="settings-model-group">
-                    <label class="settings-model-label">Model</label>
-                    <select id="settings-model-google" class="settings-model-select">
-                        <!-- Populated dynamically from llm.js -->
-                    </select>
-                </div>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="settings-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                    Get your API key from Google AI Studio
-                </a>
-            </div>
-
-            <div class="settings-section settings-api-section" id="settings-github" data-provider="github" style="display: none;">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                    </svg>
-                    GitHub API Token
-                </h4>
-                <div class="settings-input-group">
-                    <input type="password" id="settings-api-key-github" placeholder="ghp_..." />
-                    <button class="settings-show-key" data-target="settings-api-key-github" title="Show/hide key">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="settings-key-status" id="settings-key-status-github"></div>
-                <div class="settings-model-group">
-                    <label class="settings-model-label">Model</label>
-                    <select id="settings-model-github" class="settings-model-select">
-                        <!-- Populated dynamically from llm.js -->
-                    </select>
-                </div>
-                <a href="https://github.com/settings/tokens" target="_blank" class="settings-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                    Get your token from GitHub Settings
-                </a>
-            </div>
-
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" id="settings-modal-cancel">Cancel</button>
-                <button class="modal-btn modal-btn-confirm" id="settings-modal-save">Save Settings</button>
             </div>
         </div>
     </div>

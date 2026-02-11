@@ -12,7 +12,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Store, Link2, AppWindow, Layers, Languages, Sparkles, CheckCircle2, AlertCircle, Clock, Terminal, Plus, Edit3, Globe, Loader2, Copy, ChevronDown, Search, TrendingUp, RefreshCw, Image, Smartphone, Tablet, Monitor, Watch, Upload, FolderOpen, X } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Store, Link2, AppWindow, Layers, Languages, Sparkles, CheckCircle2, AlertCircle, Clock, Terminal, Plus, Edit3, Globe, Loader2, Copy, ChevronDown, Search, TrendingUp, RefreshCw, Image, Smartphone, Tablet, Monitor, Watch, Upload, FolderOpen, X, ChevronsUpDown, Check } from 'lucide-react'
 import {
   testConnection,
   listApps,
@@ -109,6 +112,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
   // Apps & Versions
   const [apps, setApps] = useState([])
   const [selectedApp, setSelectedApp] = useState(null)
+  const [appPickerOpen, setAppPickerOpen] = useState(false)
   const [versions, setVersions] = useState([])
   const [selectedVersion, setSelectedVersion] = useState(null)
   const [isLoadingApps, setIsLoadingApps] = useState(false)
@@ -1437,6 +1441,10 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && handleUnlockKey()}
                 className="h-9 text-sm flex-1 max-w-[250px]"
+                autoComplete="off"
+                data-1p-ignore
+                data-lpignore="true"
+                data-form-type="other"
               />
               <Button
                 size="sm"
@@ -1510,37 +1518,84 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">App</Label>
-                <select
-                  value={selectedApp?.id || ''}
-                  onChange={(e) => handleAppSelect(e.target.value)}
-                  disabled={isLoadingApps}
-                  className="w-full h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
-                >
-                  <option value="">Select an app...</option>
-                  {apps.map(app => (
-                    <option key={app.id} value={app.id}>
-                      {app.name} ({app.bundleId})
-                    </option>
-                  ))}
-                </select>
+                <Popover open={appPickerOpen} onOpenChange={setAppPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={appPickerOpen}
+                      disabled={isLoadingApps}
+                      className="w-full h-10 justify-between font-medium"
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        {selectedApp?.iconUrl ? (
+                          <img src={selectedApp.iconUrl} alt="" className="h-5 w-5 rounded-md shrink-0" />
+                        ) : selectedApp ? (
+                          <AppWindow className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        ) : null}
+                        <span className="truncate">
+                          {selectedApp ? selectedApp.name : 'Select an app...'}
+                        </span>
+                      </span>
+                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search apps..." />
+                      <CommandList>
+                        <CommandEmpty>No apps found.</CommandEmpty>
+                        <CommandGroup>
+                          {apps.map(app => (
+                            <CommandItem
+                              key={app.id}
+                              value={`${app.name} ${app.bundleId}`}
+                              onSelect={() => {
+                                handleAppSelect(app.id)
+                                setAppPickerOpen(false)
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              {app.iconUrl ? (
+                                <img src={app.iconUrl} alt="" className="h-6 w-6 rounded-md shrink-0" />
+                              ) : (
+                                <AppWindow className="h-5 w-5 shrink-0 text-muted-foreground" />
+                              )}
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-medium truncate">{app.name}</span>
+                                <span className="text-xs text-muted-foreground truncate">{app.bundleId}</span>
+                              </div>
+                              {selectedApp?.id === app.id && (
+                                <Check className="h-4 w-4 ml-auto shrink-0 text-primary" />
+                              )}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Version</Label>
                 <div className="flex gap-2">
-                  <select
+                  <Select
                     value={selectedVersion?.id || ''}
-                    onChange={(e) => handleVersionSelect(e.target.value)}
+                    onValueChange={handleVersionSelect}
                     disabled={isLoadingVersions || !selectedApp}
-                    className="flex-1 h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium focus:border-primary/50 focus:outline-none transition-colors"
                   >
-                    <option value="">Select a version...</option>
-                    {versions.map(version => (
-                      <option key={version.id} value={version.id}>
-                        v{version.versionString} ({version.platform}) - {version.state}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="flex-1 h-10">
+                      <SelectValue placeholder="Select a version..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {versions.map(version => (
+                        <SelectItem key={version.id} value={version.id}>
+                          v{version.versionString} ({version.platform}) - {version.state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     variant="outline"
                     size="sm"
@@ -2286,15 +2341,16 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
               {/* Device type selector */}
               <div className="mb-4">
                 <Label className="text-xs font-medium text-muted-foreground mb-2 block">Target Device</Label>
-                <select
-                  value={selectedDisplayType}
-                  onChange={(e) => setSelectedDisplayType(e.target.value)}
-                  className="w-full h-9 rounded-lg bg-muted/30 border border-border/50 px-3 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                >
-                  {Object.entries(SCREENSHOT_DISPLAY_TYPES).map(([key, info]) => (
-                    <option key={key} value={key}>{info.name} - {info.device}</option>
-                  ))}
-                </select>
+                <Select value={selectedDisplayType} onValueChange={setSelectedDisplayType}>
+                  <SelectTrigger className="h-9 bg-muted/30 border-border/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(SCREENSHOT_DISPLAY_TYPES).map(([key, info]) => (
+                      <SelectItem key={key} value={key}>{info.name} - {info.device}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Upload options */}
@@ -2485,20 +2541,21 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
             {/* Source Locale */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Source Language</Label>
-              <select
-                value={sourceLocale}
-                onChange={(e) => setSourceLocale(e.target.value)}
-                className="w-full h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium max-w-xs focus:border-primary/50 focus:outline-none transition-colors"
-              >
-                {versionLocalizations.map(loc => {
-                  const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
-                  return (
-                    <option key={loc.locale} value={loc.locale}>
-                      {localeInfo?.flag} {localeInfo?.name || loc.locale}
-                    </option>
-                  )
-                })}
-              </select>
+              <Select value={sourceLocale} onValueChange={setSourceLocale}>
+                <SelectTrigger className="h-10 max-w-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {versionLocalizations.map(loc => {
+                    const localeInfo = ASC_LOCALES.find(l => l.code === loc.locale)
+                    return (
+                      <SelectItem key={loc.locale} value={loc.locale}>
+                        {localeInfo?.flag} {localeInfo?.name || loc.locale}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Fields to translate */}
@@ -2881,16 +2938,17 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
             </div>
             <div className="space-y-2">
               <Label>Platform</Label>
-              <select
-                value={createVersionDialog.platform}
-                onChange={(e) => setCreateVersionDialog(prev => ({ ...prev, platform: e.target.value }))}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
-              >
-                <option value="IOS">iOS</option>
-                <option value="MAC_OS">macOS</option>
-                <option value="TV_OS">tvOS</option>
-                <option value="VISION_OS">visionOS</option>
-              </select>
+              <Select value={createVersionDialog.platform} onValueChange={(val) => setCreateVersionDialog(prev => ({ ...prev, platform: val }))}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="IOS">iOS</SelectItem>
+                  <SelectItem value="MAC_OS">macOS</SelectItem>
+                  <SelectItem value="TV_OS">tvOS</SelectItem>
+                  <SelectItem value="VISION_OS">visionOS</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

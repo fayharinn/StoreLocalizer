@@ -116,6 +116,12 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/googleplay/, ''),
         secure: true,
       },
+      '/api/itunes': {
+        target: 'https://itunes.apple.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/itunes/, ''),
+        secure: true,
+      },
     },
   },
 })

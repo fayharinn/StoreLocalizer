@@ -14,6 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { translateStrings, testApiConnection, SUPPORTED_LANGUAGES, PROVIDERS, DEFAULT_CONCURRENT_REQUESTS, DEFAULT_TEXTS_PER_BATCH } from './services/translationService'
 import { parseXCStrings, generateXCStrings, getTranslationStats } from './utils/xcstringsParser'
 import AppStoreConnect from './components/AppStoreConnect'
@@ -21,7 +23,7 @@ import GooglePlayConnect from './components/GooglePlayConnect'
 import { AppSidebar } from './components/AppSidebar'
 import ScreenshotMaker from './components/ScreenshotMaker'
 import SubscriptionManager from './components/SubscriptionManager'
-import { Languages, Store, Upload, Sparkles, FileText, Download, Search, Edit3, Shield, Zap, Terminal, CheckCircle2, AlertCircle, Clock, X, Plus, ChevronLeft, ChevronRight, Image, DollarSign, Play } from 'lucide-react'
+import { Languages, Upload, Sparkles, FileText, Download, Search, Edit3, Shield, Zap, Terminal, CheckCircle2, AlertCircle, Clock, X, Plus, ChevronLeft, ChevronRight, Loader2, ChevronDown } from 'lucide-react'
 import { ThemeToggle } from './components/ThemeToggle'
 
 const PROVIDER_CONFIG_KEY = 'xcstrings-localizer-provider-config'
@@ -479,6 +481,7 @@ function App() {
 
     return {
       languages: screenshotLanguages,
+      sourceLanguage: xcstringsData?.sourceLanguage || 'en',
       headlinesByLang,
       subheadlinesByLang,
       applyToAll: screenshotApplyAll
@@ -513,87 +516,10 @@ function App() {
           onGpCredentialsChange={setGpCredentials}
         />
         <SidebarInset>
-          <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border/50 bg-background/80 px-6 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border/50 bg-background/80 px-6 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
-
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/50">
-              <button
-                onClick={() => setActivePage('xcstrings')}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${activePage === 'xcstrings'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                  }
-                `}
-              >
-                <Languages className="h-4 w-4" />
-                <span className="hidden sm:inline">XCStrings</span>
-              </button>
-              <button
-                onClick={() => setActivePage('appstore')}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${activePage === 'appstore'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                  }
-                `}
-              >
-                <Store className="h-4 w-4" />
-                <span className="hidden sm:inline">App Store</span>
-              </button>
-              <button
-                onClick={() => setActivePage('googleplay')}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${activePage === 'googleplay'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                  }
-                `}
-              >
-                <Play className="h-4 w-4" />
-                <span className="hidden sm:inline">Google Play</span>
-              </button>
-              <button
-                onClick={() => setActivePage('screenshots')}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${activePage === 'screenshots'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                  }
-                `}
-              >
-                <Image className="h-4 w-4" />
-                <span className="hidden sm:inline">Screenshots</span>
-              </button>
-              <button
-                onClick={() => setActivePage('subscriptions')}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${activePage === 'subscriptions'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                  }
-                `}
-              >
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden sm:inline">Subscriptions</span>
-              </button>
-            </div>
-
             <div className="ml-auto flex items-center gap-3">
               <ThemeToggle variant="compact" />
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-medium text-emerald-500">Local-first</span>
-              </div>
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <Shield className="h-3 w-3 text-primary" />
-                <span className="text-xs font-medium text-primary">Secure</span>
-              </div>
             </div>
           </header>
 
@@ -639,7 +565,7 @@ function App() {
               {activePage === 'xcstrings' && (
               <div className="space-y-8">
               {/* Hero Section */}
-              <div className="relative overflow-hidden rounded-2xl gradient-card border border-border/50 p-8 shadow-xl">
+              <div className="relative overflow-hidden rounded-xl gradient-card border border-border/50 p-8 shadow-xl">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                 <div className="relative flex flex-col md:flex-row md:items-center gap-6">
                   <div className="flex-1">
@@ -730,12 +656,7 @@ function App() {
                   >
                     {isTesting ? (
                       <>
-                        <span className="animate-spin mr-2">
-                          <svg className="h-4 w-4" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                        </span>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         Testing...
                       </>
                     ) : 'Test Connection'}
@@ -846,7 +767,7 @@ function App() {
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                   className={`
-                    relative flex flex-col items-center justify-center h-36 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300
+                    relative flex flex-col items-center justify-center ${fileName ? 'h-36' : 'h-48'} border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300
                     ${isDragging
                       ? 'border-primary bg-primary/10 scale-[1.02]'
                       : fileName
@@ -1002,10 +923,7 @@ function App() {
                   >
                     {isTranslating ? (
                       <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
+                        <Loader2 className="h-5 w-5 animate-spin" />
                         Translating...
                       </span>
                     ) : (
@@ -1036,10 +954,14 @@ function App() {
                       <span className="text-sm font-mono text-muted-foreground">{progress.current} / {progress.total}</span>
                     </div>
                     <div className="relative h-3 rounded-full bg-background overflow-hidden">
-                      <div
-                        className="absolute inset-y-0 left-0 rounded-full gradient-primary transition-all duration-300"
-                        style={{ width: `${progressPercent}%` }}
-                      />
+                      {progress.total === 0 ? (
+                        <div className="absolute inset-0 rounded-full gradient-primary opacity-75 animate-pulse" />
+                      ) : (
+                        <div
+                          className="absolute inset-y-0 left-0 rounded-full gradient-primary transition-all duration-300"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground truncate">{progress.currentText}</p>
                   </div>
@@ -1048,26 +970,23 @@ function App() {
             </Card>
 
             {/* Logs */}
-            <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10">
-                    <Terminal className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Activity Log</CardTitle>
-                    <CardDescription>Track translation progress and events</CardDescription>
-                  </div>
+            <Collapsible open={logs.length > 0} className="border border-border/50 shadow-sm rounded-xl overflow-hidden">
+              <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 hover:bg-muted/30 transition-colors">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10">
+                  <Terminal className="h-5 w-5 text-slate-500" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-64 rounded-xl border border-border/50 bg-muted/20">
-                  {logs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                      <Terminal className="h-8 w-8 mb-2 opacity-50" />
-                      <p className="text-sm">No activity yet</p>
-                    </div>
-                  ) : (
+                <div className="text-left flex-1">
+                  <p className="text-lg font-semibold leading-none tracking-tight">Activity Log</p>
+                  <p className="text-sm text-muted-foreground mt-1">Track translation progress and events</p>
+                </div>
+                {logs.length > 0 && (
+                  <Badge variant="secondary" className="text-xs">{logs.length}</Badge>
+                )}
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-4 pb-4">
+                  <ScrollArea className="h-64 rounded-xl border border-border/50 bg-muted/20">
                     <div className="p-4 space-y-2">
                       {logs.map((log, index) => (
                         <div
@@ -1098,10 +1017,10 @@ function App() {
                         </div>
                       ))}
                     </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                  </ScrollArea>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           {/* Editor Tab */}
@@ -1130,21 +1049,22 @@ function App() {
                       className="pl-10 h-10 bg-background"
                     />
                   </div>
-                  <select
-                    value={filterLang}
-                    onChange={(e) => setFilterLang(e.target.value)}
-                    className="h-10 rounded-lg border border-input bg-background px-4 text-sm font-medium min-w-[160px]"
-                  >
-                    <option value="all">All Languages</option>
-                    {availableLanguages.map(lang => {
-                      const langInfo = SUPPORTED_LANGUAGES.find(l => l.code === lang)
-                      return (
-                        <option key={lang} value={lang}>
-                          {langInfo ? `${langInfo.flag} ${langInfo.name}` : lang}
-                        </option>
-                      )
-                    })}
-                  </select>
+                  <Select value={filterLang} onValueChange={setFilterLang}>
+                    <SelectTrigger className="h-10 min-w-[160px] bg-background">
+                      <SelectValue placeholder="All Languages" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Languages</SelectItem>
+                      {availableLanguages.map(lang => {
+                        const langInfo = SUPPORTED_LANGUAGES.find(l => l.code === lang)
+                        return (
+                          <SelectItem key={lang} value={lang}>
+                            {langInfo ? `${langInfo.flag} ${langInfo.name}` : lang}
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
                   <Button onClick={handleSave} variant="outline" className="h-10">
                     <Download className="h-4 w-4 mr-2" />
                     Export File

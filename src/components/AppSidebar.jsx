@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play } from 'lucide-react'
+import { toast } from 'sonner'
+import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play, Loader2 } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 import {
   Sidebar,
@@ -19,6 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Collapsible,
   CollapsibleContent,
@@ -35,6 +37,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { PROVIDERS } from '@/services/translationService'
 import { encrypt, decrypt } from '@/utils/crypto'
 
@@ -174,9 +184,10 @@ export function AppSidebar({
       const encrypted = await encrypt(ascCredentials.privateKey, keyPassword)
       localStorage.setItem(ENCRYPTED_KEY_STORAGE, encrypted)
       setHasStoredKey(true)
-      setShowPasswordInput(false)
       setKeyPassword('')
       setPasswordMode('')
+      setShowPasswordInput(false)
+      toast.success('Key saved (encrypted)')
     } catch {
       setKeyError('Failed to encrypt key')
     }
@@ -204,9 +215,10 @@ export function AppSidebar({
 
     if (result.success) {
       onAscCredentialsChange(prev => ({ ...prev, privateKey: result.data }))
-      setShowPasswordInput(false)
       setKeyPassword('')
       setPasswordMode('')
+      setShowPasswordInput(false)
+      toast.success('Key decrypted!')
     } else {
       setKeyError('Wrong password')
     }
@@ -246,9 +258,10 @@ export function AppSidebar({
       const encrypted = await encrypt(gpCredentials.serviceAccountJson, gpKeyPassword)
       localStorage.setItem(ENCRYPTED_GP_KEY_STORAGE, encrypted)
       setHasStoredGpKey(true)
-      setShowGpPasswordInput(false)
       setGpKeyPassword('')
       setGpPasswordMode('')
+      setShowGpPasswordInput(false)
+      toast.success('Service account saved (encrypted)')
     } catch {
       setGpKeyError('Failed to encrypt service account')
     }
@@ -276,9 +289,10 @@ export function AppSidebar({
 
     if (result.success) {
       onGpCredentialsChange(prev => ({ ...prev, serviceAccountJson: result.data }))
-      setShowGpPasswordInput(false)
       setGpKeyPassword('')
       setGpPasswordMode('')
+      setShowGpPasswordInput(false)
+      toast.success('Service account decrypted!')
     } else {
       setGpKeyError('Wrong password')
     }
@@ -301,13 +315,13 @@ export function AppSidebar({
   }
 
   return (
-    <Sidebar variant="inset" collapsible="offcanvas">
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border/50 bg-gradient-to-b from-sidebar to-sidebar/80">
-        <div className="flex items-center gap-3 px-3 py-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
+        <div className="flex items-center gap-3 px-3 py-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
             <Globe className="h-5 w-5 text-white" />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-base font-bold tracking-tight">Localizer</span>
             <span className="text-xs text-muted-foreground">App Store & Play Store</span>
           </div>
@@ -414,7 +428,7 @@ export function AppSidebar({
 
             {/* App Store Connect Quick Nav - only show when on appstore page */}
             {activePage === 'appstore' && (
-              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1">
+              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1 group-data-[collapsible=icon]:hidden">
                 <button
                   onClick={() => document.getElementById('asc-connection')?.scrollIntoView({ behavior: 'smooth' })}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
@@ -469,7 +483,7 @@ export function AppSidebar({
 
             {/* Google Play Quick Nav - only show when on googleplay page */}
             {activePage === 'googleplay' && (
-              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1">
+              <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1 group-data-[collapsible=icon]:hidden">
                 <button
                   onClick={() => document.getElementById('gp-connection')?.scrollIntoView({ behavior: 'smooth' })}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
@@ -510,10 +524,10 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="my-4 opacity-50" />
+        <SidebarSeparator className="my-4 opacity-50 group-data-[collapsible=icon]:hidden" />
 
         {/* AI Provider Settings */}
-        <Collapsible open={aiSettingsOpen} onOpenChange={setAiSettingsOpen}>
+        <Collapsible open={aiSettingsOpen} onOpenChange={setAiSettingsOpen} className="group-data-[collapsible=icon]:hidden">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
@@ -578,15 +592,16 @@ export function AppSidebar({
                       </datalist>
                     </>
                   ) : (
-                    <select
-                      value={currentModel}
-                      onChange={(e) => handleModelChange(e.target.value)}
-                      className="w-full h-9 rounded-lg bg-muted/30 border border-border/50 px-3 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                    >
-                      {PROVIDERS[providerConfig.provider]?.models.map(model => (
-                        <option key={model} value={model}>{getModelDisplayName(model)}</option>
-                      ))}
-                    </select>
+                    <Select value={currentModel} onValueChange={handleModelChange}>
+                      <SelectTrigger className="h-9 text-sm bg-muted/30 border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROVIDERS[providerConfig.provider]?.models.map(model => (
+                          <SelectItem key={model} value={model}>{getModelDisplayName(model)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
 
@@ -594,17 +609,18 @@ export function AppSidebar({
                 {PROVIDERS[providerConfig.provider]?.serviceTiers && (
                   <div className="space-y-2">
                     <Label className="text-xs font-medium text-muted-foreground">Service Tier</Label>
-                    <select
-                      value={providerConfig.serviceTier || 'auto'}
-                      onChange={(e) => onProviderConfigChange(prev => ({ ...prev, serviceTier: e.target.value }))}
-                      className="w-full h-9 rounded-lg bg-muted/30 border border-border/50 px-3 text-sm focus:border-primary/50 focus:outline-none transition-colors"
-                    >
-                      {PROVIDERS[providerConfig.provider].serviceTiers.map(tier => (
-                        <option key={tier} value={tier}>
-                          {tier === 'auto' ? 'Auto (default)' : tier === 'priority' ? 'Priority (faster)' : tier === 'flex' ? 'Flex (cheaper)' : tier.charAt(0).toUpperCase() + tier.slice(1)}
-                        </option>
-                      ))}
-                    </select>
+                    <Select value={providerConfig.serviceTier || 'auto'} onValueChange={(val) => onProviderConfigChange(prev => ({ ...prev, serviceTier: val }))}>
+                      <SelectTrigger className="h-9 text-sm bg-muted/30 border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROVIDERS[providerConfig.provider].serviceTiers.map(tier => (
+                          <SelectItem key={tier} value={tier}>
+                            {tier === 'auto' ? 'Auto (default)' : tier === 'priority' ? 'Priority (faster)' : tier === 'flex' ? 'Flex (cheaper)' : tier.charAt(0).toUpperCase() + tier.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <p className="text-xs text-muted-foreground">
                       Priority = faster, Flex = cheaper batch processing
                     </p>
@@ -656,10 +672,10 @@ export function AppSidebar({
           </SidebarGroup>
         </Collapsible>
 
-        <SidebarSeparator className="my-4 opacity-50" />
+        <SidebarSeparator className="my-4 opacity-50 group-data-[collapsible=icon]:hidden" />
 
         {/* App Store Connect Settings */}
-        <Collapsible open={ascSettingsOpen} onOpenChange={setAscSettingsOpen}>
+        <Collapsible open={ascSettingsOpen} onOpenChange={setAscSettingsOpen} className="group-data-[collapsible=icon]:hidden">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
@@ -749,37 +765,39 @@ export function AppSidebar({
 
                   {/* Save/Load encrypted key buttons */}
                   <div className="flex gap-2 pt-2">
-                    {ascCredentials.privateKey && !showPasswordInput && (
+                    {ascCredentials.privateKey && (
                       <Button
                         variant="outline"
                         size="sm"
                         className="flex-1 h-8 text-xs gap-1.5"
                         onClick={() => {
-                          setShowPasswordInput(true)
                           setPasswordMode('save')
                           setKeyError('')
+                          setKeyPassword('')
+                          setShowPasswordInput(true)
                         }}
                       >
                         <Save className="h-3.5 w-3.5" />
-                        Save Encrypted
+                        {hasStoredKey ? 'Change Password' : 'Save Encrypted'}
                       </Button>
                     )}
-                    {hasStoredKey && !ascCredentials.privateKey && !showPasswordInput && (
+                    {hasStoredKey && !ascCredentials.privateKey && (
                       <Button
                         variant="outline"
                         size="sm"
                         className="flex-1 h-8 text-xs gap-1.5"
                         onClick={() => {
-                          setShowPasswordInput(true)
                           setPasswordMode('load')
                           setKeyError('')
+                          setKeyPassword('')
+                          setShowPasswordInput(true)
                         }}
                       >
                         <Unlock className="h-3.5 w-3.5" />
                         Load Saved Key
                       </Button>
                     )}
-                    {hasStoredKey && !showPasswordInput && (
+                    {hasStoredKey && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -811,55 +829,6 @@ export function AppSidebar({
                       </AlertDialog>
                     )}
                   </div>
-
-                  {/* Password input for save/load */}
-                  {showPasswordInput && (
-                    <div className="space-y-3 p-3 rounded-xl bg-muted/30 border border-border/50 mt-2">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Lock className="h-3.5 w-3.5" />
-                        <span className="font-medium">{passwordMode === 'save' ? 'Encrypt & save key' : 'Enter password to decrypt'}</span>
-                      </div>
-                      <Input
-                        type="password"
-                        placeholder="Enter password..."
-                        value={keyPassword}
-                        onChange={(e) => {
-                          setKeyPassword(e.target.value)
-                          setKeyError('')
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            passwordMode === 'save' ? handleSaveKeyEncrypted() : handleLoadKeyEncrypted()
-                          } else if (e.key === 'Escape') {
-                            handleCancelPassword()
-                          }
-                        }}
-                        className="h-9 text-sm"
-                        autoFocus
-                      />
-                      {keyError && (
-                        <p className="text-xs text-destructive font-medium">{keyError}</p>
-                      )}
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="flex-1 h-8 text-xs"
-                          onClick={passwordMode === 'save' ? handleSaveKeyEncrypted : handleLoadKeyEncrypted}
-                          disabled={isSavingKey}
-                        >
-                          {isSavingKey ? 'Processing...' : passwordMode === 'save' ? 'Save Key' : 'Unlock'}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 text-xs"
-                          onClick={handleCancelPassword}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Status & Clear */}
@@ -907,10 +876,10 @@ export function AppSidebar({
           </SidebarGroup>
         </Collapsible>
 
-        <SidebarSeparator className="my-4 opacity-50" />
+        <SidebarSeparator className="my-4 opacity-50 group-data-[collapsible=icon]:hidden" />
 
         {/* Google Play Settings */}
-        <Collapsible open={gpSettingsOpen} onOpenChange={setGpSettingsOpen}>
+        <Collapsible open={gpSettingsOpen} onOpenChange={setGpSettingsOpen} className="group-data-[collapsible=icon]:hidden">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-2 py-2 rounded-xl hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
@@ -1041,94 +1010,70 @@ export function AppSidebar({
                 </div>
 
                 {/* Encrypted Storage for Google Play */}
-                {showGpPasswordInput ? (
-                  <div className="space-y-2 p-3 rounded-xl bg-muted/30 border border-border/50">
-                    <Label className="text-xs font-medium text-muted-foreground">
-                      {gpPasswordMode === 'save' ? 'Set password to encrypt' : 'Enter password to decrypt'}
-                    </Label>
-                    <Input
-                      type="password"
-                      placeholder="Password (min 4 chars)"
-                      value={gpKeyPassword}
-                      onChange={(e) => setGpKeyPassword(e.target.value)}
-                      className="h-8 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          gpPasswordMode === 'save' ? handleSaveGpKeyEncrypted() : handleLoadGpKeyEncrypted()
-                        }
+                <div className="flex gap-2">
+                  {gpCredentials?.serviceAccountJson && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setGpPasswordMode('save')
+                        setGpKeyError('')
+                        setGpKeyPassword('')
+                        setShowGpPasswordInput(true)
                       }}
-                    />
-                    {gpKeyError && <p className="text-xs text-red-500">{gpKeyError}</p>}
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={gpPasswordMode === 'save' ? handleSaveGpKeyEncrypted : handleLoadGpKeyEncrypted}
-                        disabled={isSavingGpKey}
-                        className="flex-1 h-8 text-xs"
-                      >
-                        {isSavingGpKey ? 'Processing...' : gpPasswordMode === 'save' ? 'Save Encrypted' : 'Decrypt & Load'}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={handleCancelGpPassword} className="h-8 text-xs">
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    {gpCredentials?.serviceAccountJson && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => { setShowGpPasswordInput(true); setGpPasswordMode('save'); setGpKeyError('') }}
-                        className="flex-1 h-8 text-xs"
-                      >
-                        <Save className="h-3.5 w-3.5 mr-1.5" />
-                        Save Encrypted
-                      </Button>
-                    )}
-                    {hasStoredGpKey && !gpCredentials?.serviceAccountJson && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => { setShowGpPasswordInput(true); setGpPasswordMode('load'); setGpKeyError('') }}
-                        className="flex-1 h-8 text-xs"
-                      >
-                        <Unlock className="h-3.5 w-3.5 mr-1.5" />
-                        Load Saved
-                      </Button>
-                    )}
-                    {hasStoredGpKey && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Saved Service Account?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete the encrypted service account from your browser storage.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeleteStoredGpKey} className="bg-destructive text-destructive-foreground">
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                  </div>
-                )}
+                      className="flex-1 h-8 text-xs"
+                    >
+                      <Save className="h-3.5 w-3.5 mr-1.5" />
+                      {hasStoredGpKey ? 'Change Password' : 'Save Encrypted'}
+                    </Button>
+                  )}
+                  {hasStoredGpKey && !gpCredentials?.serviceAccountJson && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setGpPasswordMode('load')
+                        setGpKeyError('')
+                        setGpKeyPassword('')
+                        setShowGpPasswordInput(true)
+                      }}
+                      className="flex-1 h-8 text-xs"
+                    >
+                      <Unlock className="h-3.5 w-3.5 mr-1.5" />
+                      Load Saved
+                    </Button>
+                  )}
+                  {hasStoredGpKey && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Saved Service Account?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete the encrypted service account from your browser storage.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteStoredGpKey} className="bg-destructive text-destructive-foreground">
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
         </Collapsible>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border/50 bg-gradient-to-t from-sidebar to-transparent">
+      <SidebarFooter className="border-t border-sidebar-border/50 bg-gradient-to-t from-sidebar to-transparent group-data-[collapsible=icon]:hidden">
         <div className="px-4 py-4 space-y-4">
           {/* Theme Toggle */}
           <div className="flex items-center justify-between p-2 rounded-xl bg-muted/30">
@@ -1178,6 +1123,100 @@ export function AppSidebar({
           </div>
         </div>
       </SidebarFooter>
+
+      {/* ASC Password Dialog */}
+      <Dialog open={showPasswordInput} onOpenChange={(open) => { if (!open) handleCancelPassword() }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {passwordMode === 'save' ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+              {passwordMode === 'save' ? (hasStoredKey ? 'Change Password' : 'Encrypt & Save Key') : 'Decrypt Saved Key'}
+            </DialogTitle>
+            <DialogDescription>
+              {passwordMode === 'save'
+                ? (hasStoredKey
+                  ? 'Enter a new password. This will re-encrypt your .p8 key with the new password.'
+                  : 'Choose a password to encrypt your .p8 key. It will be stored securely in your browser.')
+                : 'Enter your password to decrypt the saved key.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Input
+              type="password"
+              placeholder={passwordMode === 'save' ? 'Password (min 4 chars)' : 'Enter password...'}
+              value={keyPassword}
+              onChange={(e) => { setKeyPassword(e.target.value); setKeyError('') }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  passwordMode === 'save' ? handleSaveKeyEncrypted() : handleLoadKeyEncrypted()
+                }
+              }}
+              autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
+              data-form-type="other"
+            />
+            {keyError && <p className="text-sm text-destructive">{keyError}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={handleCancelPassword}>Cancel</Button>
+            <Button
+              onClick={passwordMode === 'save' ? handleSaveKeyEncrypted : handleLoadKeyEncrypted}
+              disabled={isSavingKey}
+            >
+              {isSavingKey ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              {passwordMode === 'save' ? (hasStoredKey ? 'Update Password' : 'Save Encrypted') : 'Decrypt'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* GP Password Dialog */}
+      <Dialog open={showGpPasswordInput} onOpenChange={(open) => { if (!open) handleCancelGpPassword() }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {gpPasswordMode === 'save' ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+              {gpPasswordMode === 'save' ? (hasStoredGpKey ? 'Change Password' : 'Encrypt & Save Service Account') : 'Decrypt Service Account'}
+            </DialogTitle>
+            <DialogDescription>
+              {gpPasswordMode === 'save'
+                ? (hasStoredGpKey
+                  ? 'Enter a new password. This will re-encrypt your service account with the new password.'
+                  : 'Choose a password to encrypt your service account JSON. It will be stored securely in your browser.')
+                : 'Enter your password to decrypt the saved service account.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Input
+              type="password"
+              placeholder={gpPasswordMode === 'save' ? 'Password (min 4 chars)' : 'Enter password...'}
+              value={gpKeyPassword}
+              onChange={(e) => setGpKeyPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  gpPasswordMode === 'save' ? handleSaveGpKeyEncrypted() : handleLoadGpKeyEncrypted()
+                }
+              }}
+              autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
+              data-form-type="other"
+            />
+            {gpKeyError && <p className="text-sm text-destructive">{gpKeyError}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={handleCancelGpPassword}>Cancel</Button>
+            <Button
+              onClick={gpPasswordMode === 'save' ? handleSaveGpKeyEncrypted : handleLoadGpKeyEncrypted}
+              disabled={isSavingGpKey}
+            >
+              {isSavingGpKey ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              {gpPasswordMode === 'save' ? (hasStoredGpKey ? 'Update Password' : 'Save Encrypted') : 'Decrypt'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   )
 }

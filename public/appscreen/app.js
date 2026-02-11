@@ -1844,6 +1844,29 @@ function setupEventListeners() {
         openLanguagesModal();
     });
 
+    // Set as Default Language button
+    document.getElementById('set-default-language-btn').addEventListener('click', () => {
+        const lang = state.currentLanguage;
+        const name = languageNames[lang] || lang.toUpperCase();
+        const flag = languageFlags[lang] || '🏳️';
+
+        // Move current language to front of projectLanguages so it's the default on load
+        const idx = state.projectLanguages.indexOf(lang);
+        if (idx > 0) {
+            state.projectLanguages.splice(idx, 1);
+            state.projectLanguages.unshift(lang);
+        }
+        saveState();
+
+        // Show brief confirmation in the button
+        const label = document.getElementById('set-default-language-label');
+        label.textContent = `${flag} ${name} is default`;
+        setTimeout(() => {
+            label.textContent = 'Set as Default Language';
+            document.getElementById('language-menu').classList.remove('visible');
+        }, 1200);
+    });
+
     // Translate All button
     document.getElementById('translate-all-btn').addEventListener('click', () => {
         document.getElementById('language-menu').classList.remove('visible');
@@ -1952,46 +1975,8 @@ function setupEventListeners() {
         }
     });
 
-    // Settings modal
-    document.getElementById('settings-btn').addEventListener('click', () => {
-        openSettingsModal();
-    });
-
-    document.getElementById('settings-modal-close').addEventListener('click', () => {
-        document.getElementById('settings-modal').classList.remove('visible');
-    });
-
-    document.getElementById('settings-modal-cancel').addEventListener('click', () => {
-        document.getElementById('settings-modal').classList.remove('visible');
-    });
-
-    document.getElementById('settings-modal-save').addEventListener('click', () => {
-        saveSettings();
-    });
-
-    // Provider radio buttons
-    document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            updateProviderSection(e.target.value);
-        });
-    });
-
-    // Show/hide key buttons for all providers
-    document.querySelectorAll('.settings-show-key').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.dataset.target;
-            const input = document.getElementById(targetId);
-            if (input) {
-                input.type = input.type === 'password' ? 'text' : 'password';
-            }
-        });
-    });
-
-    document.getElementById('settings-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'settings-modal') {
-            document.getElementById('settings-modal').classList.remove('visible');
-        }
-    });
+    // AI status indicator (updated when config is synced from sidebar)
+    updateAiStatusIndicator();
 
     // Output size dropdown
     const outputDropdown = document.getElementById('output-size-dropdown');
@@ -2645,10 +2630,13 @@ function updateLanguageMenu() {
     const container = document.getElementById('language-menu-items');
     container.innerHTML = '';
 
+    const defaultLang = state.projectLanguages[0] || 'en';
+
     state.projectLanguages.forEach(lang => {
         const btn = document.createElement('button');
         btn.className = 'language-menu-item' + (lang === state.currentLanguage ? ' active' : '');
-        btn.innerHTML = `<span class="flag">${languageFlags[lang] || '🏳️'}</span> ${languageNames[lang] || lang.toUpperCase()}`;
+        const isDefault = lang === defaultLang;
+        btn.innerHTML = `<span class="flag">${languageFlags[lang] || '🏳️'}</span> ${languageNames[lang] || lang.toUpperCase()}${isDefault ? '<span class="language-default-badge">default</span>' : ''}`;
         btn.onclick = () => {
             switchGlobalLanguage(lang);
             document.getElementById('language-menu').classList.remove('visible');
@@ -2706,13 +2694,21 @@ function updateLanguagesList() {
         item.innerHTML = `
             <span class="flag">${flag}</span>
             <span class="name">${name}</span>
-            ${isCurrent ? '<span class="current-badge">Current</span>' : ''}
+            ${isCurrent ? '<span class="current-badge">Default</span>' : `<button class="set-default-btn" title="Set as default language">Set default</button>`}
             <button class="remove-btn" ${isOnly ? 'disabled' : ''} title="${isOnly ? 'Cannot remove the only language' : 'Remove language'}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
             </button>
         `;
+
+        const setDefaultBtn = item.querySelector('.set-default-btn');
+        if (setDefaultBtn) {
+            setDefaultBtn.addEventListener('click', () => {
+                switchGlobalLanguage(lang);
+                updateLanguagesList();
+            });
+        }
 
         const removeBtn = item.querySelector('.remove-btn');
         if (!isOnly) {
@@ -2730,9 +2726,16 @@ function applyLocalizationData(payload = {}) {
     const headlinesByLang = payload.headlinesByLang || {};
     const subheadlinesByLang = payload.subheadlinesByLang || {};
     const applyToAll = payload.applyToAll !== false;
+    const sourceLanguage = payload.sourceLanguage || null;
 
     state.projectLanguages = [...new Set(languages)];
-    state.currentLanguage = state.projectLanguages[0] || 'en';
+
+    // Use source language if available and present in the project, otherwise keep current or fall back to first
+    if (sourceLanguage && state.projectLanguages.includes(sourceLanguage)) {
+        state.currentLanguage = sourceLanguage;
+    } else if (!state.projectLanguages.includes(state.currentLanguage)) {
+        state.currentLanguage = state.projectLanguages[0] || 'en';
+    }
 
     const syncTextBlock = (text) => {
         if (!text.headlines) text.headlines = { en: '' };
@@ -2790,90 +2793,27 @@ function applyAiConfig(payload = {}) {
     const model = payload.model || '';
     const provider = payload.provider || 'openai';
     const endpoint = payload.endpoint || '';
+    const region = payload.region || '';
 
-    // Store config for the specified provider
+    // Store synced config for direct use by translate/magical-titles
+    setSyncedAiConfig({ apiKey, model, provider, endpoint, region });
+
+    // Also write to localStorage for backward compat with any code that reads it directly
     const providerConfig = llmProviders[provider];
     if (providerConfig) {
-        if (apiKey) {
-            localStorage.setItem(providerConfig.storageKey, apiKey);
-        }
-        if (model) {
-            localStorage.setItem(providerConfig.modelStorageKey, model);
-        }
+        if (apiKey) localStorage.setItem(providerConfig.storageKey, apiKey);
+        if (model) localStorage.setItem(providerConfig.modelStorageKey, model);
         if (endpoint && providerConfig.endpointStorageKey) {
             localStorage.setItem(providerConfig.endpointStorageKey, endpoint);
         }
+        if (region && providerConfig.regionStorageKey) {
+            localStorage.setItem(providerConfig.regionStorageKey, region);
+        }
         localStorage.setItem('aiProvider', provider);
-
-        // Update UI for the provider
-        const input = document.getElementById(`settings-api-key-${provider}`);
-        if (input && apiKey) {
-            input.value = apiKey;
-            input.type = 'password';
-        }
-
-        const status = document.getElementById(`settings-key-status-${provider}`);
-        if (status) {
-            if (apiKey) {
-                status.textContent = '✓ API key is saved';
-                status.className = 'settings-key-status success';
-            } else {
-                status.textContent = '';
-                status.className = 'settings-key-status';
-            }
-        }
-
-        const modelSelect = document.getElementById(`settings-model-${provider}`);
-        if (modelSelect && model) {
-            modelSelect.value = model;
-        }
-
-        // Update provider radio buttons
-        document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
-            radio.checked = radio.value === provider;
-        });
-        updateProviderSection(provider);
-    } else {
-        // Fallback for legacy openai-only config
-        if (apiKey) {
-            localStorage.setItem('openaiApiKey', apiKey);
-        }
-        if (model) {
-            localStorage.setItem('openaiModel', model);
-        }
-        if (provider === 'openai') {
-            localStorage.setItem('aiProvider', 'openai');
-        }
-
-        const input = document.getElementById('settings-api-key-openai');
-        if (input && apiKey) {
-            input.value = apiKey;
-            input.type = 'password';
-        }
-
-        const status = document.getElementById('settings-key-status-openai');
-        if (status) {
-            if (apiKey) {
-                status.textContent = '✓ API key is saved';
-                status.className = 'settings-key-status success';
-            } else {
-                status.textContent = '';
-                status.className = 'settings-key-status';
-            }
-        }
-
-        const modelSelect = document.getElementById('settings-model-openai');
-        if (modelSelect && model) {
-            modelSelect.value = model;
-        }
-
-        if (provider === 'openai') {
-            document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
-                radio.checked = radio.value === 'openai';
-            });
-            updateProviderSection('openai');
-        }
     }
+
+    // Update the AI status indicator in the toolbar
+    updateAiStatusIndicator();
 }
 
 function updateAddLanguageSelect() {
@@ -3095,14 +3035,14 @@ function openTranslateModal(target) {
     const languages = isHeadline ? text.headlineLanguages : text.subheadlineLanguages;
     const texts = isHeadline ? text.headlines : text.subheadlines;
 
-    // Populate source language dropdown (first language selected by default)
+    // Populate source language dropdown (current/default language selected)
     const sourceSelect = document.getElementById('translate-source-lang');
     sourceSelect.innerHTML = '';
-    languages.forEach((lang, index) => {
+    languages.forEach((lang) => {
         const option = document.createElement('option');
         option.value = lang;
         option.textContent = `${languageFlags[lang]} ${languageNames[lang] || lang}`;
-        if (index === 0) option.selected = true;
+        if (lang === state.currentLanguage) option.selected = true;
         sourceSelect.appendChild(option);
     });
     
@@ -3187,11 +3127,11 @@ async function aiTranslateAll() {
 
     // Get selected provider and API key
     const provider = getSelectedProvider();
-    const providerConfig = llmProviders[provider];
-    const apiKey = localStorage.getItem(providerConfig.storageKey);
+    const apiKey = getApiKey(provider);
+    const providerName = getAiProviderDisplayName();
 
     if (!apiKey) {
-        setTranslateStatus(`Add your LLM API key in Settings to use AI translation.`, 'error');
+        setTranslateStatus(`Configure your AI API key in the sidebar to use AI translation.`, 'error');
         return;
     }
 
@@ -3205,7 +3145,7 @@ async function aiTranslateAll() {
         <span>Translating...</span>
     `;
 
-    setTranslateStatus(`Translating to ${targetLangs.length} language(s) with ${providerConfig.name}...`, '');
+    setTranslateStatus(`Translating to ${targetLangs.length} language(s) with ${providerName}...`, '');
 
     // Mark all target items as translating
     targetLangs.forEach(lang => {
@@ -3247,6 +3187,12 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
             responseText = await translateWithAzure(apiKey, prompt);
         } else if (provider === 'google') {
             responseText = await translateWithGoogle(apiKey, prompt);
+        } else if (provider === 'github') {
+            responseText = await translateWithGitHub(apiKey, prompt);
+        } else if (provider === 'bedrock') {
+            responseText = await translateWithBedrock(apiKey, prompt);
+        } else {
+            throw new Error(`Unsupported AI provider: ${provider}. Please select a supported provider in the sidebar.`);
         }
 
         // Clean up response - remove markdown code blocks if present
@@ -3273,9 +3219,9 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
         console.error('Translation error:', error);
 
         if (error.message === 'Failed to fetch') {
-            setTranslateStatus('Connection failed. Check your API key in Settings.', 'error');
+            setTranslateStatus('Connection failed. Check your API key in the sidebar.', 'error');
         } else if (error.message === 'AI_UNAVAILABLE' || error.message.includes('401') || error.message.includes('403')) {
-            setTranslateStatus('Invalid API key. Update it in Settings (gear icon).', 'error');
+            setTranslateStatus('Invalid API key. Update it in the sidebar AI settings.', 'error');
         } else {
             setTranslateStatus('Translation failed: ' + error.message, 'error');
         }
@@ -3385,8 +3331,8 @@ function showTranslateConfirmDialog(providerName) {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay visible';
 
-        // Default to first project language
-        const defaultLang = state.projectLanguages[0] || 'en';
+        // Default to current/default language
+        const defaultLang = state.currentLanguage || state.projectLanguages[0] || 'en';
 
         // Build language options
         const languageOptions = state.projectLanguages.map(lang => {
@@ -3502,16 +3448,16 @@ async function translateAllText() {
 
     // Get selected provider and API key
     const provider = getSelectedProvider();
-    const providerConfig = llmProviders[provider];
-    const apiKey = localStorage.getItem(providerConfig.storageKey);
+    const apiKey = getApiKey(provider);
+    const providerName = getAiProviderDisplayName();
 
     if (!apiKey) {
-        await showAppAlert('Add your LLM API key in Settings to use AI translation.', 'error');
+        await showAppAlert('Configure your AI API key in the sidebar to use AI translation.', 'error');
         return;
     }
 
     // Show confirmation dialog with source language selector
-    const sourceLang = await showTranslateConfirmDialog(providerConfig.name);
+    const sourceLang = await showTranslateConfirmDialog(providerName);
     if (!sourceLang) return; // User cancelled
 
     const targetLangs = state.projectLanguages.filter(lang => lang !== sourceLang);
@@ -3582,7 +3528,7 @@ async function translateAllText() {
         if (progressDetail) progressDetail.textContent = detail;
     };
 
-    updateStatus('Sending to AI...', `${textsToTranslate.length} texts to ${targetLangs.length} languages using ${providerConfig.name}`);
+    updateStatus('Sending to AI...', `${textsToTranslate.length} texts to ${targetLangs.length} languages using ${providerName}`);
 
     try {
         // Build a single prompt with all texts
@@ -3647,6 +3593,10 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
             responseText = await translateWithGoogle(apiKey, prompt);
         } else if (provider === 'github') {
             responseText = await translateWithGitHub(apiKey, prompt);
+        } else if (provider === 'bedrock') {
+            responseText = await translateWithBedrock(apiKey, prompt);
+        } else {
+            throw new Error(`Unsupported AI provider: ${provider}. Please select a supported provider in the sidebar.`);
         }
 
         updateStatus('Processing response...', 'Parsing translations');
@@ -3710,9 +3660,9 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
         progressOverlay.remove();
 
         if (error.message === 'Failed to fetch') {
-            await showAppAlert('Connection failed. Check your API key in Settings.', 'error');
+            await showAppAlert('Connection failed. Check your API key in the sidebar.', 'error');
         } else if (error.message === 'AI_UNAVAILABLE' || error.message.includes('401') || error.message.includes('403')) {
-            await showAppAlert('Invalid API key. Update it in Settings (gear icon).', 'error');
+            await showAppAlert('Invalid API key. Update it in the sidebar AI settings.', 'error');
         } else {
             await showAppAlert('Translation failed: ' + error.message, 'error');
         }
@@ -3780,7 +3730,7 @@ async function translateWithOpenAI(apiKey, prompt) {
 
 async function translateWithAzure(apiKey, prompt) {
     const model = getSelectedModel('azure');
-    const endpoint = localStorage.getItem('azureEndpoint');
+    const endpoint = getAzureEndpoint();
     if (!endpoint) {
         throw new Error('Azure endpoint not configured');
     }
@@ -3867,107 +3817,72 @@ async function translateWithGitHub(apiKey, prompt) {
     return data.choices[0].message.content;
 }
 
+async function translateWithBedrock(apiKey, prompt) {
+    const model = getSelectedModel('bedrock');
+    const region = getBedrockRegion();
+    const endpoint = `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(model)}/converse`;
+
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            messages: [
+                { role: 'user', content: [{ text: prompt }] }
+            ],
+            system: [{ text: 'You are a professional translator for app store content.' }],
+            inferenceConfig: {
+                temperature: 0.3,
+                maxTokens: 4096
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const status = response.status;
+        const errorBody = await response.json().catch(() => ({}));
+        console.error('Bedrock API Error:', { status, model, region, error: errorBody });
+        if (status === 401 || status === 403) throw new Error('AI_UNAVAILABLE');
+        throw new Error(`API request failed: ${status} - ${errorBody.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    if (data.message) throw new Error(data.message);
+    return data.output.message.content[0].text;
+}
+
 function setTranslateStatus(message, type) {
     const status = document.getElementById('ai-translate-status');
     status.textContent = message;
     status.className = 'ai-translate-status' + (type ? ' ' + type : '');
 }
 
-// Settings modal functions
-// LLM configuration is in llm.js (llmProviders, getSelectedModel, getSelectedProvider)
+// AI status indicator - shows current provider from sidebar
+// LLM configuration is synced from the React sidebar via syncAiConfig()
 
-function openSettingsModal() {
-    // Load saved provider
-    const savedProvider = getSelectedProvider();
-    document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
-        radio.checked = radio.value === savedProvider;
-    });
+// AI status indicator - shows current provider from sidebar
+function updateAiStatusIndicator() {
+    const indicator = document.getElementById('ai-status-indicator');
+    const textEl = document.getElementById('ai-status-text');
+    if (!indicator || !textEl) return;
 
-    // Show the correct API section
-    updateProviderSection(savedProvider);
+    const provider = getSelectedProvider();
+    const apiKey = getApiKey(provider);
+    const config = llmProviders[provider];
+    const name = config ? config.name : provider;
 
-    // Load all saved API keys and models
-    Object.entries(llmProviders).forEach(([provider, config]) => {
-        const savedKey = localStorage.getItem(config.storageKey);
-        const input = document.getElementById(`settings-api-key-${provider}`);
-        if (input) {
-            input.value = savedKey || '';
-            input.type = 'password';
-        }
-
-        const status = document.getElementById(`settings-key-status-${provider}`);
-        if (status) {
-            if (savedKey) {
-                status.textContent = '✓ API key is saved';
-                status.className = 'settings-key-status success';
-            } else {
-                status.textContent = '';
-                status.className = 'settings-key-status';
-            }
-        }
-
-        // Populate and load saved model selection
-        const modelSelect = document.getElementById(`settings-model-${provider}`);
-        if (modelSelect) {
-            // Populate options from llm.js config
-            modelSelect.innerHTML = generateModelOptions(provider);
-            // Set saved value
-            const savedModel = localStorage.getItem(config.modelStorageKey) || config.defaultModel;
-            modelSelect.value = savedModel;
-        }
-    });
-
-    document.getElementById('settings-modal').classList.add('visible');
-}
-
-function updateProviderSection(provider) {
-    document.querySelectorAll('.settings-api-section').forEach(section => {
-        section.style.display = section.dataset.provider === provider ? 'block' : 'none';
-    });
-}
-
-function saveSettings() {
-    // Save selected provider
-    const selectedProvider = document.querySelector('input[name="ai-provider"]:checked').value;
-    localStorage.setItem('aiProvider', selectedProvider);
-
-    // Save all API keys and models
-    let allValid = true;
-    Object.entries(llmProviders).forEach(([provider, config]) => {
-        const input = document.getElementById(`settings-api-key-${provider}`);
-        const status = document.getElementById(`settings-key-status-${provider}`);
-        if (!input || !status) return;
-
-        const key = input.value.trim();
-
-        if (key) {
-            // Validate key format
-            if (key.startsWith(config.keyPrefix)) {
-                localStorage.setItem(config.storageKey, key);
-                status.textContent = '✓ API key saved';
-                status.className = 'settings-key-status success';
-            } else {
-                status.textContent = `Invalid format. Should start with ${config.keyPrefix}...`;
-                status.className = 'settings-key-status error';
-                if (provider === selectedProvider) allValid = false;
-            }
-        } else {
-            localStorage.removeItem(config.storageKey);
-            status.textContent = '';
-            status.className = 'settings-key-status';
-        }
-
-        // Save model selection
-        const modelSelect = document.getElementById(`settings-model-${provider}`);
-        if (modelSelect) {
-            localStorage.setItem(config.modelStorageKey, modelSelect.value);
-        }
-    });
-
-    if (allValid) {
-        setTimeout(() => {
-            document.getElementById('settings-modal').classList.remove('visible');
-        }, 500);
+    if (apiKey) {
+        textEl.textContent = name;
+        indicator.title = `Using ${name} from sidebar`;
+        indicator.classList.add('connected');
+        indicator.classList.remove('disconnected');
+    } else {
+        textEl.textContent = 'No AI';
+        indicator.title = 'Configure AI provider in the sidebar';
+        indicator.classList.remove('connected');
+        indicator.classList.add('disconnected');
     }
 }
 

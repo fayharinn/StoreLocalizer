@@ -1,5 +1,9 @@
 // LLM Provider Configuration
 // Centralized configuration for all AI translation providers and models
+// When embedded in the React app, config is synced from the sidebar via syncAiConfig()
+
+// Synced config from the React toolbar (takes priority over localStorage)
+let _syncedAiConfig = null;
 
 const llmProviders = {
     anthropic: {
@@ -62,8 +66,38 @@ const llmProviders = {
             { id: 'gpt-4.1', name: 'GPT-4.1 ($$$)' }
         ],
         defaultModel: 'gpt-4o'
+    },
+    bedrock: {
+        name: 'AWS Bedrock',
+        keyPrefix: '',
+        storageKey: 'bedrockApiKey',
+        modelStorageKey: 'bedrockModel',
+        regionStorageKey: 'bedrockRegion',
+        models: [
+            { id: 'anthropic.claude-haiku-4-5-20251001-v1:0', name: 'Claude Haiku 4.5 ($)' },
+            { id: 'anthropic.claude-sonnet-4-5-20250929-v1:0', name: 'Claude Sonnet 4.5 ($$)' },
+            { id: 'anthropic.claude-opus-4-5-20251101-v1:0', name: 'Claude Opus 4.5 ($$$)' }
+        ],
+        defaultModel: 'anthropic.claude-haiku-4-5-20251001-v1:0',
+        needsRegion: true
     }
 };
+
+/**
+ * Set the synced AI config from the React toolbar
+ * @param {Object} config - { apiKey, model, provider, endpoint }
+ */
+function setSyncedAiConfig(config) {
+    _syncedAiConfig = config;
+}
+
+/**
+ * Get the synced AI config (if available)
+ * @returns {Object|null}
+ */
+function getSyncedAiConfig() {
+    return _syncedAiConfig;
+}
 
 /**
  * Get the selected model for a provider
@@ -71,6 +105,11 @@ const llmProviders = {
  * @returns {string} - Model ID
  */
 function getSelectedModel(provider) {
+    // Use synced config if available and matches the provider
+    if (_syncedAiConfig && _syncedAiConfig.provider === provider && _syncedAiConfig.model) {
+        return _syncedAiConfig.model;
+    }
+
     const config = llmProviders[provider];
     if (!config) return null;
     
@@ -82,7 +121,6 @@ function getSelectedModel(provider) {
         if (isValidModel) {
             return savedModel;
         }
-        // If saved model is invalid for this provider, clear it and use default
         console.warn(`Invalid model "${savedModel}" for provider "${provider}", using default`);
         localStorage.removeItem(config.modelStorageKey);
     }
@@ -95,6 +133,9 @@ function getSelectedModel(provider) {
  * @returns {string} - Provider key
  */
 function getSelectedProvider() {
+    if (_syncedAiConfig && _syncedAiConfig.provider) {
+        return _syncedAiConfig.provider;
+    }
     return localStorage.getItem('aiProvider') || 'anthropic';
 }
 
@@ -104,9 +145,53 @@ function getSelectedProvider() {
  * @returns {string|null} - API key or null
  */
 function getApiKey(provider) {
+    if (_syncedAiConfig && _syncedAiConfig.provider === provider && _syncedAiConfig.apiKey) {
+        return _syncedAiConfig.apiKey;
+    }
     const config = llmProviders[provider];
     if (!config) return null;
     return localStorage.getItem(config.storageKey);
+}
+
+/**
+ * Get the Azure endpoint
+ * @returns {string|null}
+ */
+function getAzureEndpoint() {
+    if (_syncedAiConfig && _syncedAiConfig.endpoint) {
+        return _syncedAiConfig.endpoint;
+    }
+    return localStorage.getItem('azureEndpoint');
+}
+
+/**
+ * Get the Bedrock AWS region
+ * @returns {string}
+ */
+function getBedrockRegion() {
+    if (_syncedAiConfig && _syncedAiConfig.region) {
+        return _syncedAiConfig.region;
+    }
+    return localStorage.getItem('bedrockRegion') || 'us-east-1';
+}
+
+/**
+ * Check if AI is configured (has a provider with an API key)
+ * @returns {boolean}
+ */
+function isAiConfigured() {
+    const provider = getSelectedProvider();
+    return !!getApiKey(provider);
+}
+
+/**
+ * Get a display name for the current AI provider
+ * @returns {string}
+ */
+function getAiProviderDisplayName() {
+    const provider = getSelectedProvider();
+    const config = llmProviders[provider];
+    return config ? config.name : provider;
 }
 
 /**
@@ -142,5 +227,11 @@ window.llmProviders = llmProviders;
 window.getSelectedModel = getSelectedModel;
 window.getSelectedProvider = getSelectedProvider;
 window.getApiKey = getApiKey;
+window.getAzureEndpoint = getAzureEndpoint;
+window.getBedrockRegion = getBedrockRegion;
 window.validateApiKeyFormat = validateApiKeyFormat;
 window.generateModelOptions = generateModelOptions;
+window.setSyncedAiConfig = setSyncedAiConfig;
+window.getSyncedAiConfig = getSyncedAiConfig;
+window.isAiConfigured = isAiConfigured;
+window.getAiProviderDisplayName = getAiProviderDisplayName;

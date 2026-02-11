@@ -15,8 +15,7 @@ function showMagicalTitlesTooltip() {
 
     // Don't show if no API key is configured
     const provider = getSelectedProvider();
-    const providerConfig = llmProviders[provider];
-    const apiKey = localStorage.getItem(providerConfig.storageKey);
+    const apiKey = getApiKey(provider);
     if (!apiKey) return;
 
     magicalTitlesTooltipShown = true;
@@ -194,7 +193,7 @@ async function generateTitlesWithOpenAI(apiKey, images, prompt) {
 
 async function generateTitlesWithAzure(apiKey, images, prompt) {
     const model = getSelectedModel('azure');
-    const endpoint = localStorage.getItem('azureEndpoint');
+    const endpoint = getAzureEndpoint();
     if (!endpoint) {
         throw new Error('Azure endpoint not configured');
     }
@@ -332,6 +331,56 @@ async function generateTitlesWithGitHub(apiKey, images, prompt) {
     return data.choices[0].message.content;
 }
 
+async function generateTitlesWithBedrock(apiKey, images, prompt) {
+    const model = getSelectedModel('bedrock');
+    const region = getBedrockRegion();
+    const endpoint = `https://bedrock-runtime.${region}.amazonaws.com/model/${encodeURIComponent(model)}/converse`;
+
+    // Build content array with images and text for Bedrock Converse API
+    const content = [];
+
+    for (const img of images) {
+        content.push({
+            image: {
+                format: img.mimeType.split('/')[1] || 'png',
+                source: { bytes: img.base64 }
+            }
+        });
+    }
+
+    content.push({ text: prompt });
+
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            messages: [
+                { role: 'user', content: content }
+            ],
+            system: [{ text: 'You are an expert App Store marketing copywriter.' }],
+            inferenceConfig: {
+                temperature: 0.3,
+                maxTokens: 4096
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const status = response.status;
+        const errorBody = await response.json().catch(() => ({}));
+        console.error('Bedrock Vision API Error:', { status, model, region, error: errorBody });
+        if (status === 401 || status === 403) throw new Error('AI_UNAVAILABLE');
+        throw new Error(`API request failed: ${status} - ${errorBody.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    if (data.message) throw new Error(data.message);
+    return data.output.message.content[0].text;
+}
+
 /**
  * Show the magical titles confirmation dialog
  */
@@ -344,17 +393,17 @@ function showMagicalTitlesDialog() {
 
     // Get provider and API key
     const provider = getSelectedProvider();
-    const providerConfig = llmProviders[provider];
-    const apiKey = localStorage.getItem(providerConfig.storageKey);
+    const apiKey = getApiKey(provider);
+    const providerName = getAiProviderDisplayName();
 
     if (!apiKey) {
-        showAppAlert('Please configure your AI API key in Settings first.', 'error');
+        showAppAlert('Please configure your AI API key in the sidebar first.', 'error');
         return;
     }
 
     // Update modal info
     document.getElementById('magical-titles-count').textContent = state.screenshots.length;
-    document.getElementById('magical-titles-provider').textContent = providerConfig.name;
+    document.getElementById('magical-titles-provider').textContent = providerName;
 
     // Populate language dropdown
     const langSelect = document.getElementById('magical-titles-language');
@@ -383,8 +432,8 @@ async function generateMagicalTitles() {
 
     // Get provider and API key
     const provider = getSelectedProvider();
-    const providerConfig = llmProviders[provider];
-    const apiKey = localStorage.getItem(providerConfig.storageKey);
+    const apiKey = getApiKey(provider);
+    const providerName = getAiProviderDisplayName();
 
     // Get selected language from dropdown
     const langSelect = document.getElementById('magical-titles-language');
@@ -452,7 +501,7 @@ Write all titles in ${langName}.`;
                 </div>
                 <h3 class="modal-title">Generating Magical Titles...</h3>
                 <p id="magical-titles-status" style="color: var(--text-secondary); margin-top: 8px;">Analyzing ${images.length} screenshots with AI...</p>
-                <p id="magical-titles-detail" style="color: var(--text-tertiary); font-size: 12px; margin-top: 4px;">Using ${providerConfig.name}</p>
+                <p id="magical-titles-detail" style="color: var(--text-tertiary); font-size: 12px; margin-top: 4px;">Using ${providerName}</p>
             </div>
         </div>
     `;
@@ -481,6 +530,8 @@ Write all titles in ${langName}.`;
             responseText = await generateTitlesWithGoogle(apiKey, images, prompt);
         } else if (provider === 'github') {
             responseText = await generateTitlesWithGitHub(apiKey, images, prompt);
+        } else if (provider === 'bedrock') {
+            responseText = await generateTitlesWithBedrock(apiKey, images, prompt);
         } else {
             throw new Error(`Unknown provider: ${provider}`);
         }
@@ -545,7 +596,7 @@ Write all titles in ${langName}.`;
         progressOverlay.remove();
 
         if (error.message === 'AI_UNAVAILABLE') {
-            await showAppAlert('AI service unavailable. Please check your API key in Settings.', 'error');
+            await showAppAlert('AI service unavailable. Please check your API key in the sidebar.', 'error');
         } else if (error instanceof SyntaxError) {
             await showAppAlert('Failed to parse AI response. Please try again.', 'error');
         } else {

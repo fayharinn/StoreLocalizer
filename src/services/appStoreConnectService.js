@@ -213,10 +213,11 @@ export async function testConnection(credentials) {
 // Fetch app icon from iTunes Search API
 async function fetchAppIcon(bundleId) {
   try {
-    const response = await fetch(`https://itunes.apple.com/lookup?bundleId=${bundleId}`)
+    // In dev, use Vite proxy to avoid CORS; in production, call iTunes directly
+    const itunesBase = import.meta.env.DEV ? '/api/itunes' : 'https://itunes.apple.com'
+    const response = await fetch(`${itunesBase}/lookup?bundleId=${bundleId}`)
     const data = await response.json()
     if (data.results && data.results.length > 0) {
-      // Get the 512px icon and resize to 60px for display
       return data.results[0].artworkUrl512 || data.results[0].artworkUrl100 || null
     }
   } catch {

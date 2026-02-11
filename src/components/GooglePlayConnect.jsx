@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose, DialogTrigger } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Store, Link2, AppWindow, Layers, Languages, Sparkles, CheckCircle2, AlertCircle,
   Clock, Terminal, Edit3, Globe, Loader2, ChevronDown, RefreshCw, Upload, X, Save, Image, Trash2, ExternalLink, Lock, Unlock
@@ -592,6 +593,10 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
                 onChange={(e) => { setDecryptPassword(e.target.value); setDecryptError('') }}
                 className="max-w-xs h-9"
                 onKeyDown={(e) => e.key === 'Enter' && handleDecryptServiceAccount()}
+                autoComplete="off"
+                data-1p-ignore
+                data-lpignore="true"
+                data-form-type="other"
               />
               <Button
                 size="sm"
@@ -892,41 +897,48 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
             <div className="flex flex-wrap gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Language</Label>
-                <select
+                <Select
                   value={selectedImageLocale}
-                  onChange={(e) => {
-                    setSelectedImageLocale(e.target.value)
+                  onValueChange={(val) => {
+                    setSelectedImageLocale(val)
                     setImages([])
                   }}
-                  className="h-9 rounded-lg border border-input bg-background px-3 text-sm min-w-[180px]"
                 >
-                  <option value="">Select language...</option>
-                  {existingLocales.map(locale => {
-                    const info = GP_LOCALES.find(l => l.code === locale)
-                    return (
-                      <option key={locale} value={locale}>
-                        {info?.flag} {info?.name || locale}
-                      </option>
-                    )
-                  })}
-                </select>
+                  <SelectTrigger className="h-9 min-w-[180px]">
+                    <SelectValue placeholder="Select language..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {existingLocales.map(locale => {
+                      const info = GP_LOCALES.find(l => l.code === locale)
+                      return (
+                        <SelectItem key={locale} value={locale}>
+                          {info?.flag} {info?.name || locale}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Image Type</Label>
-                <select
+                <Select
                   value={selectedImageType}
-                  onChange={(e) => {
-                    setSelectedImageType(e.target.value)
+                  onValueChange={(val) => {
+                    setSelectedImageType(val)
                     setImages([])
                   }}
-                  className="h-9 rounded-lg border border-input bg-background px-3 text-sm min-w-[200px]"
                 >
-                  {Object.entries(GP_IMAGE_TYPES).map(([key, info]) => (
-                    <option key={key} value={key}>
-                      {info.name} (max {info.max})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="h-9 min-w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(GP_IMAGE_TYPES).map(([key, info]) => (
+                      <SelectItem key={key} value={key}>
+                        {info.name} (max {info.max})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex items-end gap-2">
                 <Button
@@ -1047,20 +1059,21 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
             {/* Source Locale */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Source Language</Label>
-              <select
-                value={sourceLocale}
-                onChange={(e) => setSourceLocale(e.target.value)}
-                className="w-full max-w-xs h-10 rounded-lg border border-input bg-background px-3 text-sm"
-              >
-                {existingLocales.map(locale => {
-                  const info = GP_LOCALES.find(l => l.code === locale)
-                  return (
-                    <option key={locale} value={locale}>
-                      {info?.flag} {info?.name || locale}
-                    </option>
-                  )
-                })}
-              </select>
+              <Select value={sourceLocale} onValueChange={setSourceLocale}>
+                <SelectTrigger className="h-10 max-w-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {existingLocales.map(locale => {
+                    const info = GP_LOCALES.find(l => l.code === locale)
+                    return (
+                      <SelectItem key={locale} value={locale}>
+                        {info?.flag} {info?.name || locale}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Fields to Translate */}
