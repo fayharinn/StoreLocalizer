@@ -116,6 +116,7 @@ function App() {
   const [screenshotHeadlineKey, setScreenshotHeadlineKey] = useState('')
   const [screenshotSubheadlineKey, setScreenshotSubheadlineKey] = useState('')
   const [screenshotApplyAll, setScreenshotApplyAll] = useState(true)
+  const [languageSearch, setLanguageSearch] = useState('')
 
   // Editor state
   const [editDialog, setEditDialog] = useState({ open: false, key: '', lang: '', value: '' })
@@ -846,8 +847,23 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent>
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search languages..."
+                    value={languageSearch}
+                    onChange={(e) => setLanguageSearch(e.target.value)}
+                    className="pl-9 h-9"
+                  />
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {SUPPORTED_LANGUAGES.map(lang => {
+                  {SUPPORTED_LANGUAGES
+                    .filter(lang => {
+                      if (!languageSearch) return true
+                      const q = languageSearch.toLowerCase()
+                      return lang.name.toLowerCase().includes(q) || lang.code.toLowerCase().includes(q)
+                    })
+                    .map(lang => {
                     const translated = stats?.translationCounts?.[lang.code] || 0
                     const missing = stats ? stats.totalStrings - translated : 0
                     const isComplete = stats && missing === 0
