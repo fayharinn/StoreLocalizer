@@ -16,7 +16,7 @@ const llmProviders = {
             { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5 ($$)' },
             { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5 ($$$)' },
         ],
-        defaultModel: 'claude-sonnet-4-5-20250929'
+        defaultModel: 'claude-sonnet-4-6'
     },
     openai: {
         name: 'OpenAI (GPT)',
@@ -75,7 +75,7 @@ const llmProviders = {
         regionStorageKey: 'bedrockRegion',
         models: [
             { id: 'anthropic.claude-haiku-4-5-20251001-v1:0', name: 'Claude Haiku 4.5 ($)' },
-            { id: 'anthropic.claude-sonnet-4-5-20250929-v1:0', name: 'Claude Sonnet 4.5 ($$)' },
+            { id: 'anthropic.claude-sonnet-4-6', name: 'Claude Sonnet 4.6 ($$)' },
             { id: 'anthropic.claude-opus-4-5-20251101-v1:0', name: 'Claude Opus 4.5 ($$$)' }
         ],
         defaultModel: 'anthropic.claude-haiku-4-5-20251001-v1:0',
