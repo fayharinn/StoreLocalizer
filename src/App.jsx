@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { translateStrings, testApiConnection, SUPPORTED_LANGUAGES, PROVIDERS, DEFAULT_CONCURRENT_REQUESTS, DEFAULT_TEXTS_PER_BATCH } from './services/translationService'
 import { parseXCStrings, generateXCStrings, getTranslationStats } from './utils/xcstringsParser'
 import AppStoreConnect from './components/AppStoreConnect'
-import GooglePlayConnect from './components/GooglePlayConnect'
+import GooglePlayConnect from './components/googleplay'
 import { AppSidebar } from './components/AppSidebar'
 import ScreenshotMaker from './components/ScreenshotMaker'
 import SubscriptionManager from './components/SubscriptionManager'
