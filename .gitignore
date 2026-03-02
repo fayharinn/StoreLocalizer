@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 !.env.example
 .env
-.env.*.claude/
+.env.*
+.claude/
