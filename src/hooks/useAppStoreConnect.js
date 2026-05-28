@@ -28,7 +28,7 @@ import { decrypt } from '@/utils/crypto'
 
 const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
 
-export default function useAppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig }) {
+export default function useAppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig, translationPrompts }) {
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState(null)
   const [sessionTimeLeft, setSessionTimeLeft] = useState(0)
@@ -926,7 +926,8 @@ Respond with ONLY the keywords, nothing else:`
             if (progress.error) {
               addLog(`  ${progress.field}: ${progress.error}`, 'error')
             }
-          }
+          },
+          translationPrompts
         )
 
         if (translationErrors && translationErrors.length > 0) {

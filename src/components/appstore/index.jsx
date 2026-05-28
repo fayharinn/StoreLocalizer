@@ -10,6 +10,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CheckCircle2, AlertCircle, Clock, Terminal, Image } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 import useAppStoreConnect from '@/hooks/useAppStoreConnect'
+import useAppEvents from '@/hooks/useAppEvents'
+import useAscTranslationPrompt from '@/hooks/useAscTranslationPrompt'
+import {
+  EVENT_TRANSLATION_PROMPTS_KEY,
+  VERSION_TRANSLATION_PROMPTS_KEY,
+  LEGACY_EVENT_PROMPT_KEY,
+  LEGACY_SHARED_PROMPT_KEY,
+} from '@/constants'
+
+const EVENT_PROMPT_FIELDS = [
+  { key: 'name', label: 'Event name' },
+  { key: 'shortDescription', label: 'Short description' },
+  { key: 'longDescription', label: 'Long description' },
+]
+
+const VERSION_PROMPT_FIELDS = [
+  { key: 'description', label: 'Description' },
+  { key: 'whatsNew', label: "What's new" },
+  { key: 'promotionalText', label: 'Promotional text' },
+  { key: 'keywords', label: 'Keywords' },
+]
 import HeroSection from './HeroSection'
 import ConnectionCard from './ConnectionCard'
 import AppVersionSelector from './AppVersionSelector'
@@ -17,9 +38,21 @@ import LocalizationsCard from './LocalizationsCard'
 import ASOKeywordsCard from './ASOKeywordsCard'
 import ScreenshotsCard from './ScreenshotsCard'
 import TranslationCard from './TranslationCard'
+import EventsCard from './EventsCard'
+import TranslationPromptDialog from './TranslationPromptDialog'
 
 export default function AppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig }) {
-  const hook = useAppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig })
+  // Each section has its own set of per-field prompts — different char limits, different content.
+  const eventPrompt = useAscTranslationPrompt(EVENT_TRANSLATION_PROMPTS_KEY, {
+    fields: EVENT_PROMPT_FIELDS.map(f => f.key),
+    legacyKey: LEGACY_EVENT_PROMPT_KEY,
+  })
+  const versionPrompt = useAscTranslationPrompt(VERSION_TRANSLATION_PROMPTS_KEY, {
+    fields: VERSION_PROMPT_FIELDS.map(f => f.key),
+    legacyKey: LEGACY_SHARED_PROMPT_KEY,
+  })
+  const hook = useAppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig, translationPrompts: versionPrompt.prompts })
+  const eventsHook = useAppEvents({ credentials, selectedApp: hook.selectedApp, aiConfig, translationPrompts: eventPrompt.prompts })
 
   return (
     <div className="space-y-8">
@@ -140,6 +173,16 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
         />
       )}
 
+      {hook.selectedApp && (
+        <EventsCard
+          selectedApp={hook.selectedApp}
+          eventsHook={eventsHook}
+          aiConfig={aiConfig}
+          promptIsCustom={eventPrompt.anyCustom}
+          onEditPrompt={() => eventPrompt.setPromptDialog({ open: true, field: 'name' })}
+        />
+      )}
+
       {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
         <TranslationCard
           versionLocalizations={hook.versionLocalizations}
@@ -161,6 +204,8 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
           handleFieldToggle={hook.handleFieldToggle}
           handleLocaleToggle={hook.handleLocaleToggle}
           handleTranslate={hook.handleTranslate}
+          promptIsCustom={versionPrompt.anyCustom}
+          onEditPrompt={() => versionPrompt.setPromptDialog({ open: true, field: 'description' })}
         />
       )}
 
@@ -464,6 +509,40 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
           </div>
         </DialogContent>
       </Dialog>
+
+      {eventPrompt.promptDialog.open && (
+        <TranslationPromptDialog
+          open
+          title="Event localization prompts"
+          description="One prompt per field for In-App Event translations (name 30 chars, short description 50, long description 120)."
+          fields={EVENT_PROMPT_FIELDS}
+          initialField={eventPrompt.promptDialog.field}
+          getPrompt={eventPrompt.getPromptFor}
+          getDefault={eventPrompt.getDefaultFor}
+          isCustom={eventPrompt.isCustom}
+          onSave={eventPrompt.setPrompt}
+          onReset={eventPrompt.reset}
+          onResetAll={eventPrompt.resetAll}
+          onClose={() => eventPrompt.setPromptDialog({ open: false, field: 'name' })}
+        />
+      )}
+
+      {versionPrompt.promptDialog.open && (
+        <TranslationPromptDialog
+          open
+          title="Version localization prompts"
+          description="One prompt per field for App Store listing translations (description 4000 chars, what's new 4000, promotional text 170, keywords 100)."
+          fields={VERSION_PROMPT_FIELDS}
+          initialField={versionPrompt.promptDialog.field}
+          getPrompt={versionPrompt.getPromptFor}
+          getDefault={versionPrompt.getDefaultFor}
+          isCustom={versionPrompt.isCustom}
+          onSave={versionPrompt.setPrompt}
+          onReset={versionPrompt.reset}
+          onResetAll={versionPrompt.resetAll}
+          onClose={() => versionPrompt.setPromptDialog({ open: false, field: 'description' })}
+        />
+      )}
     </div>
   )
 }

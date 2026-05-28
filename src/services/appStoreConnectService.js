@@ -160,7 +160,7 @@ export async function generateToken(keyId, issuerId, privateKeyContent) {
 }
 
 // Make authenticated API request
-async function apiRequest(endpoint, token, options = {}) {
+export async function apiRequest(endpoint, token, options = {}) {
   const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`
 
   const response = await fetch(url, {
@@ -515,7 +515,111 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export async function translateAppStoreContent(text, targetLocale, aiConfig, fieldType = 'description') {
+// Field-specific default system prompts. Each App Store field has a different
+// purpose, length, and voice, so each gets a tailored default.
+// Placeholders: {localeName}, {limit}, {fieldType}
+export const DEFAULT_TRANSLATION_PROMPTS = {
+  // ── App Store listing fields ──────────────────────────────────────────────
+  description: `You are a senior App Store localization specialist. Translate this app's STORE DESCRIPTION into {localeName}.
+
+This is long-form marketing copy that sells the app. Adapt idioms and tone so it reads like it was written by a native marketer, not translated word-for-word. Keep feature names and value propositions compelling.
+
+- Hard limit: {limit} characters. Never exceed it.
+- Preserve paragraphs, line breaks, bullet symbols, and emoji exactly.
+- Keep proper nouns, brand names, and trademarks unchanged.
+- Output ONLY the translated description — no notes, no quotes.`,
+
+  whatsNew: `You are a senior App Store localization specialist. Translate these RELEASE NOTES ("What's New") into {localeName}.
+
+These announce what changed in a new version. Keep it concise and scannable, matching the source's bullet/line structure. Use the natural release-notes voice for {localeName} (e.g. "Corrige…", "Améliore…") — not marketing fluff.
+
+- Hard limit: {limit} characters. Never exceed it.
+- Keep version numbers, feature names, and brand names unchanged.
+- Preserve bullets and line breaks exactly.
+- Output ONLY the translated release notes — nothing else.`,
+
+  promotionalText: `You are a senior App Store localization specialist. Translate this PROMOTIONAL TEXT into {localeName}.
+
+This is a short, punchy hook shown at the top of the listing. It must grab attention in one or two sentences and feel native — rewrite rather than translate literally if that lands better.
+
+- Hard limit: {limit} characters. This is tight — prioritize impact over completeness and count carefully.
+- One or two sentences, no line breaks.
+- Keep brand names unchanged.
+- Output ONLY the translated promotional text — nothing else.`,
+
+  keywords: `You are an ASO (App Store Optimization) specialist. Localize this KEYWORD LIST into {localeName}.
+
+These are comma-separated SEARCH keywords, not a sentence. Localize each term to what real users in that market actually type — this may mean different words, not a literal translation. Drop articles and filler; never repeat a word already implied by another keyword.
+
+- Hard limit: {limit} characters INCLUDING commas. Very tight — pack in as many high-value terms as fit.
+- Comma-separated, no spaces after commas, no duplicates.
+- Keep brand names only if they are searched terms.
+- Output ONLY the comma-separated keywords — nothing else.`,
+
+  // ── In-App Event fields ───────────────────────────────────────────────────
+  name: `You are an App Store localization specialist. Translate this IN-APP EVENT NAME into {localeName}.
+
+This is the event's title — short, catchy, and prominent on the event card. Make it punchy and idiomatic; rewrite rather than translate literally if it reads better.
+
+- Hard limit: {limit} characters. Extremely tight — favor a short, impactful title over a literal one.
+- No trailing punctuation, no quotes, no line breaks.
+- Keep brand names unchanged.
+- Output ONLY the translated name — nothing else.`,
+
+  shortDescription: `You are an App Store localization specialist. Translate this IN-APP EVENT SHORT DESCRIPTION into {localeName}.
+
+This is a one-line teaser shown under the event name. It should entice in a single glance.
+
+- Hard limit: {limit} characters. Very tight — keep it to one short line.
+- No line breaks.
+- Keep brand names unchanged.
+- Output ONLY the translated short description — nothing else.`,
+
+  longDescription: `You are an App Store localization specialist. Translate this IN-APP EVENT LONG DESCRIPTION into {localeName}.
+
+This explains what the event is and why users should take part. Keep it inviting and clear.
+
+- Hard limit: {limit} characters. Keep it concise — trim secondary detail before going over.
+- Keep brand names unchanged.
+- Output ONLY the translated long description — nothing else.`,
+}
+
+// Generic fallback for any field not in the map above (e.g. name/subtitle reuse).
+export const DEFAULT_TRANSLATION_PROMPT = `You are a professional App Store content translator translating to {localeName}.
+
+CRITICAL CHARACTER LIMIT: {limit} characters maximum. NEVER exceed this — Apple will reject translations that go over.
+
+- Maintain the tone and style appropriate for an App Store listing.
+- If a natural translation would exceed {limit}, shorten aggressively. Going short is always better than going over.
+- Keep proper nouns, brand names, and app names unchanged.
+- Output ONLY the translated text — no explanations, no quotes.`
+
+// Resolve the default prompt for a given field type.
+export function getDefaultTranslationPrompt(fieldType) {
+  return DEFAULT_TRANSLATION_PROMPTS[fieldType] || DEFAULT_TRANSLATION_PROMPT
+}
+
+function buildSystemPrompt(customPrompt, vars) {
+  const template = customPrompt && customPrompt.trim()
+    ? customPrompt
+    : getDefaultTranslationPrompt(vars.fieldType)
+  return template
+    .replace(/\{localeName\}/g, vars.localeName)
+    .replace(/\{limit\}/g, String(vars.limit))
+    .replace(/\{fieldType\}/g, vars.fieldType)
+}
+
+// Hard-truncate at the last word boundary that fits in `limit`. Adds ellipsis
+// only when truncation actually drops characters mid-text.
+function hardTruncate(text, limit) {
+  if (text.length <= limit) return text
+  const slice = text.slice(0, limit)
+  const lastSpace = slice.lastIndexOf(' ')
+  if (lastSpace > limit * 0.7) return slice.slice(0, lastSpace).trimEnd()
+  return slice.trimEnd()
+}
+
+export async function translateAppStoreContent(text, targetLocale, aiConfig, fieldType = 'description', customPrompt = null) {
   const { provider, apiKey, model, region } = aiConfig
 
   // Character limits per field type
@@ -526,24 +630,17 @@ export async function translateAppStoreContent(text, targetLocale, aiConfig, fie
     whatsNew: 4000,
     name: 30,
     subtitle: 30,
+    shortDescription: 50,
+    longDescription: 120,
   }
 
   const limit = charLimits[fieldType] || 4000
   const localeInfo = ASC_LOCALES.find(l => l.code === targetLocale)
   const localeName = localeInfo?.name || targetLocale
 
-  const systemMessage = `You are a professional App Store content translator. Translate the following text to ${localeName}.
+  const systemMessage = buildSystemPrompt(customPrompt, { localeName, limit, fieldType })
 
-RULES:
-1. Maintain the tone and style appropriate for an App Store listing
-2. The translation MUST NOT exceed ${limit} characters
-3. Keep proper nouns, brand names, and app names unchanged unless they have an official localized version
-4. For keywords, keep them comma-separated and translate each keyword individually
-5. Output ONLY the translated text, nothing else`
-
-  const userMessage = `Translate to ${localeName} (max ${limit} chars):\n\n${text}`
-
-  try {
+  const callProvider = async (sysMsg, userMsg) => {
     let content
 
     if (provider === 'openai') {
@@ -557,8 +654,8 @@ RULES:
         body: JSON.stringify({
           model,
           messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: userMessage }
+            { role: 'system', content: sysMsg },
+            { role: 'user', content: userMsg }
           ],
         })
       })
@@ -592,8 +689,8 @@ RULES:
         body: JSON.stringify({
           model,
           messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: userMessage }
+            { role: 'system', content: sysMsg },
+            { role: 'user', content: userMsg }
           ],
         })
       })
@@ -616,8 +713,8 @@ RULES:
           'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: [{ text: userMessage }] }],
-          system: [{ text: systemMessage }],
+          messages: [{ role: 'user', content: [{ text: userMsg }] }],
+          system: [{ text: sysMsg }],
           inferenceConfig: { maxTokens: 4096 }
         })
       })
@@ -640,8 +737,8 @@ RULES:
         body: JSON.stringify({
           model,
           messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: userMessage }
+            { role: 'system', content: sysMsg },
+            { role: 'user', content: userMsg }
           ],
           max_tokens: 4096
         })
@@ -658,9 +755,25 @@ RULES:
       throw new Error(`Unknown provider: ${provider}`)
     }
 
-    // Enforce character limit
+    return content
+  }
+
+  const userMessage = `Translate to ${localeName} (max ${limit} chars):\n\n${text}`
+
+  try {
+    let content = await callProvider(systemMessage, userMessage)
+
+    // Apple rejects over-limit translations. If the model overshot, retry ONCE
+    // with explicit numeric feedback before falling back to a hard truncate.
     if (content.length > limit) {
-      content = content.substring(0, limit - 3) + '...'
+      console.warn(`[ASC Translation] ${fieldType} over limit (${content.length}/${limit}) for ${targetLocale}, retrying with feedback...`)
+      const retryUser = `Your previous translation was ${content.length} characters but the MAXIMUM allowed is ${limit}. Shorten it aggressively — it MUST fit in ${limit} characters or fewer. Translate to ${localeName} (max ${limit} chars):\n\n${text}`
+      try {
+        const retried = await callProvider(systemMessage, retryUser)
+        content = retried.length <= limit ? retried : hardTruncate(retried, limit)
+      } catch {
+        content = hardTruncate(content, limit)
+      }
     }
 
     return { translation: content, error: null }
@@ -1040,8 +1153,10 @@ export async function getAllScreenshotsForVersion(credentials, versionLocalizati
   return screenshotsByLocale
 }
 
-// Batch translate all fields for a locale
-export async function translateAllFields(sourceLocalization, targetLocale, aiConfig, fieldsToTranslate, onProgress) {
+// Batch translate all fields for a locale.
+// `customPrompts` is a map { field: promptString } — each field can have its own prompt.
+// For backwards compatibility, a plain string is treated as "same prompt for every field".
+export async function translateAllFields(sourceLocalization, targetLocale, aiConfig, fieldsToTranslate, onProgress, customPrompts = null) {
   const results = {}
   const errors = []
   const total = fieldsToTranslate.length
@@ -1084,11 +1199,15 @@ export async function translateAllFields(sourceLocalization, targetLocale, aiCon
 
     while (retries <= maxRetries && !success) {
       try {
+        const fieldPrompt = typeof customPrompts === 'string'
+          ? customPrompts
+          : customPrompts?.[field] ?? null
         const { translation, error } = await translateAppStoreContent(
           sourceText,
           targetLocale,
           aiConfig,
-          field
+          field,
+          fieldPrompt
         )
 
         if (error) {

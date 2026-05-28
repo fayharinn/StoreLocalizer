@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sparkles, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Sparkles, CheckCircle2, AlertCircle, Loader2, MessageSquareText } from 'lucide-react'
 import { PROVIDERS } from '@/services/translationService'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 
@@ -26,18 +26,35 @@ export default function TranslationCard({
   handleFieldToggle,
   handleLocaleToggle,
   handleTranslate,
+  promptIsCustom,
+  onEditPrompt,
 }) {
   return (
     <Card id="asc-translation" className="border-border/50 shadow-sm scroll-mt-6">
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg">
-            <Sparkles className="h-5 w-5 text-white" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">AI Translation</CardTitle>
+              <CardDescription>Auto-translate metadata to other languages</CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-lg">AI Translation</CardTitle>
-            <CardDescription>Auto-translate metadata to other languages</CardDescription>
-          </div>
+          {onEditPrompt && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onEditPrompt}
+              className="h-9 shrink-0"
+              title="Customize the AI translation prompt"
+            >
+              <MessageSquareText className="h-4 w-4 mr-2" />
+              Prompt
+              {promptIsCustom && <span className="ml-2 h-1.5 w-1.5 rounded-full bg-foreground" />}
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
