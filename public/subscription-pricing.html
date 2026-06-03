@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>App Subscription Pricing by Country — Free Tool</title>
+<meta name="description" content="Set GDP and purchasing-power-parity (PPP) adjusted in-app purchase and subscription prices by country for the App Store and Google Play. Free, open-source." />
+<link rel="canonical" href="https://storelocalizer.com/subscription-pricing.html" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="App Subscription Pricing by Country — Free Tool" />
+<meta property="og:description" content="Set GDP and purchasing-power-parity (PPP) adjusted in-app purchase and subscription prices by country for the App Store and Google Play. Free, open-source." />
+<meta property="og:url" content="https://storelocalizer.com/subscription-pricing.html" />
+<meta property="og:image" content="https://storelocalizer.com/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="App Subscription Pricing by Country — Free Tool" />
+<meta name="twitter:description" content="GDP/PPP-adjusted in-app purchase and subscription pricing by country for App Store and Google Play. Free and open-source." />
+<meta name="twitter:image" content="https://storelocalizer.com/og.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is purchasing-power-parity (PPP) app pricing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Purchasing-power-parity pricing adjusts your in-app purchase and subscription prices to the relative income and cost of living of each country. A price that feels fair in a high-income market can be unaffordable elsewhere, so PPP and GDP-based adjustments help keep your app accessible across territories while supporting healthy conversion."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the subscription pricing tool free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. StoreLocalizer is completely free and open-source. You can use the pricing recommendations and IAP name localization without any subscription or account."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it support both the App Store and Google Play?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The tool works with App Store Connect and Google Play Console territories, so you can set localized in-app purchase and subscription prices across both platforms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can it translate subscription and in-app purchase names?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Alongside pricing, StoreLocalizer can translate your IAP and subscription display names into 40+ languages with AI, so localized customers see the offer in their own language."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How are the recommended prices calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Starting from the base price you set, the tool suggests per-country prices adjusted using GDP and purchasing-power indicators. The recommendations are a starting point; you stay in control and can review or change every price before applying it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will PPP pricing increase my revenue?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "PPP and GDP-adjusted pricing is a widely used strategy to make apps affordable in lower-income markets, which can improve conversion. Results vary by app and market, so treat the recommendations as a data-informed starting point rather than a guarantee."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0a0a0a;--card:#141414;--text:#e5e5e5;--muted:#a1a1aa;--accent:#7c3aed;--accent2:#8b5cf6;--border:#262626}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+  a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+  header.site{position:sticky;top:0;z-index:10;background:rgba(10,10,10,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  header.site .wrap{display:flex;align-items:center;gap:20px;height:60px}
+  .logo{font-weight:700;font-size:18px;color:var(--text)}
+  nav.top{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto;font-size:14px}nav.top a{color:var(--muted)}
+  .hero{padding:72px 0 48px;text-align:center}
+  .hero h1{font-size:40px;line-height:1.15;font-weight:800;letter-spacing:-.02em;margin-bottom:18px;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.sub{font-size:19px;color:var(--muted);max-width:620px;margin:0 auto 28px}
+  .cta{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;font-size:16px}.cta:hover{text-decoration:none;opacity:.92}
+  section{padding:36px 0;border-top:1px solid var(--border)}
+  h2{font-size:28px;font-weight:700;margin-bottom:14px;letter-spacing:-.01em}
+  h3{font-size:19px;font-weight:600;margin:22px 0 8px}
+  p{color:#d4d4d8;margin-bottom:14px}
+  ul{margin:0 0 14px 22px;color:#d4d4d8}li{margin-bottom:8px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:18px}
+  .step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .step .n{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;margin-bottom:10px}
+  details{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:10px}
+  summary{font-weight:600;cursor:pointer}details p{margin:10px 0 0}
+  footer.site{border-top:1px solid var(--border);padding:36px 0;color:var(--muted);font-size:14px}
+  footer.site nav{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  @media(max-width:600px){.hero h1{font-size:30px}.hero p.sub{font-size:17px}}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="logo" href="/">🌍 StoreLocalizer</a>
+  <nav class="top">
+    <a href="/app-store-localization.html">App Store</a>
+    <a href="/google-play-localization.html">Google Play</a>
+    <a href="/xcstrings-translator.html">xcstrings</a>
+    <a href="/app-store-screenshots.html">Screenshots</a>
+    <a href="/subscription-pricing.html">Pricing</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <h1>App Subscription Pricing by Country</h1>
+    <p class="sub">Set GDP and purchasing-power-adjusted in-app purchase and subscription prices for every App Store and Google Play territory — fair for your users, smart for your revenue.</p>
+    <a class="cta" href="/">Open the free tool →</a>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Price your in-app purchases for each market</h2>
+    <p>A subscription price that feels reasonable in the United States can be out of reach in markets where incomes and the cost of living are very different. Charging the same converted amount everywhere leaves money on the table in some countries and prices you out of others. StoreLocalizer helps you localize in-app purchase and subscription prices the same way you localize your listing — so the offer makes sense wherever your app is sold.</p>
+    <p>The tool recommends GDP and purchasing-power-parity (PPP) adjusted prices for your in-app purchases and subscriptions across App Store and Google Play territories. Instead of a single global price, you get a per-country price tuned to local purchasing power, which can improve conversion in lower-income markets while keeping your pricing intentional rather than arbitrary. It pairs naturally with full <a href="/app-store-localization.html">App Store localization</a> and <a href="/google-play-localization.html">Google Play localization</a> of your store listing.</p>
+
+    <h3>What PPP and GDP-adjusted pricing means</h3>
+    <p>Purchasing-power parity compares how much a unit of currency actually buys in each country. Two markets with the same nominal exchange rate can have very different real spending power, so PPP-based adjustments scale your base price up or down to reflect that. GDP-per-capita signals add another dimension of how affordable a price is likely to feel locally. Together they give you a principled, data-informed starting point for each territory rather than a guess.</p>
+    <p>StoreLocalizer is free and open-source. The pricing recommendations are a starting point — you review every price and stay fully in control before anything is applied to App Store Connect or Google Play Console.</p>
+
+    <h3>Localize the names too, not just the prices</h3>
+    <p>Pricing is only half of a localized offer. StoreLocalizer can also translate your subscription and IAP display names into 40+ languages with AI, so a customer in Japan, Brazil, or Germany sees both a fair price and a name they understand.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="n">1</span>
+        <h3>Set your base price</h3>
+        <p>Choose the anchor price for your in-app purchase or subscription in your home currency. Everything else is derived from it.</p>
+      </div>
+      <div class="step">
+        <span class="n">2</span>
+        <h3>Get per-country recommendations</h3>
+        <p>See GDP/PPP-adjusted price suggestions for each App Store and Google Play territory, tuned to local purchasing power.</p>
+      </div>
+      <div class="step">
+        <span class="n">3</span>
+        <h3>Apply &amp; localize names</h3>
+        <p>Review and apply the prices, then translate your IAP and subscription display names into 40+ languages with AI.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Frequently asked questions</h2>
+    <details>
+      <summary>What is purchasing-power-parity (PPP) app pricing?</summary>
+      <p>Purchasing-power-parity pricing adjusts your in-app purchase and subscription prices to the relative income and cost of living of each country. A price that feels fair in a high-income market can be unaffordable elsewhere, so PPP and GDP-based adjustments help keep your app accessible across territories while supporting healthy conversion.</p>
+    </details>
+    <details>
+      <summary>Is the subscription pricing tool free?</summary>
+      <p>Yes. StoreLocalizer is completely free and open-source. You can use the pricing recommendations and IAP name localization without any subscription or account.</p>
+    </details>
+    <details>
+      <summary>Does it support both the App Store and Google Play?</summary>
+      <p>Yes. The tool works with App Store Connect and Google Play Console territories, so you can set localized in-app purchase and subscription prices across both platforms.</p>
+    </details>
+    <details>
+      <summary>Can it translate subscription and in-app purchase names?</summary>
+      <p>Yes. Alongside pricing, StoreLocalizer can translate your IAP and subscription display names into 40+ languages with AI, so localized customers see the offer in their own language.</p>
+    </details>
+    <details>
+      <summary>How are the recommended prices calculated?</summary>
+      <p>Starting from the base price you set, the tool suggests per-country prices adjusted using GDP and purchasing-power indicators. The recommendations are a starting point; you stay in control and can review or change every price before applying it.</p>
+    </details>
+    <details>
+      <summary>Will PPP pricing increase my revenue?</summary>
+      <p>PPP and GDP-adjusted pricing is a widely used strategy to make apps affordable in lower-income markets, which can improve conversion. Results vary by app and market, so treat the recommendations as a data-informed starting point rather than a guarantee.</p>
+    </details>
+  </div>
+</section>
+</main>
+
+<footer class="site"><div class="wrap">
+  <nav>
+    <a href="/">Home (free tool)</a>
+    <a href="/app-store-localization.html">App Store Localization</a>
+    <a href="/google-play-localization.html">Google Play Localization</a>
+    <a href="/xcstrings-translator.html">xcstrings Translator</a>
+    <a href="/app-store-screenshots.html">Screenshot Generator</a>
+    <a href="/subscription-pricing.html">Subscription Pricing</a>
+    <a href="https://github.com/fayharinn/StoreLocalizer" rel="noopener">GitHub</a>
+  </nav>
+  <p>StoreLocalizer — free, open-source App Store &amp; Google Play localization. Translate listings into 40+ languages with AI.</p>
+</div></footer>
+</body>
+</html>
