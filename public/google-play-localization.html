@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Google Play Listing Translation — Free AI Tool</title>
+<meta name="description" content="Translate your Google Play Console store listing — title, short and full description — into 40+ languages with AI. Free, open-source, uses the Play Developer API edit workflow." />
+<link rel="canonical" href="https://storelocalizer.com/google-play-localization.html" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Google Play Listing Translation — Free AI Tool" />
+<meta property="og:description" content="Translate your Google Play store listing into 40+ languages with AI. Free, open-source, powered by the Play Developer API edit-session workflow." />
+<meta property="og:url" content="https://storelocalizer.com/google-play-localization.html" />
+<meta property="og:image" content="https://storelocalizer.com/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Google Play Listing Translation — Free AI Tool" />
+<meta name="twitter:description" content="Translate your Google Play store listing into 40+ languages with AI. Free and open-source." />
+<meta name="twitter:image" content="https://storelocalizer.com/og.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is StoreLocalizer free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. StoreLocalizer is free and open-source. You run it in your browser and bring your own AI provider key, so there are no subscription fees from us. You only pay your AI provider for the tokens used during translation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does it connect to Google Play Console?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You supply a Google Cloud service account that has been granted access in the Play Console. StoreLocalizer authenticates with the Google Play Developer API using that service account and uses the standard edit-session workflow: create an edit, mutate the localized listings, then commit the edit so changes go live."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which languages can I translate into?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can translate your listing into 40+ languages supported by Google Play, including Spanish, French, German, Portuguese, Japanese, Korean, Simplified and Traditional Chinese, Arabic, Hindi, and many more."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will it overwrite my existing listings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You choose which languages and fields to translate, and you review every change before committing the edit. Nothing goes live until you commit, so you stay in control and can avoid overwriting listings you have already polished by hand."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I keep my brand and product names untranslated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Add brand names, product names, or other terms to the protected words list and the AI will leave them intact across every language so your branding stays consistent."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which AI providers are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "StoreLocalizer supports multiple AI providers including OpenAI, Azure OpenAI, AWS Bedrock, and GitHub Models. You pick the provider and model that fits your budget and quality needs."
+      }
+    }
+  ]
+}
+</script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0a0a0a;--card:#141414;--text:#e5e5e5;--muted:#a1a1aa;--accent:#7c3aed;--accent2:#8b5cf6;--border:#262626}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+  a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+  header.site{position:sticky;top:0;z-index:10;background:rgba(10,10,10,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  header.site .wrap{display:flex;align-items:center;gap:20px;height:60px}
+  .logo{font-weight:700;font-size:18px;color:var(--text)}
+  nav.top{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto;font-size:14px}nav.top a{color:var(--muted)}
+  .hero{padding:72px 0 48px;text-align:center}
+  .hero h1{font-size:40px;line-height:1.15;font-weight:800;letter-spacing:-.02em;margin-bottom:18px;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.sub{font-size:19px;color:var(--muted);max-width:620px;margin:0 auto 28px}
+  .cta{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600;padding:14px 28px;border-radius:10px;font-size:16px}.cta:hover{text-decoration:none;opacity:.92}
+  section{padding:36px 0;border-top:1px solid var(--border)}
+  h2{font-size:28px;font-weight:700;margin-bottom:14px;letter-spacing:-.01em}
+  h3{font-size:19px;font-weight:600;margin:22px 0 8px}
+  p{color:#d4d4d8;margin-bottom:14px}
+  ul{margin:0 0 14px 22px;color:#d4d4d8}li{margin-bottom:8px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:18px}
+  .step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .step .n{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;margin-bottom:10px}
+  details{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:10px}
+  summary{font-weight:600;cursor:pointer}details p{margin:10px 0 0}
+  footer.site{border-top:1px solid var(--border);padding:36px 0;color:var(--muted);font-size:14px}
+  footer.site nav{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  @media(max-width:600px){.hero h1{font-size:30px}.hero p.sub{font-size:17px}}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="logo" href="/">🌍 StoreLocalizer</a>
+  <nav class="top">
+    <a href="/app-store-localization.html">App Store</a>
+    <a href="/google-play-localization.html">Google Play</a>
+    <a href="/xcstrings-translator.html">xcstrings</a>
+    <a href="/app-store-screenshots.html">Screenshots</a>
+    <a href="/subscription-pricing.html">Pricing</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <h1>Google Play listing translation, powered by AI</h1>
+  <p class="sub">Translate your Google Play Console store listing into 40+ languages in minutes. Free, open-source, and connected straight to the Play Developer API.</p>
+  <a class="cta" href="/">Open the free tool →</a>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Translate your Google Play store listing the smart way</h2>
+  <p>Most installs in fast-growing markets come from users who never see English. If your Google Play listing only exists in one language, you are invisible to millions of potential users searching in their own. StoreLocalizer makes <strong>Google Play console localization</strong> a one-sitting job instead of a translation-agency project.</p>
+  <p>The tool uses AI to translate every part of your store listing — the app <strong>title</strong>, the <strong>short description</strong>, and the <strong>full description</strong> — into 40+ languages. You pick the AI provider (OpenAI, Azure OpenAI, AWS Bedrock, or GitHub Models) and bring your own key, so quality and cost are entirely in your hands.</p>
+  <p>To push changes back, StoreLocalizer talks to the Google Play Developer API using a Google Cloud service account that you supply. It follows the official edit-session workflow — create an edit, mutate the localized listings, then commit the edit — so nothing changes until you say so. Want brand names left alone? Add them to the protected words list and the AI keeps them intact in every language.</p>
+  <p>Already shipping on iOS too? Pair this with <a href="/app-store-localization.html">App Store listing localization</a> to cover both stores, and generate matching localized <a href="/app-store-screenshots.html">store screenshots</a> so your whole presence speaks the user's language.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="step">
+      <span class="n">1</span>
+      <h3>Connect a Google service account</h3>
+      <p>Grant a Google Cloud service account access in the Play Console and load its key. StoreLocalizer authenticates with the Play Developer API in your browser.</p>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <h3>Choose languages &amp; AI provider</h3>
+      <p>Select the target languages and the AI provider and model you want. Add protected words so brand and product names stay untranslated.</p>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <h3>Review &amp; commit the edit</h3>
+      <p>Inspect every translated title and description, then commit the edit session to publish your localized listings to Google Play.</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Why localize on Google Play</h2>
+  <ul>
+    <li><strong>Reach non-English markets:</strong> Android growth is strongest in regions where English is not the primary language.</li>
+    <li><strong>Better store search:</strong> Localized titles and descriptions surface in native-language Play Store searches.</li>
+    <li><strong>Higher conversion:</strong> Shoppers install more when the listing reads naturally in their own language.</li>
+    <li><strong>You stay in control:</strong> Free, open-source, and review-before-commit — no listing changes without your approval.</li>
+  </ul>
+  <p>Planning international pricing too? See our notes on <a href="/subscription-pricing.html">subscription pricing across markets</a>.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Frequently asked questions</h2>
+  <details>
+    <summary>Is StoreLocalizer free?</summary>
+    <p>Yes. StoreLocalizer is free and open-source. You run it in your browser and bring your own AI provider key, so there are no subscription fees from us. You only pay your AI provider for the tokens used during translation.</p>
+  </details>
+  <details>
+    <summary>How does it connect to Google Play Console?</summary>
+    <p>You supply a Google Cloud service account that has been granted access in the Play Console. StoreLocalizer authenticates with the Google Play Developer API using that service account and uses the standard edit-session workflow: create an edit, mutate the localized listings, then commit the edit so changes go live.</p>
+  </details>
+  <details>
+    <summary>Which languages can I translate into?</summary>
+    <p>You can translate your listing into 40+ languages supported by Google Play, including Spanish, French, German, Portuguese, Japanese, Korean, Simplified and Traditional Chinese, Arabic, Hindi, and many more.</p>
+  </details>
+  <details>
+    <summary>Will it overwrite my existing listings?</summary>
+    <p>You choose which languages and fields to translate, and you review every change before committing the edit. Nothing goes live until you commit, so you stay in control and can avoid overwriting listings you have already polished by hand.</p>
+  </details>
+  <details>
+    <summary>Can I keep my brand and product names untranslated?</summary>
+    <p>Yes. Add brand names, product names, or other terms to the protected words list and the AI will leave them intact across every language so your branding stays consistent.</p>
+  </details>
+  <details>
+    <summary>Which AI providers are supported?</summary>
+    <p>StoreLocalizer supports multiple AI providers including OpenAI, Azure OpenAI, AWS Bedrock, and GitHub Models. You pick the provider and model that fits your budget and quality needs.</p>
+  </details>
+</div></section>
+</main>
+
+<footer class="site"><div class="wrap">
+  <nav>
+    <a href="/">Home (free tool)</a>
+    <a href="/app-store-localization.html">App Store Localization</a>
+    <a href="/google-play-localization.html">Google Play Localization</a>
+    <a href="/xcstrings-translator.html">xcstrings Translator</a>
+    <a href="/app-store-screenshots.html">Screenshot Generator</a>
+    <a href="/subscription-pricing.html">Subscription Pricing</a>
+    <a href="https://github.com/fayharinn/StoreLocalizer" rel="noopener">GitHub</a>
+  </nav>
+  <p>StoreLocalizer — free, open-source App Store &amp; Google Play localization. Translate listings into 40+ languages with AI.</p>
+</div></footer>
+</body>
+</html>
