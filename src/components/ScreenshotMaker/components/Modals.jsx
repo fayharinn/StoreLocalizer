@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,11 +30,14 @@ export function TranslateModal({ visible, onClose, target, state, dispatch, aiCo
   const currentScreenshot = state.screenshots[state.selectedIndex];
   const text = currentScreenshot?.text || state.defaults?.text || {};
 
-  const languages = isHeadline ? (text.headlineLanguages || ['en']) : (text.subheadlineLanguages || ['en']);
-  const texts = isHeadline ? (text.headlines || {}) : (text.subheadlines || {});
+  const languages = useMemo(() => state.projectLanguages || ['en'], [state.projectLanguages]);
+  const texts = useMemo(() => {
+    return isHeadline ? (text.headlines || {}) : (text.subheadlines || {});
+  }, [isHeadline, text.headlines, text.subheadlines]);
 
-  // Reset state when modal opens
-  useEffect(() => {
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
     if (visible) {
       setSourceLang(state.currentLanguage || languages[0] || 'en');
       setTranslations({ ...texts });
@@ -42,7 +45,7 @@ export function TranslateModal({ visible, onClose, target, state, dispatch, aiCo
       setStatusType('');
       setTranslating(false);
     }
-  }, [visible]);
+  }
 
   const sourceText = translations[sourceLang] || texts[sourceLang] || '';
   const targetLangs = languages.filter(lang => lang !== sourceLang);
@@ -139,6 +142,12 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
     const key = isHeadline ? 'headlines' : 'subheadlines';
     const merged = { ...texts, ...translations };
     dispatch({ type: SET_TEXT_SETTING, payload: { key, value: merged } });
+
+    // Also update the list of languages with actual translations
+    const langKey = isHeadline ? 'headlineLanguages' : 'subheadlineLanguages';
+    const activeLangs = Object.keys(merged).filter(lang => merged[lang]?.trim());
+    dispatch({ type: SET_TEXT_SETTING, payload: { key: langKey, value: activeLangs } });
+
     onClose();
   }, [isHeadline, texts, translations, dispatch, onClose]);
 
@@ -569,11 +578,13 @@ export function MagicalTitlesModal({ visible, onClose, onConfirm, state, aiConfi
   const providerConfig = llmProviders[provider];
   const providerName = providerConfig?.name || provider || '-';
 
-  useEffect(() => {
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
     if (visible) {
       setSelectedLang(state.currentLanguage || 'en');
     }
-  }, [visible, state.currentLanguage]);
+  }
 
   return (
     <div className={`modal-overlay ${visible ? 'visible' : ''}`}>
