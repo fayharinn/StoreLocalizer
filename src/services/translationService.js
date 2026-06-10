@@ -40,8 +40,8 @@ export const SUPPORTED_LANGUAGES = [
 export const PROVIDERS = {
   openai: {
     name: 'OpenAI',
-    models: ['gpt-4.1-nano', 'gpt-5-mini'],
-    defaultModel: 'gpt-4.1-nano',
+    models: ['gpt-5.4-nano', 'gpt-5.4-mini', 'gpt-5.5'],
+    defaultModel: 'gpt-5.4-nano',
     serviceTiers: ['auto', 'default', 'flex', 'priority'],
     defaultServiceTier: 'auto',
   },
@@ -68,6 +68,73 @@ export const PROVIDERS = {
     models: ['gpt-4o', 'gpt-4.1'],
     defaultModel: 'gpt-4o',
   },
+  deepseek: {
+    name: 'DeepSeek',
+    models: ['deepseek-v4-flash', 'deepseek-v4-pro'],
+    defaultModel: 'deepseek-v4-flash',
+  },
+  cloudflare: {
+    name: 'Cloudflare Workers AI',
+    // Text-generation (LLM) models only — see https://developers.cloudflare.com/ai/models/
+    models: [
+      '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+      '@cf/meta/llama-4-scout-17b-16e-instruct',
+      '@cf/meta/llama-3.1-8b-instruct',
+      '@cf/openai/gpt-oss-120b',
+      '@cf/openai/gpt-oss-20b',
+      '@cf/qwen/qwen3-30b-a3b-fp8',
+      '@cf/qwen/qwq-32b',
+      '@cf/mistralai/mistral-small-3.1-24b-instruct',
+      '@cf/google/gemma-3-12b-it',
+      '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+      '@cf/nvidia/nemotron-3-120b-a12b',
+      '@cf/moonshotai/kimi-k2.6',
+      '@cf/zai-org/glm-4.7-flash',
+    ],
+    defaultModel: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+    needsEndpoint: true,
+    endpointLabel: 'Account ID',
+    placeholder: 'Cloudflare Account ID',
+  },
+}
+
+/**
+ * Fetch the list of chat-capable models directly from the OpenAI API.
+ * Filters out non-chat models (embeddings, audio, image, moderation, etc.)
+ * so the user doesn't have to maintain the model list by hand.
+ *
+ * @param {string} apiKey - OpenAI API key (sk-...)
+ * @returns {Promise<string[]>} sorted list of model ids, newest first
+ */
+export async function fetchOpenAIModels(apiKey) {
+  if (!apiKey) throw new Error('Missing OpenAI API key')
+
+  const response = await fetch('https://api.openai.com/v1/models', {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })
+
+  if (!response.ok) {
+    let detail = ''
+    try {
+      const body = await response.json()
+      detail = body?.error?.message || ''
+    } catch { /* ignore parse errors */ }
+    throw new Error(detail || `Failed to fetch models (${response.status})`)
+  }
+
+  const data = await response.json()
+  const ids = (data?.data || []).map(m => m.id).filter(Boolean)
+
+  const chatModels = ids.filter(id => {
+    // Keep chat families: gpt-*, chatgpt-*, o1/o3/o4 reasoning models
+    if (!/^(gpt-|chatgpt-|o[1-9])/i.test(id)) return false
+    // Drop non-chat variants that share the gpt- prefix
+    if (/embedding|whisper|tts|dall-e|audio|realtime|image|moderation|transcribe|-search|computer-use/i.test(id)) return false
+    return true
+  })
+
+  // Sort descending so newer families (gpt-5, gpt-4.1, o4...) surface first
+  return chatModels.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
 }
 
 const LANG_NAMES = {
@@ -245,6 +312,52 @@ async function callOpenAI(apiKey, model, systemMessage, userMessage, serviceTier
   return result.choices[0].message.content
 }
 
+// Generic OpenAI-compatible chat completion (used by DeepSeek and Cloudflare Workers AI)
+async function callOpenAICompatible(url, apiKey, model, systemMessage, userMessage, jsonMode = true) {
+  const body = {
+    model,
+    messages: [
+      { role: 'system', content: systemMessage },
+      { role: 'user', content: userMessage }
+    ]
+  }
+  if (jsonMode) body.response_format = { type: 'json_object' }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body)
+  })
+
+  const result = await response.json()
+  if (result.error) throw new Error(result.error.message || JSON.stringify(result.error))
+  if (!result.choices?.[0]?.message?.content) {
+    throw new Error(`Invalid API response: ${JSON.stringify(result).slice(0, 200)}`)
+  }
+  return result.choices[0].message.content
+}
+
+// DeepSeek API (OpenAI-compatible)
+async function callDeepSeek(apiKey, model, systemMessage, userMessage, jsonMode = true) {
+  return callOpenAICompatible('https://api.deepseek.com/chat/completions', apiKey, model, systemMessage, userMessage, jsonMode)
+}
+
+// Cloudflare Workers AI (OpenAI-compatible endpoint). `accountId` is the Cloudflare account id.
+function cloudflareUrl(accountId) {
+  const id = (accountId || '').trim()
+  if (!id) throw new Error('Cloudflare Account ID is required')
+  return `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(id)}/ai/v1/chat/completions`
+}
+
+async function callCloudflare(apiKey, model, accountId, systemMessage, userMessage, jsonMode = false) {
+  // Open-weight models on Workers AI don't reliably support json_object, so default it off
+  // and rely on the prompt + the markdown-fence stripping in the parser.
+  return callOpenAICompatible(cloudflareUrl(accountId), apiKey, model, systemMessage, userMessage, jsonMode)
+}
+
 // Anthropic Claude API
 async function callAnthropic(apiKey, model, systemMessage, userMessage) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -394,6 +507,12 @@ async function translateSingleText(text, targetLangs, config, protectedWords = [
       case 'github':
         content = await callGitHubModels(apiKey, model, systemMessage, userMessage)
         break
+      case 'deepseek':
+        content = await callDeepSeek(apiKey, model, systemMessage, userMessage)
+        break
+      case 'cloudflare':
+        content = await callCloudflare(apiKey, model, endpoint, systemMessage, userMessage)
+        break
       default:
         throw new Error(`Unknown provider: ${provider}`)
     }
@@ -437,6 +556,12 @@ async function translateBatch(texts, targetLangs, config, protectedWords = []) {
         break
       case 'github':
         content = await callGitHubModels(apiKey, model, systemMessage, userMessage)
+        break
+      case 'deepseek':
+        content = await callDeepSeek(apiKey, model, systemMessage, userMessage)
+        break
+      case 'cloudflare':
+        content = await callCloudflare(apiKey, model, endpoint, systemMessage, userMessage)
         break
       default:
         throw new Error(`Unknown provider: ${provider}`)
@@ -577,6 +702,36 @@ export async function testApiConnection(config) {
         })
         break
 
+      case 'deepseek':
+        response = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 20,
+            messages: [{ role: 'user', content: testMessage }]
+          })
+        })
+        break
+
+      case 'cloudflare':
+        response = await fetch(cloudflareUrl(endpoint), {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 20,
+            messages: [{ role: 'user', content: testMessage }]
+          })
+        })
+        break
+
       default:
         throw new Error(`Unknown provider: ${provider}`)
     }
@@ -641,6 +796,12 @@ export async function translateText(prompt, sourceLocale, targetLocale, config) 
         break
       case 'github':
         content = await callGitHubModels(apiKey, model, systemMessage, prompt)
+        break
+      case 'deepseek':
+        content = await callDeepSeek(apiKey, model, systemMessage, prompt, false)
+        break
+      case 'cloudflare':
+        content = await callCloudflare(apiKey, model, endpoint, systemMessage, prompt, false)
         break
       default:
         throw new Error(`Unknown provider: ${provider}`)

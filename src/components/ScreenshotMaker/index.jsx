@@ -222,7 +222,8 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     const apiKey = aiConfig.apiKeys?.[provider] || '';
     const model = aiConfig.models?.[provider] || '';
     if (!apiKey && !model) return null;
-    const endpoint = provider === 'azure' ? aiConfig.endpoint : undefined;
+    // Azure uses endpoint as the resource URL; Cloudflare uses it as the Account ID
+    const endpoint = (provider === 'azure' || provider === 'cloudflare') ? aiConfig.endpoint : undefined;
     const region = provider === 'bedrock' ? (aiConfig.region || 'us-east-1') : undefined;
     return { apiKey, model, provider, endpoint, region };
   }, [aiConfig]);

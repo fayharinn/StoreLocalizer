@@ -553,6 +553,80 @@ export async function generateTitlesWithBedrock(apiKey, images, prompt, model, r
 // Dispatcher functions
 // ---------------------------------------------------------------------------
 
+// --- DeepSeek & Cloudflare Workers AI (OpenAI-compatible) ---
+
+const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+
+function cloudflareChatUrl(accountId) {
+  const id = (accountId || '').trim();
+  if (!id) throw new Error('Cloudflare Account ID is required');
+  return `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(id)}/ai/v1/chat/completions`;
+}
+
+async function postOpenAICompatible(url, apiKey, body) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const status = response.status;
+    const errorBody = await response.json().catch(() => ({}));
+    if (status === 401 || status === 403) throw new Error('AI_UNAVAILABLE');
+    throw new Error(
+      `API request failed: ${status} - ${errorBody.error?.message || 'Unknown error'}`
+    );
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+function buildVisionContent(images, prompt) {
+  const content = [];
+  for (const img of images) {
+    content.push({
+      type: 'image_url',
+      image_url: { url: `data:${img.mimeType};base64,${img.base64}` },
+    });
+  }
+  content.push({ type: 'text', text: prompt });
+  return content;
+}
+
+export async function translateWithDeepSeek(apiKey, prompt, model) {
+  return postOpenAICompatible(DEEPSEEK_URL, apiKey, {
+    model,
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: prompt }],
+  });
+}
+
+export async function translateWithCloudflare(apiKey, prompt, model, accountId) {
+  return postOpenAICompatible(cloudflareChatUrl(accountId), apiKey, {
+    model,
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: prompt }],
+  });
+}
+
+export async function generateTitlesWithDeepSeek(apiKey, images, prompt, model) {
+  return postOpenAICompatible(DEEPSEEK_URL, apiKey, {
+    model,
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: buildVisionContent(images, prompt) }],
+  });
+}
+
+export async function generateTitlesWithCloudflare(apiKey, images, prompt, model, accountId) {
+  return postOpenAICompatible(cloudflareChatUrl(accountId), apiKey, {
+    model,
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: buildVisionContent(images, prompt) }],
+  });
+}
+
 /**
  * Translate text using the specified AI provider
  * @param {string} provider - Provider key (anthropic, openai, azure, google, github, bedrock)
@@ -578,6 +652,10 @@ export async function translateText(provider, apiKey, prompt, model, options = {
       return translateWithGitHub(apiKey, prompt, model);
     case 'bedrock':
       return translateWithBedrock(apiKey, prompt, model, options.region);
+    case 'deepseek':
+      return translateWithDeepSeek(apiKey, prompt, model);
+    case 'cloudflare':
+      return translateWithCloudflare(apiKey, prompt, model, options.endpoint);
     default:
       throw new Error(`Unknown provider: ${provider}`);
   }
@@ -609,6 +687,10 @@ export async function generateTitles(provider, apiKey, images, prompt, model, op
       return generateTitlesWithGitHub(apiKey, images, prompt, model);
     case 'bedrock':
       return generateTitlesWithBedrock(apiKey, images, prompt, model, options.region);
+    case 'deepseek':
+      return generateTitlesWithDeepSeek(apiKey, images, prompt, model);
+    case 'cloudflare':
+      return generateTitlesWithCloudflare(apiKey, images, prompt, model, options.endpoint);
     default:
       throw new Error(`Unknown provider: ${provider}`);
   }

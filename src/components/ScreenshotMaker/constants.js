@@ -194,6 +194,30 @@ export const llmProviders = {
         ],
         defaultModel: 'anthropic.claude-haiku-4-5-20251001-v1:0',
         needsRegion: true
+    },
+    deepseek: {
+        name: 'DeepSeek',
+        keyPrefix: 'sk-',
+        storageKey: 'deepseekApiKey',
+        modelStorageKey: 'deepseekModel',
+        models: [
+            { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash ($)' },
+            { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro ($$)' }
+        ],
+        defaultModel: 'deepseek-v4-flash'
+    },
+    cloudflare: {
+        name: 'Cloudflare Workers AI',
+        keyPrefix: '',
+        storageKey: 'cloudflareApiKey',
+        modelStorageKey: 'cloudflareModel',
+        models: [
+            { id: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', name: 'Llama 3.3 70B (fast)' },
+            { id: '@cf/openai/gpt-oss-120b', name: 'GPT-OSS 120B' },
+            { id: '@cf/mistralai/mistral-small-3.1-24b-instruct', name: 'Mistral Small 3.1 24B' }
+        ],
+        defaultModel: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+        needsEndpoint: true
     }
 };
 
