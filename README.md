@@ -225,7 +225,42 @@ src/
 
 Issues and PRs are welcome! Run `bun run lint` before submitting. The screenshots in this README are generated with `node scripts/take-screenshots.mjs` against the dev server.
 
-**Contributors:** [isnine](https://github.com/isnine) (Azure OpenAI) · [krrskl](https://github.com/krrskl) (GitHub Models)
+### Contributors
+
+<!-- contributors:start -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/fayharinn">
+          <img src="https://avatars.githubusercontent.com/u/82935554?v=4&s=100" width="72" alt="fayharinn" /><br />
+          <sub><b>fayharinn</b></sub>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://github.com/krrskl">
+          <img src="https://avatars.githubusercontent.com/u/16052364?v=4&s=100" width="72" alt="krrskl" /><br />
+          <sub><b>krrskl</b></sub>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://github.com/isnine">
+          <img src="https://avatars.githubusercontent.com/u/16702489?v=4&s=100" width="72" alt="isnine" /><br />
+          <sub><b>isnine</b></sub>
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://github.com/jtaxiexpress">
+          <img src="https://avatars.githubusercontent.com/u/86914073?v=4&s=100" width="72" alt="jtaxiexpress" /><br />
+          <sub><b>jtaxiexpress</b></sub>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!-- contributors:end -->
+
+*This grid refreshes automatically on every push.*
 
 **Credits:** screenshot generator originally based on [appscreen](https://github.com/YUZU-Hub/appscreen) by Stefan from yuzuhub.com.
 
