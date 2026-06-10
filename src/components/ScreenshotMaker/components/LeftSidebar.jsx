@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { deviceDimensions, languageFlags, languageNames } from '../constants';
+import { deviceDimensions, languageFlags, languageNames, llmProviders } from '../constants';
 import TemplatesPanel from './TemplatesPanel';
 import {
   SELECT_SCREENSHOT,
@@ -29,6 +29,7 @@ import {
   TRANSFER_STYLE,
   SET_PROJECTS,
   SET_CURRENT_PROJECT_ID,
+  BATCH_UPDATE,
 } from '../hooks/useAppState';
 import {
   detectLanguageFromFilename,
@@ -193,6 +194,7 @@ export default function LeftSidebar({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [uploadDragOver, setUploadDragOver] = useState(false);
 
   const fileInputRef = useRef(null);
   const replaceFileInputRef = useRef(null);
@@ -461,6 +463,23 @@ export default function LeftSidebar({
 
   }, [dispatch]);
 
+  const handleDuplicateScreenshot = useCallback((index) => {
+    const src = screenshots[index];
+    if (!src) return;
+    const clone = {
+      ...src, // keeps image / localizedImages references (HTMLImageElements are immutable here)
+      name: `${src.name || 'Screenshot'} copy`,
+      background: JSON.parse(JSON.stringify(src.background)),
+      screenshot: JSON.parse(JSON.stringify(src.screenshot)),
+      text: JSON.parse(JSON.stringify(src.text)),
+      overlay: { ...src.overlay },
+      overrides: JSON.parse(JSON.stringify(src.overrides || {})),
+    };
+    const next = [...screenshots];
+    next.splice(index + 1, 0, clone);
+    dispatch({ type: BATCH_UPDATE, payload: { screenshots: next, selectedIndex: index + 1 } });
+  }, [screenshots, dispatch]);
+
   const handleApplyStyleToAll = useCallback((index) => {
     dispatch({ type: SELECT_SCREENSHOT, payload: { index } });
     dispatch({ type: APPLY_STYLE_TO_ALL });
@@ -532,7 +551,8 @@ export default function LeftSidebar({
           }
         }}
       >
-        <div className="drag-handle">
+        <div className="drag-handle" title="Drag to reorder">
+          <span className="order-num">{index + 1}</span>
           <GripIcon />
         </div>
 
@@ -556,8 +576,17 @@ export default function LeftSidebar({
                     {languageFlags[lang] || lang}
                   </span>
                 ))}
-                {complete && projectLanguages.length > 1 && (
-                  <span className="screenshot-complete">✓</span>
+                {projectLanguages.length > 1 && (
+                  complete ? (
+                    <span className="screenshot-complete" title="All languages covered">✓</span>
+                  ) : (
+                    <span
+                      className="screenshot-incomplete"
+                      title={`Missing: ${projectLanguages.filter((l) => !langs.includes(l)).map((l) => languageNames[l] || l).join(', ')}`}
+                    >
+                      ●
+                    </span>
+                  )
                 )}
               </span>
             )}
@@ -582,6 +611,10 @@ export default function LeftSidebar({
             <DropdownMenuItem onClick={() => handleReplaceScreenshot(index)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16"/></svg>
               Replace Screenshot
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDuplicateScreenshot(index)}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              Duplicate Screenshot
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleTransferStyle(index)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -697,7 +730,7 @@ export default function LeftSidebar({
               title="AI provider"
             >
               <AIIcon />
-              <span>{aiConfig?.provider ? languageNames[aiConfig.provider] || aiConfig.provider : 'No AI'}</span>
+              <span>{aiConfig?.provider ? llmProviders[aiConfig.provider]?.name || aiConfig.provider : 'No AI'}</span>
             </span>
           </div>
         </div>
@@ -781,19 +814,42 @@ export default function LeftSidebar({
           onChange={handleReplaceFileChange}
         />
 
-        {/* ---- Screenshot list ---- */}
-        <div className="screenshot-list">
+        {/* ---- Screenshot list (arrow keys move the selection) ---- */}
+        <div
+          className="screenshot-list"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            if (screenshots.length === 0) return;
+            e.preventDefault();
+            const delta = e.key === 'ArrowDown' ? 1 : -1;
+            const next = Math.min(screenshots.length - 1, Math.max(0, selectedIndex + delta));
+            if (next !== selectedIndex) {
+              dispatch({ type: SELECT_SCREENSHOT, payload: { index: next } });
+            }
+          }}
+        >
           {screenshots.map((screenshot, index) =>
             renderScreenshotThumbnail(screenshot, index)
           )}
 
-          {/* Upload drop zone */}
+          {/* Upload drop zone — grows into a full empty state when the list is empty */}
           <div
-            className="screenshot-item upload-item"
+            className={[
+              'screenshot-item upload-item',
+              screenshots.length === 0 ? 'empty' : '',
+              uploadDragOver ? 'dragover' : '',
+            ].filter(Boolean).join(' ')}
             onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'copy';
+              setUploadDragOver(true);
+            }}
+            onDragLeave={() => setUploadDragOver(false)}
             onDrop={(e) => {
               e.preventDefault();
+              setUploadDragOver(false);
               handleFileUpload(e.dataTransfer.files);
             }}
           >
@@ -801,7 +857,10 @@ export default function LeftSidebar({
               <PlusIcon />
             </div>
             <div className="screenshot-info">
-              <span className="screenshot-name">Add Screenshots</span>
+              <span className="screenshot-name">
+                {screenshots.length === 0 ? 'Add your first screenshot' : 'Add Screenshots'}
+              </span>
+              <span className="screenshot-device upload-hint">or drag &amp; drop images</span>
             </div>
           </div>
         </div>
@@ -939,10 +998,12 @@ export default function LeftSidebar({
           <button
             className="export-btn export-all-btn"
             onClick={onExportAll}
-            title="Export all screenshots as ZIP"
+            title={projectLanguages.length > 1
+              ? `Export ${screenshots.length} screenshot${screenshots.length !== 1 ? 's' : ''} × ${projectLanguages.length} languages as ZIP`
+              : 'Export all screenshots as ZIP'}
           >
             <DownloadIcon />
-            Export All
+            Export All{screenshots.length > 0 ? ` (${screenshots.length}${projectLanguages.length > 1 ? ` × ${projectLanguages.length}` : ''})` : ''}
           </button>
         </div>
       </div>

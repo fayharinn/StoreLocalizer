@@ -68,26 +68,53 @@ function CollapsibleSection({ label, enabled, onToggle, defaultOpen = false, chi
   );
 }
 
-function RangeControl({ label, value, min, max, unit, onChange }) {
-  const formatValue = (v) => {
-    if (unit === 'deg') return `${v}\u00B0`;
-    if (unit === '%') return `${v}%`;
-    if (unit === 'px') return `${v}px`;
-    return v;
-  };
+function RangeControl({ label, value, min, max, unit, onChange, resetValue }) {
+  const unitSymbol = unit === 'deg' ? '\u00B0' : unit === '%' ? '%' : unit === 'px' ? 'px' : '';
+  const pct = max === min ? 0 : ((value - min) / (max - min)) * 100;
+  const clamp = (v) => Math.min(max, Math.max(min, v));
+  const canReset = resetValue !== undefined && value !== resetValue;
+
   return (
     <div className="control-group">
-      <label className="control-label">{label}</label>
-      <div className="control-row">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-        />
-        <span className="range-value">{formatValue(value)}</span>
+      <div className="range-head">
+        <label className="control-label">{label}</label>
+        <div className="range-value-edit">
+          {canReset && (
+            <button
+              className="range-reset-btn"
+              title={`Reset to ${resetValue}${unitSymbol}`}
+              onClick={() => onChange(resetValue)}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          )}
+          <input
+            className="range-value-input"
+            type="number"
+            min={min}
+            max={max}
+            value={value}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              if (!Number.isNaN(v)) onChange(clamp(v));
+            }}
+          />
+          <span className="range-unit">{unitSymbol}</span>
+        </div>
       </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        style={{ background: `linear-gradient(to right, var(--accent) ${pct}%, var(--bg-tertiary) ${pct}%)` }}
+        title={resetValue !== undefined ? `Double-click to reset to ${resetValue}${unitSymbol}` : undefined}
+        onDoubleClick={resetValue !== undefined ? () => onChange(resetValue) : undefined}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
     </div>
   );
 }
@@ -407,6 +434,7 @@ function TextSection({
             min={0}
             max={100}
             unit="%"
+            resetValue={12}
             onChange={(v) => set('offsetY', v)}
           />
           <RangeControl
@@ -415,6 +443,7 @@ function TextSection({
             min={-50}
             max={50}
             unit="%"
+            resetValue={0}
             onChange={(v) => set('offsetX', v)}
           />
           <RangeControl
@@ -423,6 +452,7 @@ function TextSection({
             min={80}
             max={250}
             unit="%"
+            resetValue={110}
             onChange={(v) => set('lineHeight', v)}
           />
 
@@ -466,6 +496,7 @@ function TextSection({
           min={0}
           max={100}
           unit="%"
+          resetValue={70}
           onChange={(v) => set('subheadlineOpacity', v)}
         />
       )}
@@ -479,8 +510,6 @@ function TextSection({
 
 export default function RightSidebar({ state, dispatch, onTranslateHeadline, onTranslateSubheadline, mobile }) {
   const [activeTab, setActiveTab] = useState('background');
-  const [gradientPresetsOpen, setGradientPresetsOpen] = useState(false);
-  const [positionPresetsOpen, setPositionPresetsOpen] = useState(false);
   const bgImageInputRef = useRef(null);
   const overlayImageInputRef = useRef(null);
 
@@ -553,7 +582,18 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
     const { angle, stops } = parseGradient(gradientStr);
     setBg('gradient.angle', angle);
     setBg('gradient.stops', stops);
-    setGradientPresetsOpen(false);
+  };
+
+  // Is this preset the one currently applied? (drives the selected ring in the gallery)
+  const isGradientPresetActive = (gradientStr) => {
+    const p = parseGradient(gradientStr);
+    if (p.angle !== bg.gradient.angle) return false;
+    if (p.stops.length !== bg.gradient.stops.length) return false;
+    return p.stops.every(
+      (s, i) =>
+        s.color.toLowerCase() === bg.gradient.stops[i].color.toLowerCase() &&
+        s.position === bg.gradient.stops[i].position,
+    );
   };
 
   // =========================================================================
@@ -567,8 +607,14 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
     setSS('y', preset.y);
     setSS('rotation', preset.rotation);
     setSS('perspective', preset.perspective);
-    setPositionPresetsOpen(false);
   };
+
+  const isPositionPresetActive = (preset) =>
+    ss.scale === preset.scale &&
+    ss.x === preset.x &&
+    ss.y === preset.y &&
+    ss.rotation === preset.rotation &&
+    (ss.perspective || 0) === preset.perspective;
 
   // =========================================================================
   // Render
@@ -659,32 +705,19 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
             {/* --- Gradient options --- */}
             {bg.type === 'gradient' && (
               <>
-                {/* Gradient presets dropdown */}
+                {/* Gradient presets — always-visible gallery, one click to apply */}
                 <div className="control-group">
-                  <div className="preset-dropdown">
-                    <button
-                      className="preset-dropdown-trigger"
-                      onClick={() => setGradientPresetsOpen((v) => !v)}
-                    >
-                      <span>Gradient Presets</span>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </button>
-                    {gradientPresetsOpen && (
-                      <div className="preset-dropdown-content">
-                        <div className="preset-grid">
-                          {gradientPresets.map((g, i) => (
-                            <div
-                              key={i}
-                              className="preset-swatch"
-                              style={{ background: g }}
-                              onClick={() => applyGradientPreset(g)}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  <label className="control-label">Presets</label>
+                  <div className="preset-grid inline">
+                    {gradientPresets.map((g, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className={`preset-swatch${isGradientPresetActive(g) ? ' selected' : ''}`}
+                        style={{ background: g }}
+                        onClick={() => applyGradientPreset(g)}
+                      />
+                    ))}
                   </div>
                 </div>
 
@@ -695,6 +728,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   min={0}
                   max={360}
                   unit="deg"
+                  resetValue={135}
                   onChange={(v) => setBg('gradient.angle', v)}
                 />
 
@@ -880,6 +914,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   min={-45}
                   max={45}
                   unit="deg"
+                  resetValue={0}
                   onChange={(v) => setSS('rotation3D.x', v)}
                 />
                 <RangeControl
@@ -888,6 +923,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   min={-45}
                   max={45}
                   unit="deg"
+                  resetValue={0}
                   onChange={(v) => setSS('rotation3D.y', v)}
                 />
                 <RangeControl
@@ -896,42 +932,29 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   min={-45}
                   max={45}
                   unit="deg"
+                  resetValue={0}
                   onChange={(v) => setSS('rotation3D.z', v)}
                 />
               </>
             )}
 
-            {/* Position presets dropdown */}
+            {/* Position presets — always-visible gallery with active state */}
             <div className="control-group">
-              <div className="preset-dropdown">
-                <button
-                  className="preset-dropdown-trigger"
-                  onClick={() => setPositionPresetsOpen((v) => !v)}
-                >
-                  <span>Position Presets</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-                {positionPresetsOpen && (
-                  <div className="preset-dropdown-content">
-                    <div className="preset-positions">
-                      {Object.keys(positionPresets).map((presetName) => (
-                        <button
-                          key={presetName}
-                          className="position-preset"
-                          title={positionPresetLabels[presetName]}
-                          onClick={() => applyPositionPreset(presetName)}
-                        >
-                          <svg viewBox="0 0 40 60" fill="none" stroke="currentColor" strokeWidth="2">
-                            {positionPresetSVGs[presetName]}
-                          </svg>
-                          <span>{positionPresetLabels[presetName]}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <label className="control-label">Layout Presets</label>
+              <div className="preset-positions">
+                {Object.keys(positionPresets).map((presetName) => (
+                  <button
+                    key={presetName}
+                    className={`position-preset${isPositionPresetActive(positionPresets[presetName]) ? ' selected' : ''}`}
+                    title={positionPresetLabels[presetName]}
+                    onClick={() => applyPositionPreset(presetName)}
+                  >
+                    <svg viewBox="0 0 40 60" fill="none" stroke="currentColor" strokeWidth="2">
+                      {positionPresetSVGs[presetName]}
+                    </svg>
+                    <span>{positionPresetLabels[presetName]}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -943,6 +966,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
               min={30}
               max={100}
               unit="%"
+              resetValue={70}
               onChange={(v) => setSS('scale', v)}
             />
             <RangeControl
@@ -951,6 +975,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
               min={-30}
               max={130}
               unit="%"
+              resetValue={50}
               onChange={(v) => setSS('y', v)}
             />
             <RangeControl
@@ -959,6 +984,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
               min={-30}
               max={130}
               unit="%"
+              resetValue={50}
               onChange={(v) => setSS('x', v)}
             />
 
@@ -973,6 +999,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   min={0}
                   max={100}
                   unit="px"
+                  resetValue={24}
                   onChange={(v) => setSS('cornerRadius', v)}
                 />
                 <RangeControl
@@ -981,6 +1008,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   min={-45}
                   max={45}
                   unit="deg"
+                  resetValue={0}
                   onChange={(v) => setSS('rotation', v)}
                 />
 
@@ -1012,6 +1040,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                     min={0}
                     max={100}
                     unit="%"
+                    resetValue={30}
                     onChange={(v) => setSS('shadow.opacity', v)}
                   />
                   <RangeControl
@@ -1020,6 +1049,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                     min={-50}
                     max={100}
                     unit="px"
+                    resetValue={20}
                     onChange={(v) => setSS('shadow.y', v)}
                   />
                   <RangeControl
@@ -1028,6 +1058,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                     min={-50}
                     max={50}
                     unit="px"
+                    resetValue={0}
                     onChange={(v) => setSS('shadow.x', v)}
                   />
                 </CollapsibleSection>
@@ -1143,6 +1174,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                 min={0}
                 max={100}
                 unit="%"
+                resetValue={100}
                 onChange={(v) => setOverlay('opacity', v)}
               />
               <RangeControl
@@ -1151,6 +1183,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                 min={-180}
                 max={180}
                 unit="deg"
+                resetValue={0}
                 onChange={(v) => setOverlay('rotation', v)}
               />
 

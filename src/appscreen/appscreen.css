@@ -1551,6 +1551,116 @@ input[type="range"]::-webkit-slider-thumb:hover {
     box-shadow: 0 0 0 2px var(--accent), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Inline preset gallery — always visible, denser than the old dropdown grid */
+.preset-grid.inline {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+}
+
+.preset-grid.inline .preset-swatch {
+    padding: 0;
+    border-radius: 5px;
+}
+
+.preset-grid.inline .preset-swatch:hover {
+    transform: scale(1.12);
+    z-index: 1;
+}
+
+.position-preset.selected {
+    border-color: var(--accent);
+    background: rgba(10, 132, 255, 0.12);
+    color: var(--text-primary);
+}
+
+.position-preset.selected svg {
+    stroke: var(--accent);
+}
+
+/* Range control 2.0 — label + editable value on one line, filled track below */
+.range-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    min-height: 20px;
+}
+
+.range-head .control-label {
+    margin-bottom: 0;
+}
+
+.range-value-edit {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+}
+
+.range-value-input {
+    width: 42px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    padding: 2px 3px;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.range-value-input::-webkit-outer-spin-button,
+.range-value-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.range-value-input:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.range-value-input:focus {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    outline: 1px solid var(--accent);
+}
+
+.range-unit {
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.range-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 2px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.control-group:hover .range-reset-btn {
+    opacity: 0.55;
+}
+
+.range-reset-btn:hover {
+    opacity: 1 !important;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
 /* Tabs — matches shadcn TabsList */
 .tabs {
     display: inline-flex;
@@ -2681,6 +2791,79 @@ input[type="range"]::-webkit-slider-thumb:hover {
     color: #30d158;
     font-weight: bold;
     margin-left: 2px;
+}
+
+.screenshot-incomplete {
+    color: #ff9f0a;
+    font-size: 8px;
+    margin-left: 2px;
+    vertical-align: middle;
+    cursor: help;
+}
+
+/* Order number in the drag handle — swaps to the grip on hover */
+.drag-handle {
+    position: relative;
+}
+
+.drag-handle .order-num {
+    font-size: 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+}
+
+.drag-handle svg {
+    display: none;
+    position: absolute;
+}
+
+.screenshot-item:hover .drag-handle .order-num {
+    display: none;
+}
+
+.screenshot-item:hover .drag-handle svg {
+    display: block;
+}
+
+/* Upload zone — full empty state when the list has no screenshots yet */
+.upload-item.empty {
+    flex-direction: column;
+    gap: 6px;
+    padding: 24px 12px;
+    text-align: center;
+}
+
+.upload-item.empty .upload-item-icon {
+    width: auto;
+    height: auto;
+}
+
+.upload-item.empty .upload-item-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.upload-item.empty .screenshot-info {
+    flex: none;
+}
+
+.upload-item .upload-hint {
+    opacity: 0.6;
+}
+
+.upload-item.dragover .upload-item-icon {
+    opacity: 1;
+    color: var(--accent);
+    transform: scale(1.15);
+    transition: transform 0.15s;
+}
+
+/* Keyboard focus on the screenshot list (arrow keys move selection) */
+.screenshot-list:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 8px;
 }
 
 /* Screenshot Translations Modal */
