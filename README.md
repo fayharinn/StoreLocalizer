@@ -4,7 +4,7 @@
 
 **Ship your app worldwide — translate, price, and design your store listings with AI.**
 
-[![Try it live](https://img.shields.io/badge/▶_Try_it_live-localizer.fayhe.com-7c5cff?style=for-the-badge)](https://localizer.fayhe.com/)
+[![Try it live](https://img.shields.io/badge/▶_Try_it_live-storelocalizer.com-7c5cff?style=for-the-badge)](https://storelocalizer.com/)
 
 [![GitHub Stars](https://img.shields.io/github/stars/fayharinn/StoreLocalizer.svg?style=flat&logo=github&color=ffd166)](https://github.com/fayharinn/StoreLocalizer/stargazers)
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
@@ -109,7 +109,7 @@ bun run dev        # → http://localhost:5173
 
 That's it for local use — the dev server proxies all App Store Connect / Google Play calls for you.
 
-**No install?** Use the hosted version at **[localizer.fayhe.com](https://localizer.fayhe.com/)**.
+**No install?** Use the hosted version at **[storelocalizer.com](https://storelocalizer.com/)**.
 
 **Desktop app** (Tauri 2, Rust toolchain required):
 
