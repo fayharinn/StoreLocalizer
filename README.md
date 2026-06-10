@@ -6,9 +6,9 @@
 
 [![Try it live](https://img.shields.io/badge/▶_Try_it_live-storelocalizer.com-7c5cff?style=for-the-badge)](https://storelocalizer.com/)
 
-[![GitHub Stars](https://img.shields.io/github/stars/fayharinn/StoreLocalizer.svg?style=flat&logo=github&color=ffd166)](https://github.com/fayharinn/StoreLocalizer/stargazers)
+[![GitHub Stars](https://badgen.net/github/stars/fayharinn/StoreLocalizer?color=ffd166&icon=github)](https://github.com/fayharinn/StoreLocalizer/stargazers)
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
-[![Last Commit](https://img.shields.io/github/last-commit/fayharinn/StoreLocalizer.svg?style=flat&color=4ade80)](https://github.com/fayharinn/StoreLocalizer/commits/main)
+[![Last Commit](https://badgen.net/github/last-commit/fayharinn/StoreLocalizer/main?color=4ade80)](https://github.com/fayharinn/StoreLocalizer/commits/main)
 [![Follow on X](https://img.shields.io/badge/Follow-@fayhecode-black?style=flat&logo=x)](https://x.com/fayhecode)
 
 *One tool for the whole store pipeline: `.xcstrings` translation · App Store Connect & Google Play sync ·
