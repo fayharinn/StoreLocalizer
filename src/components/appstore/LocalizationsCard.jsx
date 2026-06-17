@@ -18,6 +18,8 @@ export default function LocalizationsCard({
   handleEditLocalization,
   isCopyingSupportUrl,
   handleCopySupportUrl,
+  isCopyingMarketingUrl,
+  handleCopyMarketingUrl,
   sourceLocale,
   hasAppInfoChanges,
   isSavingAppInfo,
@@ -105,13 +107,14 @@ export default function LocalizationsCard({
                   <Layers className="h-4 w-4 text-muted-foreground" />
                   Version Content
                 </h4>
-                {versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl && (
+                <div className="flex items-center gap-2">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={handleCopySupportUrl}
-                    disabled={isCopyingSupportUrl}
+                    disabled={isCopyingSupportUrl || !versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl}
                     className="gap-2"
+                    title={!versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl ? `Fill Support URL in source locale (${sourceLocale}) first` : ""}
                   >
                     {isCopyingSupportUrl ? (
                       <>
@@ -125,7 +128,27 @@ export default function LocalizationsCard({
                       </>
                     )}
                   </Button>
-                )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyMarketingUrl}
+                    disabled={isCopyingMarketingUrl || !versionLocalizations.find(l => l.locale === sourceLocale)?.marketingUrl}
+                    className="gap-2"
+                    title={!versionLocalizations.find(l => l.locale === sourceLocale)?.marketingUrl ? `Fill Marketing URL in source locale (${sourceLocale}) first` : ""}
+                  >
+                    {isCopyingMarketingUrl ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Copying...
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copy Marketing URL to all
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
               <div className="rounded-xl border border-border/50 overflow-hidden">
                 <Table>

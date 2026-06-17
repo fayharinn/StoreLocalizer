@@ -109,6 +109,8 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
           handleEditLocalization={hook.handleEditLocalization}
           isCopyingSupportUrl={hook.isCopyingSupportUrl}
           handleCopySupportUrl={hook.handleCopySupportUrl}
+          isCopyingMarketingUrl={hook.isCopyingMarketingUrl}
+          handleCopyMarketingUrl={hook.handleCopyMarketingUrl}
           sourceLocale={hook.sourceLocale}
           hasAppInfoChanges={hook.hasAppInfoChanges}
           isSavingAppInfo={hook.isSavingAppInfo}

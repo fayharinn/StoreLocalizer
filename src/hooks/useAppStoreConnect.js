@@ -186,6 +186,7 @@ export default function useAppStoreConnect({ credentials, onCredentialsChange, a
   const currentAiModel = aiConfig.models[aiConfig.provider] || PROVIDERS[aiConfig.provider]?.defaultModel || ''
 
   const [isCopyingSupportUrl, setIsCopyingSupportUrl] = useState(false)
+  const [isCopyingMarketingUrl, setIsCopyingMarketingUrl] = useState(false)
 
   useEffect(() => {
     const canAutoConnect = credentials.keyId && credentials.issuerId && hasValidToken(credentials.keyId, credentials.issuerId)
@@ -1270,6 +1271,45 @@ Respond with ONLY the keywords, nothing else:`
     setIsCopyingSupportUrl(false)
   }
 
+  const handleCopyMarketingUrl = async () => {
+    const sourceLoc = versionLocalizations.find(l => l.locale === sourceLocale)
+    if (!sourceLoc?.marketingUrl) {
+      addLog(`No Marketing URL found in source locale (${sourceLocale})`, 'error')
+      return
+    }
+
+    setIsCopyingMarketingUrl(true)
+    let copiedCount = 0
+    let errorCount = 0
+
+    for (const loc of versionLocalizations) {
+      if (loc.locale === sourceLocale) continue
+      if (loc.marketingUrl === sourceLoc.marketingUrl) continue
+
+      try {
+        await updateVersionLocalization(credentials, loc.id, {
+          marketingUrl: sourceLoc.marketingUrl
+        })
+        copiedCount++
+      } catch (error) {
+        errorCount++
+        addLog(`Failed to copy Marketing URL to ${loc.locale}: ${error.message}`, 'error')
+      }
+    }
+
+    if (copiedCount > 0) {
+      addLog(`Copied Marketing URL to ${copiedCount} locale(s)`, 'success')
+      const versionLocs = await getVersionLocalizations(credentials, selectedVersion.id)
+      setVersionLocalizations(versionLocs)
+    }
+
+    if (errorCount > 0) {
+      addLog(`${errorCount} error(s) while copying Marketing URL`, 'error')
+    }
+
+    setIsCopyingMarketingUrl(false)
+  }
+
   const handleAppInfoChange = (locId, field, value) => {
     setEditedAppInfo(prev => ({
       ...prev,
@@ -1555,6 +1595,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
     currentAiApiKey,
     currentAiModel,
     isCopyingSupportUrl,
+    isCopyingMarketingUrl,
     handleTestConnection,
     handleAppSelect,
     handleVersionSelect,
@@ -1578,6 +1619,7 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
     handleEditLocalization,
     handleSaveEdit,
     handleCopySupportUrl,
+    handleCopyMarketingUrl,
     handleAppInfoChange,
     getAppInfoValue,
     isFieldEdited,
