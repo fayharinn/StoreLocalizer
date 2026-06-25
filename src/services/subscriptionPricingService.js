@@ -25,7 +25,7 @@ export const GDP_PER_CAPITA = {
   'BO': { name: 'Bolivia', gdp: 4421, currency: 'BOB', symbol: 'BOB', flag: '🇧🇴' },
   'BR': { name: 'Brazil', gdp: 10311, currency: 'BRL', symbol: 'R$', flag: '🇧🇷' },
   'BS': { name: 'Bahamas', gdp: 39455, currency: 'BSD', symbol: 'BSD', flag: '🇧🇸' },
-  'BT': { name: 'Bhutan', gdp: 3831, currency: 'INR,BTN', symbol: 'INR,BTN', flag: '🇧🇹' },
+  'BT': { name: 'Bhutan', gdp: 3831, currency: 'BTN', symbol: 'Nu.', flag: '🇧🇹' },
   'BW': { name: 'Botswana', gdp: 7696, currency: 'BWP', symbol: 'BWP', flag: '🇧🇼' },
   'BY': { name: 'Belarus', gdp: 8318, currency: 'BYN', symbol: 'BYN', flag: '🇧🇾' },
   'BZ': { name: 'Belize', gdp: 7681, currency: 'BZD', symbol: 'BZD', flag: '🇧🇿' },
@@ -114,7 +114,7 @@ export const GDP_PER_CAPITA = {
   'MX': { name: 'Mexico', gdp: 14186, currency: 'MXN', symbol: 'MX$', flag: '🇲🇽' },
   'MY': { name: 'Malaysia', gdp: 11874, currency: 'MYR', symbol: 'RM', flag: '🇲🇾' },
   'MZ': { name: 'Mozambique', gdp: 657, currency: 'MZN', symbol: 'MZN', flag: '🇲🇿' },
-  'NA': { name: 'Namibia', gdp: 4413, currency: 'NAD,ZAR', symbol: 'NAD,ZAR', flag: '🇳🇦' },
+  'NA': { name: 'Namibia', gdp: 4413, currency: 'NAD', symbol: 'N$', flag: '🇳🇦' },
   'NE': { name: 'Niger', gdp: 735, currency: 'XOF', symbol: 'F CFA', flag: '🇳🇪' },
   'NG': { name: 'Nigeria', gdp: 1084, currency: 'NGN', symbol: 'NGN', flag: '🇳🇬' },
   'NI': { name: 'Nicaragua', gdp: 2848, currency: 'NIO', symbol: 'NIO', flag: '🇳🇮' },
@@ -124,7 +124,7 @@ export const GDP_PER_CAPITA = {
   'NR': { name: 'Nauru', gdp: 13609, currency: 'AUD', symbol: 'A$', flag: '🇳🇷' },
   'NZ': { name: 'New Zealand', gdp: 49205, currency: 'NZD', symbol: 'NZ$', flag: '🇳🇿' },
   'OM': { name: 'Oman', gdp: 20285, currency: 'OMR', symbol: 'OMR', flag: '🇴🇲' },
-  'PA': { name: 'Panama', gdp: 19161, currency: 'PAB,USD', symbol: 'PAB,USD', flag: '🇵🇦' },
+  'PA': { name: 'Panama', gdp: 19161, currency: 'USD', symbol: '$', flag: '🇵🇦' },
   'PE': { name: 'Peru', gdp: 8452, currency: 'PEN', symbol: 'PEN', flag: '🇵🇪' },
   'PG': { name: 'Papua New Guinea', gdp: 3007, currency: 'PGK', symbol: 'PGK', flag: '🇵🇬' },
   'PH': { name: 'Philippines', gdp: 3985, currency: 'PHP', symbol: '₱', flag: '🇵🇭' },
@@ -149,7 +149,7 @@ export const GDP_PER_CAPITA = {
   'SN': { name: 'Senegal', gdp: 1773, currency: 'XOF', symbol: 'F CFA', flag: '🇸🇳' },
   'SR': { name: 'Suriname', gdp: 6962, currency: 'SRD', symbol: 'SRD', flag: '🇸🇷' },
   'ST': { name: 'São Tomé & Príncipe', gdp: 3491, currency: 'STN', symbol: 'STN', flag: '🇸🇹' },
-  'SV': { name: 'El Salvador', gdp: 5580, currency: 'SVC,USD', symbol: 'SVC,USD', flag: '🇸🇻' },
+  'SV': { name: 'El Salvador', gdp: 5580, currency: 'USD', symbol: '$', flag: '🇸🇻' },
   'SZ': { name: 'Eswatini', gdp: 3910, currency: 'SZL', symbol: 'SZL', flag: '🇸🇿' },
   'TC': { name: 'Turks & Caicos Islands', gdp: 37507, currency: 'USD', symbol: '$', flag: '🇹🇨' },
   'TD': { name: 'Chad', gdp: 962, currency: 'XAF', symbol: 'FCFA', flag: '🇹🇩' },
@@ -158,16 +158,16 @@ export const GDP_PER_CAPITA = {
   'TM': { name: 'Turkmenistan', gdp: 6857, currency: 'TMT', symbol: 'TMT', flag: '🇹🇲' },
   'TN': { name: 'Tunisia', gdp: 4181, currency: 'TND', symbol: 'TND', flag: '🇹🇳' },
   'TO': { name: 'Tonga', gdp: 5652, currency: 'TOP', symbol: 'TOP', flag: '🇹🇴' },
-  'TR': { name: 'Türkiye', gdp: 15893, currency: 'USD', symbol: '$', flag: '🇹🇷' },
+  'TR': { name: 'Türkiye', gdp: 15893, currency: 'TRY', symbol: '₺', flag: '🇹🇷' },
   'TT': { name: 'Trinidad & Tobago', gdp: 18733, currency: 'TTD', symbol: 'TTD', flag: '🇹🇹' },
   'TW': { name: 'Taiwan', gdp: 32756, currency: 'TWD', symbol: 'NT$', flag: '🇹🇼' },
   'TZ': { name: 'Tanzania', gdp: 1187, currency: 'TZS', symbol: 'TZS', flag: '🇹🇿' },
   'UA': { name: 'Ukraine', gdp: 5389, currency: 'UAH', symbol: '₴', flag: '🇺🇦' },
   'UG': { name: 'Uganda', gdp: 1078, currency: 'UGX', symbol: 'UGX', flag: '🇺🇬' },
-  'UY': { name: 'Uruguay', gdp: 23907, currency: 'UYU,UYW', symbol: 'UYU,UYW', flag: '🇺🇾' },
+  'UY': { name: 'Uruguay', gdp: 23907, currency: 'UYU', symbol: '$', flag: '🇺🇾' },
   'UZ': { name: 'Uzbekistan', gdp: 3162, currency: 'UZS', symbol: 'UZS', flag: '🇺🇿' },
   'VC': { name: 'St. Vincent & Grenadines', gdp: 11501, currency: 'XCD', symbol: 'EC$', flag: '🇻🇨' },
-  'VE': { name: 'Venezuela', gdp: 4218, currency: 'VES,VED', symbol: 'VES,VED', flag: '🇻🇪' },
+  'VE': { name: 'Venezuela', gdp: 4218, currency: 'VES', symbol: 'Bs.', flag: '🇻🇪' },
   'VG': { name: 'British Virgin Islands', gdp: 34000, currency: 'USD', symbol: '$', flag: '🇻🇬' },
   'VN': { name: 'Vietnam', gdp: 4717, currency: 'VND', symbol: '₫', flag: '🇻🇳' },
   'VU': { name: 'Vanuatu', gdp: 3411, currency: 'VUV', symbol: 'VUV', flag: '🇻🇺' },
@@ -301,23 +301,40 @@ export async function generatePricingRecommendations(basePriceUSD, options = {})
     if (!recommendation) continue
 
     // Convert recommended USD price to local currency
-    const exchangeRate = rates[country.currency] || 1
+    let exchangeRate = 1
+    let usedCurrency = country.currency
+
+    if (country.currency.includes(',')) {
+      const codes = country.currency.split(',')
+      for (const code of codes) {
+        if (rates[code] !== undefined) {
+          exchangeRate = rates[code]
+          usedCurrency = code
+          break
+        }
+      }
+    } else {
+      exchangeRate = rates[country.currency] || 1
+    }
+
     const localPrice = recommendation.recommendedPriceUSD * exchangeRate
-    const roundedLocalPrice = roundToNicePrice(localPrice, country.currency)
+    const roundedLocalPrice = roundToNicePrice(localPrice, usedCurrency)
     
     // Also show what the base price would be in local currency (without GDP adjustment)
     const baseLocalPrice = basePriceUSD * exchangeRate
-    const roundedBaseLocalPrice = roundToNicePrice(baseLocalPrice, country.currency)
+    const roundedBaseLocalPrice = roundToNicePrice(baseLocalPrice, usedCurrency)
+
+    const usedSymbol = country.symbol.includes(',') ? country.symbol.split(',')[0] : country.symbol
 
     results.push({
       ...recommendation,
       exchangeRate,
       // Recommended price in local currency (GDP-adjusted)
       localPrice: roundedLocalPrice,
-      localPriceFormatted: formatPrice(roundedLocalPrice, country.currency, country.symbol),
+      localPriceFormatted: formatPrice(roundedLocalPrice, usedCurrency, usedSymbol),
       // Base price in local currency (no GDP adjustment, just conversion)
       baseLocalPrice: roundedBaseLocalPrice,
-      baseLocalPriceFormatted: formatPrice(roundedBaseLocalPrice, country.currency, country.symbol),
+      baseLocalPriceFormatted: formatPrice(roundedBaseLocalPrice, usedCurrency, usedSymbol),
       // Savings compared to just converting USD price
       savingsLocal: roundedBaseLocalPrice - roundedLocalPrice,
       savingsPercent: Math.round(((roundedBaseLocalPrice - roundedLocalPrice) / roundedBaseLocalPrice) * 100)
