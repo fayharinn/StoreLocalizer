@@ -12,7 +12,7 @@ import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
 import {
   DollarSign, Globe, TrendingUp, Sparkles, Download, Languages,
-  ChevronDown, ChevronUp, BarChart3, CheckCircle2, AlertCircle, 
+  ChevronDown, ChevronUp, BarChart3, CheckCircle2, AlertCircle,
   Loader2, RefreshCw, Link2, Package, Edit3, Save, Database, Clock, Lock
 } from 'lucide-react'
 import {
@@ -73,7 +73,7 @@ const ISO2_TO_ISO3 = {
   'SB': 'SLB', 'ZA': 'ZAF', 'ES': 'ESP', 'LK': 'LKA', 'SR': 'SUR', 'SE': 'SWE', 'CH': 'CHE', 'TW': 'TWN',
   'TJ': 'TJK', 'TZ': 'TZA', 'TH': 'THA', 'TO': 'TON', 'TT': 'TTO', 'TN': 'TUN', 'TR': 'TUR', 'TM': 'TKM',
   'TC': 'TCA', 'UG': 'UGA', 'UA': 'UKR', 'AE': 'ARE', 'GB': 'GBR', 'US': 'USA', 'UY': 'URY', 'UZ': 'UZB',
-  'VU': 'VUT', 'VE': 'VEN', 'VN': 'VNM', 'YE': 'YEM', 'ZM': 'ZMB', 'ZW': 'ZWE'
+  'VU': 'VUT', 'VE': 'VEN', 'VN': 'VNM', 'YE': 'YEM', 'ZM': 'ZMB', 'ZW': 'ZWE', 'XK': 'KOS'
 }
 
 
@@ -124,25 +124,25 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
       setUnlockError('Enter password')
       return
     }
-    
+
     const stored = localStorage.getItem(ENCRYPTED_KEY_STORAGE)
     if (!stored) {
       setUnlockError('No stored key found')
       return
     }
-    
+
     setIsUnlocking(true)
     setUnlockError('')
-    
+
     const result = await decrypt(stored, unlockPassword)
-    
+
     if (result.success) {
       onCredentialsChange(prev => ({ ...prev, privateKey: result.data }))
       setUnlockPassword('')
     } else {
       setUnlockError('Wrong password')
     }
-    
+
     setIsUnlocking(false)
   }
 
@@ -183,7 +183,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
 
   // Live GDP data state
   const [liveGDPData, setLiveGDPData] = useState(null)
-  const [gdpDataSource, setGdpDataSource] = useState('IMF Estimates (2023)')
+  const [gdpDataSource, setGdpDataSource] = useState('IMF Estimates (2024)')
   const [isLoadingGDP, setIsLoadingGDP] = useState(false)
   const [isLiveData, setIsLiveData] = useState(false)
 
@@ -212,10 +212,10 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
   // Load apps when credentials are available
   const handleConnect = async () => {
     if (!hasCredentials) return
-    
+
     setIsLoading(true)
     setError(null)
-    
+
     try {
       const appsList = await listApps(ascCredentials)
       setApps(appsList)
@@ -284,7 +284,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
         setSubscriptionName(enLoc.name || detail.name)
         setSubscriptionDescription(enLoc.description || '')
       }
-      
+
       // Auto-load prices
       await loadPricesForSubscription(sub.id)
     } catch (err) {
@@ -297,21 +297,21 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
   // Load prices for a subscription (reusable)
   const loadPricesForSubscription = async (subscriptionId) => {
     setIsLoadingPrices(true)
-    
+
     try {
       // Fetch current prices and exchange rates in parallel
       const [prices, exchangeResult] = await Promise.all([
         getSubscriptionPricesWithDetails(ascCredentials, subscriptionId),
         fetchExchangeRates()
       ])
-      
+
       console.log('Fetched prices:', prices)
       setCurrentPrices(prices)
 
       // Find US price as base (territory is 2-letter code like 'US')
       const usPrice = prices.find(p => p.territory === 'US')
       console.log('US Price:', usPrice)
-      
+
       // Use US price if available, otherwise use the basePrice state or first available price
       let basePriceUSD = basePrice
       if (usPrice && usPrice.customerPrice) {
@@ -321,37 +321,37 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
         basePriceUSD = parseFloat(prices[0].customerPrice)
         setBasePrice(basePriceUSD)
       }
-      
+
       // Generate GDP recommendations
       const recommendations = await generatePricingRecommendations(basePriceUSD)
       console.log('GDP recommendations:', recommendations)
-      
+
       // Get exchange rates for conversion
       const rates = exchangeResult.rates || {}
-      
+
       // Map current prices to recommendations
       // Prices are in local currency, need to convert to USD for comparison
       const comparisonData = recommendations.recommendations.map(rec => {
         const currentPrice = prices.find(p => p.territory === rec.countryCode)
-        
+
         // Convert local price to USD using exchange rate
         let currentPriceUSD = null
         let currentPriceLocal = null
-        
+
         if (currentPrice?.customerPrice) {
           currentPriceLocal = parseFloat(currentPrice.customerPrice)
           const exchangeRate = rates[rec.currency] || 1
           // Convert from local currency to USD (divide by rate)
           currentPriceUSD = exchangeRate > 0 ? currentPriceLocal / exchangeRate : currentPriceLocal
         }
-        
+
         // Check for scheduled future price
-        const futurePrice = prices.find(p => 
-          p.territory === rec.countryCode && 
-          p.startDate && 
+        const futurePrice = prices.find(p =>
+          p.territory === rec.countryCode &&
+          p.startDate &&
           new Date(p.startDate) > new Date()
         )
-        
+
         return {
           ...rec,
           territory: rec.countryCode,
@@ -394,24 +394,24 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
   // Update price for a territory
   const handleUpdatePrice = async (territory, recommendedLocalPrice, currencySymbol) => {
     if (!selectedSubscription) return
-    
+
     setIsLoadingPrices(true)
 
     try {
       // Convert ISO2 to ISO3 for App Store Connect API
       const iso3Territory = ISO2_TO_ISO3[territory] || territory
-      
+
       // Check if there's already a future price for this territory and delete it
-      const existingPrices = currentPrices.filter(p => 
+      const existingPrices = currentPrices.filter(p =>
         p.territory === territory && p.startDate && new Date(p.startDate) > new Date()
       )
       for (const existingPrice of existingPrices) {
         await deleteSubscriptionPrice(ascCredentials, existingPrice.id)
       }
-      
+
       // Get available price points for this territory
       const pricePoints = await getAvailablePricePoints(ascCredentials, selectedSubscription.id, [iso3Territory])
-      
+
       // Find the smallest price point >= recommended price (round up)
       const targetPrice = recommendedLocalPrice
       let bestPoint = null
@@ -428,9 +428,9 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
 
       // If no price point >= target, take the highest available
       if (!bestPoint && pricePoints.length > 0) {
-        bestPoint = pricePoints.reduce((max, pp) => 
+        bestPoint = pricePoints.reduce((max, pp) =>
           parseFloat(pp.customerPrice) > parseFloat(max.customerPrice) ? pp : max
-        , pricePoints[0])
+          , pricePoints[0])
       }
 
       if (bestPoint) {
@@ -460,7 +460,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
   // Save localization
   const handleSaveLocalization = async () => {
     if (!editingLocale || !selectedSubscription) return
-    
+
     setIsSaving(true)
     setError(null)
 
@@ -480,7 +480,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
   // Add new localization
   const handleAddLocalization = async (locale) => {
     if (!selectedSubscription) return
-    
+
     setIsLoading(true)
     setError(null)
 
@@ -599,7 +599,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
   // Push translations to ASC
   const handlePushToASC = async () => {
     if (!localizations || !selectedSubscription) return
-    
+
     setIsLoading(true)
     setError(null)
     let successCount = 0
@@ -609,11 +609,11 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
       for (const locale of selectedLocales) {
         const ascLocale = ASC_LOCALES.find(l => l.code.startsWith(locale) || l.code === locale)?.code || locale
         const translation = localizations.subscriptions?.monthly?.[locale]
-        
+
         if (!translation) continue
 
         const existingLoc = subscriptionDetail?.localizations.find(l => l.locale === ascLocale)
-        
+
         if (existingLoc) {
           await updateSubscriptionLocalization(ascCredentials, existingLoc.id, {
             name: translation.displayName,
@@ -794,9 +794,9 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                     <div className="flex items-center gap-2 mt-4 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 text-sm">
                       <Clock className="h-4 w-4" />
                       <span>Session active: {formatTimeLeft(sessionTimeLeft)}</span>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={handleConnect}
                         className="ml-2"
                       >
@@ -869,11 +869,10 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                         <button
                           key={app.id}
                           onClick={() => handleAppSelect(app)}
-                          className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors ${
-                            selectedApp?.id === app.id
+                          className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors ${selectedApp?.id === app.id
                               ? 'bg-primary/10 text-primary'
                               : 'hover:bg-muted/50'
-                          }`}
+                            }`}
                         >
                           {app.iconUrl ? (
                             <img src={app.iconUrl} alt="" className="w-8 h-8 rounded-lg" />
@@ -910,11 +909,10 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                           <button
                             key={group.id}
                             onClick={() => handleGroupSelect(group)}
-                            className={`w-full p-3 rounded-lg text-left transition-colors ${
-                              selectedGroup?.id === group.id
+                            className={`w-full p-3 rounded-lg text-left transition-colors ${selectedGroup?.id === group.id
                                 ? 'bg-primary/10 text-primary'
                                 : 'hover:bg-muted/50'
-                            }`}
+                              }`}
                           >
                             <p className="text-sm font-medium">{group.referenceName}</p>
                             <p className="text-xs text-muted-foreground">
@@ -948,11 +946,10 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                             <button
                               key={sub.id}
                               onClick={() => handleSubscriptionSelect(sub)}
-                              className={`w-full p-3 rounded-lg text-left transition-colors ${
-                                selectedSubscription?.id === sub.id
+                              className={`w-full p-3 rounded-lg text-left transition-colors ${selectedSubscription?.id === sub.id
                                   ? 'bg-primary/10 text-primary'
                                   : 'hover:bg-muted/50'
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center justify-between mb-1">
                                 <p className="text-sm font-medium">{sub.name}</p>
@@ -1008,7 +1005,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                             </div>
                           )
                         })}
-                        
+
                         {/* Add new locale button */}
                         <div className="pt-2 border-t border-border/50">
                           <p className="text-xs text-muted-foreground mb-2">Add localization:</p>
@@ -1093,8 +1090,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                       </CardDescription>
                     </div>
                   </div>
-                  <Button 
-                    onClick={handleLoadPrices} 
+                  <Button
+                    onClick={handleLoadPrices}
                     disabled={isLoadingPrices}
                     variant="outline"
                     size="sm"
@@ -1107,7 +1104,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                   </Button>
                 </div>
               </CardHeader>
-              
+
               {showPriceComparison && (
                 <CardContent>
                   {/* US Base Price Info */}
@@ -1127,7 +1124,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {currentPrices.length > 0 
+                      {currentPrices.length > 0
                         ? `${currentPrices.length} territories with prices configured`
                         : 'No prices found in ASC. Showing recommendations based on default price.'}
                     </p>
@@ -1136,107 +1133,105 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                   {/* Price Comparison Table */}
                   {priceRecommendations && priceRecommendations.length > 0 ? (
                     <ScrollArea className="h-[400px]">
-                    <div className="space-y-2">
-                      {priceRecommendations
-                        .filter(p => p.countryCode !== 'US')
-                        .map((p) => {
-                          const priceDiff = p.currentPriceUSD 
-                            ? ((p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100).toFixed(0)
-                            : null
-                          const isOverpriced = priceDiff && parseFloat(priceDiff) > 15
-                          const isUnderpriced = priceDiff && parseFloat(priceDiff) < -15
-                          const isOptimal = priceDiff && Math.abs(parseFloat(priceDiff)) <= 15
+                      <div className="space-y-2">
+                        {priceRecommendations
+                          .filter(p => p.countryCode !== 'US')
+                          .map((p) => {
+                            const priceDiff = p.currentPriceUSD
+                              ? ((p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100).toFixed(0)
+                              : null
+                            const isOverpriced = priceDiff && parseFloat(priceDiff) > 15
+                            const isUnderpriced = priceDiff && parseFloat(priceDiff) < -15
+                            const isOptimal = priceDiff && Math.abs(parseFloat(priceDiff)) <= 15
 
-                          return (
-                            <div 
-                              key={p.countryCode} 
-                              className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                                isOverpriced ? 'border-amber-500/30 bg-amber-500/5' :
-                                isUnderpriced ? 'border-blue-500/30 bg-blue-500/5' :
-                                isOptimal ? 'border-emerald-500/30 bg-emerald-500/5' :
-                                'border-border/50 hover:bg-muted/30'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className="text-xl">{p.flag || '🌍'}</span>
-                                <div>
-                                  <p className="font-medium">{p.countryName}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    GDP: ${p.gdp?.toLocaleString()}/capita • {p.territory}
-                                  </p>
+                            return (
+                              <div
+                                key={p.countryCode}
+                                className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${isOverpriced ? 'border-amber-500/30 bg-amber-500/5' :
+                                    isUnderpriced ? 'border-blue-500/30 bg-blue-500/5' :
+                                      isOptimal ? 'border-emerald-500/30 bg-emerald-500/5' :
+                                        'border-border/50 hover:bg-muted/30'
+                                  }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xl">{p.flag || '🌍'}</span>
+                                  <div>
+                                    <p className="font-medium">{p.countryName}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      GDP: ${p.gdp?.toLocaleString()}/capita • {p.territory}
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-4">
-                                {/* Current Price */}
-                                <div className="text-right min-w-[90px]">
-                                  <p className="text-xs text-muted-foreground">Current</p>
-                                  {p.currentPriceLocal ? (
-                                    <>
-                                      <p className="font-semibold">${p.currentPriceUSD?.toFixed(2)}</p>
-                                      <p className="text-xs text-muted-foreground">{p.symbol}{p.currentPriceLocal.toFixed(2)}</p>
-                                      {p.scheduledDate && (
-                                        <p className="text-xs text-purple-500 flex items-center gap-1">
-                                          <Clock className="h-3 w-3" />
-                                          {p.symbol}{p.scheduledPrice} on {p.scheduledDate}
-                                        </p>
+
+                                <div className="flex items-center gap-4">
+                                  {/* Current Price */}
+                                  <div className="text-right min-w-[90px]">
+                                    <p className="text-xs text-muted-foreground">Current</p>
+                                    {p.currentPriceLocal ? (
+                                      <>
+                                        <p className="font-semibold">${p.currentPriceUSD?.toFixed(2)}</p>
+                                        <p className="text-xs text-muted-foreground">{p.symbol}{p.currentPriceLocal.toFixed(2)}</p>
+                                        {p.scheduledDate && (
+                                          <p className="text-xs text-purple-500 flex items-center gap-1">
+                                            <Clock className="h-3 w-3" />
+                                            {p.symbol}{p.scheduledPrice} on {p.scheduledDate}
+                                          </p>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <p className="text-muted-foreground text-sm">Not set</p>
+                                    )}
+                                  </div>
+
+                                  {/* Arrow */}
+                                  <div className="text-muted-foreground">→</div>
+
+                                  {/* Recommended Price */}
+                                  <div className="text-right min-w-[90px]">
+                                    <p className="text-xs text-muted-foreground">Recommended</p>
+                                    <p className="font-semibold text-emerald-500">
+                                      ${p.recommendedPriceUSD.toFixed(2)}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">{p.localPriceFormatted}</p>
+                                  </div>
+
+                                  {/* Status Badge */}
+                                  <Badge
+                                    variant="outline"
+                                    className={`min-w-[80px] justify-center ${!p.currentPriceUSD ? 'bg-gray-500/10 text-gray-500 border-gray-500/20' :
+                                        isOverpriced ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                          isUnderpriced ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                            'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                      }`}
+                                  >
+                                    {!p.currentPriceUSD ? 'No price' :
+                                      isOverpriced ? `+${priceDiff}% high` :
+                                        isUnderpriced ? `${priceDiff}% low` :
+                                          '✓ Optimal'}
+                                  </Badge>
+
+                                  {/* Update Button */}
+                                  {(!p.currentPriceUSD || isOverpriced || isUnderpriced) && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleUpdatePrice(p.territory, p.localPrice, p.symbol)}
+                                      disabled={isLoadingPrices}
+                                      className="min-w-[70px]"
+                                    >
+                                      {isLoadingPrices ? (
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                      ) : (
+                                        'Update'
                                       )}
-                                    </>
-                                  ) : (
-                                    <p className="text-muted-foreground text-sm">Not set</p>
+                                    </Button>
                                   )}
                                 </div>
-
-                                {/* Arrow */}
-                                <div className="text-muted-foreground">→</div>
-
-                                {/* Recommended Price */}
-                                <div className="text-right min-w-[90px]">
-                                  <p className="text-xs text-muted-foreground">Recommended</p>
-                                  <p className="font-semibold text-emerald-500">
-                                    ${p.recommendedPriceUSD.toFixed(2)}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">{p.localPriceFormatted}</p>
-                                </div>
-
-                                {/* Status Badge */}
-                                <Badge 
-                                  variant="outline" 
-                                  className={`min-w-[80px] justify-center ${
-                                    !p.currentPriceUSD ? 'bg-gray-500/10 text-gray-500 border-gray-500/20' :
-                                    isOverpriced ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                    isUnderpriced ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                    'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                  }`}
-                                >
-                                  {!p.currentPriceUSD ? 'No price' :
-                                   isOverpriced ? `+${priceDiff}% high` :
-                                   isUnderpriced ? `${priceDiff}% low` :
-                                   '✓ Optimal'}
-                                </Badge>
-
-                                {/* Update Button */}
-                                {(!p.currentPriceUSD || isOverpriced || isUnderpriced) && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleUpdatePrice(p.territory, p.localPrice, p.symbol)}
-                                    disabled={isLoadingPrices}
-                                    className="min-w-[70px]"
-                                  >
-                                    {isLoadingPrices ? (
-                                      <Loader2 className="h-3 w-3 animate-spin" />
-                                    ) : (
-                                      'Update'
-                                    )}
-                                  </Button>
-                                )}
                               </div>
-                            </div>
-                          )
-                        })}
-                    </div>
-                  </ScrollArea>
+                            )
+                          })}
+                      </div>
+                    </ScrollArea>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
                       <p>No pricing recommendations available.</p>
@@ -1246,34 +1241,34 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
 
                   {/* Summary */}
                   {priceRecommendations && priceRecommendations.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-3 gap-4 text-center">
-                    <div className="p-3 rounded-lg bg-emerald-500/10">
-                      <p className="text-2xl font-bold text-emerald-500">
-                        {priceRecommendations.filter(p => {
-                          if (!p.currentPriceUSD || p.countryCode === 'US') return false
-                          const diff = Math.abs((p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100)
-                          return diff <= 15
-                        }).length}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Optimal</p>
+                    <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-3 gap-4 text-center">
+                      <div className="p-3 rounded-lg bg-emerald-500/10">
+                        <p className="text-2xl font-bold text-emerald-500">
+                          {priceRecommendations.filter(p => {
+                            if (!p.currentPriceUSD || p.countryCode === 'US') return false
+                            const diff = Math.abs((p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100)
+                            return diff <= 15
+                          }).length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Optimal</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-amber-500/10">
+                        <p className="text-2xl font-bold text-amber-500">
+                          {priceRecommendations.filter(p => {
+                            if (!p.currentPriceUSD || p.countryCode === 'US') return false
+                            const diff = (p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100
+                            return diff > 15
+                          }).length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Overpriced</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-gray-500/10">
+                        <p className="text-2xl font-bold text-gray-500">
+                          {priceRecommendations.filter(p => !p.currentPriceUSD && p.countryCode !== 'US').length}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Not Set</p>
+                      </div>
                     </div>
-                    <div className="p-3 rounded-lg bg-amber-500/10">
-                      <p className="text-2xl font-bold text-amber-500">
-                        {priceRecommendations.filter(p => {
-                          if (!p.currentPriceUSD || p.countryCode === 'US') return false
-                          const diff = (p.currentPriceUSD - p.recommendedPriceUSD) / p.recommendedPriceUSD * 100
-                          return diff > 15
-                        }).length}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Overpriced</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-gray-500/10">
-                      <p className="text-2xl font-bold text-gray-500">
-                        {priceRecommendations.filter(p => !p.currentPriceUSD && p.countryCode !== 'US').length}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Not Set</p>
-                    </div>
-                  </div>
                   )}
                 </CardContent>
               )}
@@ -1294,8 +1289,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                 <div>
                   <h3 className="font-semibold mb-1">GDP-Based Price Optimization</h3>
                   <p className="text-sm text-muted-foreground">
-                    If your subscription costs <span className="font-mono font-semibold text-foreground">${basePrice.toFixed(2)}</span> in the USA, 
-                    this tool calculates the recommended price for each country based on their GDP per capita (purchasing power). 
+                    If your subscription costs <span className="font-mono font-semibold text-foreground">${basePrice.toFixed(2)}</span> in the USA,
+                    this tool calculates the recommended price for each country based on their GDP per capita (purchasing power).
                     Lower GDP countries get a discount to make your app accessible, while maintaining fair pricing globally.
                   </p>
                 </div>
@@ -1333,9 +1328,9 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                 </div>
 
                 <div className="pt-4 border-t border-border/50">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleRefreshGDP}
                     disabled={isLoadingGDP}
                     className="w-full"
@@ -1397,10 +1392,10 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                   {pricingTable.map((p) => {
                     const tier = p.tier || (p.gdpRatio >= 0.5 ? 'high' : p.gdpRatio >= 0.2 ? 'medium' : 'low')
                     const discount = Math.round((1 - p.multiplier) * 100)
-                    
+
                     return (
-                      <div 
-                        key={p.countryCode} 
+                      <div
+                        key={p.countryCode}
                         className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors"
                       >
                         <div className="flex items-center gap-3">
@@ -1412,7 +1407,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-4">
                           {/* Recommended USD Price */}
                           <div className="text-right">
@@ -1421,7 +1416,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                               ${(p.recommendedPriceUSD || p.price || 0).toFixed(2)}
                             </p>
                           </div>
-                          
+
                           {/* Local Currency Price */}
                           {p.localPriceFormatted && (
                             <div className="text-right min-w-[100px]">
@@ -1429,17 +1424,16 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                               <p className="font-semibold">{p.localPriceFormatted}</p>
                             </div>
                           )}
-                          
+
                           {/* Discount Badge */}
-                          <Badge 
-                            variant="outline" 
-                            className={`min-w-[60px] justify-center ${
-                              discount > 0 
-                                ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' 
-                                : discount < 0 
+                          <Badge
+                            variant="outline"
+                            className={`min-w-[60px] justify-center ${discount > 0
+                                ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                                : discount < 0
                                   ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                   : 'bg-muted text-muted-foreground'
-                            }`}
+                              }`}
                           >
                             {discount > 0 ? `-${discount}%` : discount < 0 ? `+${Math.abs(discount)}%` : 'Base'}
                           </Badge>
@@ -1457,19 +1451,18 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
             {['high', 'medium', 'low'].map((tier) => {
               const tierData = tiersSummary.tiers[tier]
               const avgPrice = tier === 'high' ? tiersSummary.stats.avgHigh :
-                              tier === 'medium' ? tiersSummary.stats.avgMedium :
-                              tiersSummary.stats.avgLow
+                tier === 'medium' ? tiersSummary.stats.avgMedium :
+                  tiersSummary.stats.avgLow
               const avgDiscount = tier === 'high' ? 0 : tier === 'medium' ? 25 : 50
 
               return (
                 <Card key={tier} className="border-border/50 shadow-sm">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline" className={`capitalize ${
-                        tier === 'high' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                        tier === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                        'bg-blue-500/10 text-blue-500 border-blue-500/20'
-                      }`}>
+                      <Badge variant="outline" className={`capitalize ${tier === 'high' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                          tier === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                            'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                        }`}>
                         {tier === 'high' ? '💰 High GDP' : tier === 'medium' ? '📊 Medium GDP' : '🌍 Low GDP'}
                       </Badge>
                       <span className="text-2xl font-bold">${avgPrice.toFixed(2)}</span>
@@ -1564,9 +1557,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                     {Object.entries(SUBSCRIPTION_PERIODS).map(([key, period]) => (
                       <div
                         key={key}
-                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
-                          selectedPeriods.includes(key) ? 'border-primary/50 bg-primary/5' : 'border-border/50 hover:border-border'
-                        }`}
+                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${selectedPeriods.includes(key) ? 'border-primary/50 bg-primary/5' : 'border-border/50 hover:border-border'
+                          }`}
                         onClick={() => togglePeriod(key)}
                       >
                         <Checkbox checked={selectedPeriods.includes(key)} onCheckedChange={() => togglePeriod(key)} />
@@ -1597,9 +1589,8 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
                     {SUPPORTED_LANGUAGES.map(lang => (
                       <div
                         key={lang.code}
-                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
-                          selectedLocales.includes(lang.code) ? 'border-primary/50 bg-primary/5' : 'border-border/50 hover:border-border'
-                        }`}
+                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${selectedLocales.includes(lang.code) ? 'border-primary/50 bg-primary/5' : 'border-border/50 hover:border-border'
+                          }`}
                         onClick={() => toggleLocale(lang.code)}
                       >
                         <Checkbox checked={selectedLocales.includes(lang.code)} onCheckedChange={() => toggleLocale(lang.code)} />
