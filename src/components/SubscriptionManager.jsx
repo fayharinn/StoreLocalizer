@@ -73,7 +73,7 @@ const ISO2_TO_ISO3 = {
   'SB': 'SLB', 'ZA': 'ZAF', 'ES': 'ESP', 'LK': 'LKA', 'SR': 'SUR', 'SE': 'SWE', 'CH': 'CHE', 'TW': 'TWN',
   'TJ': 'TJK', 'TZ': 'TZA', 'TH': 'THA', 'TO': 'TON', 'TT': 'TTO', 'TN': 'TUN', 'TR': 'TUR', 'TM': 'TKM',
   'TC': 'TCA', 'UG': 'UGA', 'UA': 'UKR', 'AE': 'ARE', 'GB': 'GBR', 'US': 'USA', 'UY': 'URY', 'UZ': 'UZB',
-  'VU': 'VUT', 'VE': 'VEN', 'VN': 'VNM', 'YE': 'YEM', 'ZM': 'ZMB', 'ZW': 'ZWE', 'XK': 'KOS'
+  'VU': 'VUT', 'VE': 'VEN', 'VN': 'VNM', 'YE': 'YEM', 'ZM': 'ZMB', 'ZW': 'ZWE', 'XK': 'XKS'
 }
 
 
