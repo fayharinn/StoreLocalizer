@@ -17,7 +17,6 @@ import {
   createScreenshotSet,
   uploadScreenshot,
   deleteAllScreenshotsInSet,
-  normalizeLocaleCode,
   hasValidToken,
   getTokenTimeLeft,
   SCREENSHOT_DISPLAY_TYPES,
@@ -25,6 +24,7 @@ import {
 } from '@/services/appStoreConnectService'
 import { PROVIDERS } from '@/services/translationService'
 import { decrypt } from '@/utils/crypto'
+import { readLocalizedMediaDrop, formatFileSize } from '@/utils/mediaDrop'
 
 const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
 
@@ -902,82 +902,12 @@ Respond with ONLY the keywords, nothing else:`
     )
   }
 
-  const readDirectoryRecursive = async (dirEntry, path = '') => {
-    const files = []
-    const reader = dirEntry.createReader()
-
-    const readEntries = () => new Promise((resolve, reject) => {
-      reader.readEntries(resolve, reject)
-    })
-
-    let entries = await readEntries()
-    while (entries.length > 0) {
-      for (const entry of entries) {
-        const entryPath = path ? `${path}/${entry.name}` : entry.name
-        if (entry.isFile) {
-          const file = await new Promise((resolve) => entry.file(resolve))
-          files.push({ file, path: entryPath })
-        } else if (entry.isDirectory) {
-          const subFiles = await readDirectoryRecursive(entry, entryPath)
-          files.push(...subFiles)
-        }
-      }
-      entries = await readEntries()
-    }
-
-    return files
-  }
-
   const handleScreenshotDrop = async (e) => {
     e.preventDefault()
     e.stopPropagation()
     setIsDraggingScreenshots(false)
 
-    const items = e.dataTransfer.items
-    const queue = []
-
-    for (const item of items) {
-      if (item.kind === 'file') {
-        const entry = item.webkitGetAsEntry?.()
-        if (entry) {
-          if (entry.isDirectory) {
-            const files = await readDirectoryRecursive(entry)
-
-            const filesByLocale = {}
-            for (const { file, path } of files) {
-              const pathParts = path.split('/')
-              const localeFolder = pathParts.length > 1 ? pathParts[0] : entry.name
-              const normalizedLocale = normalizeLocaleCode(localeFolder)
-
-              if (!filesByLocale[normalizedLocale]) {
-                filesByLocale[normalizedLocale] = []
-              }
-              if (file.type.startsWith('image/')) {
-                filesByLocale[normalizedLocale].push(file)
-              }
-            }
-
-            for (const [locale, files] of Object.entries(filesByLocale)) {
-              if (files.length > 0) {
-                files.sort((a, b) => a.name.localeCompare(b.name))
-                queue.push({ locale, files, status: 'pending' })
-              }
-            }
-          } else {
-            const file = item.getAsFile()
-            if (file?.type.startsWith('image/')) {
-              const locale = sourceLocale || 'en-US'
-              const existing = queue.find(q => q.locale === locale)
-              if (existing) {
-                existing.files.push(file)
-              } else {
-                queue.push({ locale, files: [file], status: 'pending' })
-              }
-            }
-          }
-        }
-      }
-    }
+    const queue = await readLocalizedMediaDrop(e.dataTransfer, sourceLocale || 'en-US')
 
     if (queue.length > 0) {
       setScreenshotUploadQueue(queue)
@@ -989,12 +919,6 @@ Respond with ONLY the keywords, nothing else:`
 
   const removeFromUploadQueue = (locale) => {
     setScreenshotUploadQueue(prev => prev.filter(q => q.locale !== locale))
-  }
-
-  const formatFileSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B'
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 
   const handleUploadScreenshots = async () => {

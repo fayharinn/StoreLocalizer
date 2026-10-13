@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { CalendarRange, Loader2, Plus, RefreshCw, Pencil, Trash2, Globe, Sparkles, ChevronRight, Languages, MessageSquareText } from 'lucide-react'
+import { CalendarRange, Loader2, Plus, RefreshCw, Pencil, Trash2, Globe, Sparkles, ChevronRight, Languages, MessageSquareText, ImagePlus } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
-import { EVENT_BADGES } from '@/services/appStoreEventsService'
+import { EVENT_BADGES, EVENT_LOCALIZATION_LIMITS } from '@/services/appStoreEventsService'
 import EventDialog from './EventDialog'
 import EventLocalizationDialog from './EventLocalizationDialog'
 import EventDeleteConfirm from './EventDeleteConfirm'
-import EventTranslateAllDialog from './EventTranslateAllDialog'
+import TranslateAllLocalesDialog from './TranslateAllLocalesDialog'
+import LocalizedMediaPanel from './LocalizedMediaPanel'
 
 function badgeLabel(value) {
   return EVENT_BADGES.find(b => b.value === value)?.label || value || '—'
@@ -18,7 +19,7 @@ function localeFlag(code) {
   return ASC_LOCALES.find(l => l.code === code)?.flag || '🌐'
 }
 
-export default function EventsCard({ selectedApp, eventsHook, aiConfig, promptIsCustom, onEditPrompt }) {
+export default function EventsCard({ selectedApp, eventsHook, assetLibrary, aiConfig, promptIsCustom, onEditPrompt, onPreviewAsset }) {
   const {
     events,
     isLoadingEvents,
@@ -45,6 +46,7 @@ export default function EventsCard({ selectedApp, eventsHook, aiConfig, promptIs
     setLocalizationDialog,
     translateAllDialog,
     setTranslateAllDialog,
+    media,
   } = eventsHook
 
   const [confirmDeleteLocId, setConfirmDeleteLocId] = useState(null)
@@ -361,6 +363,26 @@ export default function EventsCard({ selectedApp, eventsHook, aiConfig, promptIs
                   })}
                 </div>
               )}
+
+              {eventLocalizations.length > 0 && assetLibrary && (
+                <div className="space-y-3 border-t border-border/50 pt-4">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold">
+                    <ImagePlus className="h-4 w-4 text-muted-foreground" />
+                    Event artwork
+                    <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">iOS 27</Badge>
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Event card and details page media, from the Asset Library. One asset per slot and locale.
+                  </p>
+                  <LocalizedMediaPanel
+                    media={media}
+                    library={assetLibrary}
+                    localizations={eventLocalizations}
+                    onPreview={onPreviewAsset}
+                    dropHint="Folder with one subfolder per event locale (/en-US, /fr-FR…)."
+                  />
+                </div>
+              )}
             </div>
             )
           })()}
@@ -413,9 +435,11 @@ export default function EventsCard({ selectedApp, eventsHook, aiConfig, promptIs
       />
 
       {translateAllDialog.open && selectedEvent && (
-        <EventTranslateAllDialog
+        <TranslateAllLocalesDialog
           key={selectedEvent.id}
           open
+          title="AI-translate event to other languages"
+          description={`AI-translates the primary locale (${selectedEvent.primaryLocale}) into every selected language and saves each localization to App Store Connect. Char limits are enforced strictly (${EVENT_LOCALIZATION_LIMITS.name}/${EVENT_LOCALIZATION_LIMITS.shortDescription}/${EVENT_LOCALIZATION_LIMITS.longDescription}).`}
           primaryLocale={selectedEvent.primaryLocale}
           existingLocales={eventLocalizations.map(l => l.locale)}
           isTranslating={isTranslatingAll}

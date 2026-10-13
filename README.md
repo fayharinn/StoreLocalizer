@@ -65,6 +65,11 @@ Generate keywords with AI — or plug your **[AppCompete](https://appcompete.com
 
 Connect once with your API keys — then translate descriptions, what's new, keywords and promotional text across every locale, manage screenshots, create versions, and push everything back **without leaving the browser**.
 
+- **Asset Library (iOS 27)** — upload screenshots, app previews and the new *creative assets* (product page header, search results, In-App Event cards) once, then place them on any surface. Sizes and device groups (iPhone Duo included) come live from Apple's spec catalog, and a dropped `/en-US`, `/fr-FR`… folder is validated, uploaded and placed per locale in one go.
+- **Custom Product Pages** — create, publish/hide and deep-link page variants, AI-translate their promotional text, and fill their media from the library.
+- **Product Page Optimization** — set up A/B tests with up to 3 treatments (alternate icon + media per locale) and start them once Apple accepts them.
+- **In-App Events** — create, localize and AI-translate events, with their card and details page artwork.
+
 <div align="center"><img src="docs/screenshots/app-store-connect.png" width="860" alt="App Store Connect integration" /></div>
 
 ### 📸 Screenshot Studio

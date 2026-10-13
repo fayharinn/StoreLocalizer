@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
-import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Moon, Sun, Monitor, DollarSign, Play, Loader2, Search, Bot } from 'lucide-react'
+import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Images, Library, CalendarRange, PanelsTopLeft, FlaskConical, Moon, Sun, Monitor, DollarSign, Play, Loader2, Search, Bot } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 import {
   Sidebar,
@@ -485,11 +485,46 @@ export function AppSidebar({
                   <span>ASO Keywords</span>
                 </button>
                 <button
+                  onClick={() => document.getElementById('asc-media')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Images className="h-3.5 w-3.5" />
+                  <span>Product Page Media</span>
+                </button>
+                <button
                   onClick={() => document.getElementById('asc-screenshots')?.scrollIntoView({ behavior: 'smooth' })}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Image className="h-3.5 w-3.5" />
                   <span>Screenshots</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('asc-asset-library')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Library className="h-3.5 w-3.5" />
+                  <span>Asset Library</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('asc-events')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <CalendarRange className="h-3.5 w-3.5" />
+                  <span>In-App Events</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('asc-cpp')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <PanelsTopLeft className="h-3.5 w-3.5" />
+                  <span>Custom Product Pages</span>
+                </button>
+                <button
+                  onClick={() => document.getElementById('asc-ppo')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <FlaskConical className="h-3.5 w-3.5" />
+                  <span>Page Optimization</span>
                 </button>
                 <button
                   onClick={() => document.getElementById('asc-translation')?.scrollIntoView({ behavior: 'smooth' })}

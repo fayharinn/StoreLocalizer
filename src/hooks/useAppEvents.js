@@ -13,10 +13,11 @@ import {
 } from '@/services/appStoreEventsService'
 import { translateAllFields, ASC_LOCALES } from '@/services/appStoreConnectService'
 import { PROVIDERS } from '@/services/translationService'
+import useLocalizedMedia from './useLocalizedMedia'
 
 const EVENT_LOC_FIELDS = ['name', 'shortDescription', 'longDescription']
 
-export default function useAppEvents({ credentials, selectedApp, aiConfig, translationPrompts }) {
+export default function useAppEvents({ credentials, selectedApp, assetLibrary, aiConfig, translationPrompts }) {
   const [events, setEvents] = useState([])
   const [isLoadingEvents, setIsLoadingEvents] = useState(false)
 
@@ -264,9 +265,29 @@ export default function useAppEvents({ credentials, selectedApp, aiConfig, trans
     refreshLocalizations,
   ])
 
+  // Event card / details page artwork lives in the Asset Library. A localization
+  // needs a name, so media can only go on locales that already exist.
+  const ensureLocalization = useCallback(async (locale) => {
+    const existing = eventLocalizations.find(l => l.locale === locale)
+    if (!existing) throw new Error(`Add the ${locale} localization to the event first`)
+    return existing
+  }, [eventLocalizations])
+
+  const media = useLocalizedMedia({
+    credentials,
+    library: assetLibrary,
+    surfaceType: 'appEventLocalizations',
+    scopeId: selectedEvent?.id,
+    localizations: eventLocalizations,
+    ensureLocalization,
+    fallbackLocale: selectedEvent?.primaryLocale,
+    log: addLog,
+  })
+
   return {
     // data
     events,
+    media,
     isLoadingEvents,
     selectedEvent,
     eventLocalizations,

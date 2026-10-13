@@ -4,9 +4,8 @@ import { callChatCompletion } from './translationService.js'
 // Use proxy to avoid CORS
 // In production, set VITE_ASC_PROXY_URL to your Cloudflare Worker URL
 // e.g., https://xcstrings-localizer-proxy.your-account.workers.dev
-const BASE_URL = import.meta.env.VITE_ASC_PROXY_URL
-  ? `${import.meta.env.VITE_ASC_PROXY_URL}/v1`
-  : '/api/appstoreconnect/v1'
+const API_ROOT = import.meta.env.VITE_ASC_PROXY_URL || '/api/appstoreconnect'
+const BASE_URL = `${API_ROOT}/v1`
 
 // App Store Connect supported locales with their display info
 export const ASC_LOCALES = [
@@ -160,9 +159,12 @@ export async function generateToken(keyId, issuerId, privateKeyContent) {
   return jwt
 }
 
-// Make authenticated API request
+// Make authenticated API request. Endpoints are relative to /v1 unless they
+// start with /v2/ (e.g. Product Page Optimization experiments).
 export async function apiRequest(endpoint, token, options = {}) {
-  const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`
+  const url = endpoint.startsWith('http')
+    ? endpoint
+    : endpoint.startsWith('/v2/') ? `${API_ROOT}${endpoint}` : `${BASE_URL}${endpoint}`
 
   const response = await fetch(url, {
     // Store data must always be fresh — bypass the browser HTTP cache

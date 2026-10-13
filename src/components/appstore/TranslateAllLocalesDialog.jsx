@@ -7,10 +7,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Loader2, MessageSquareText } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
-import { EVENT_LOCALIZATION_LIMITS } from '@/services/appStoreEventsService'
 
-export default function EventTranslateAllDialog({
+// AI-translate a source locale into a picked set of ASC locales.
+// Shared by In-App Events and Custom Product Pages.
+export default function TranslateAllLocalesDialog({
   open,
+  title,
+  description,
   primaryLocale,
   existingLocales = [],
   isTranslating,
@@ -55,13 +58,9 @@ export default function EventTranslateAllDialog({
             <div className="flex h-7 w-7 items-center justify-center rounded-md gradient-primary">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            AI-translate event to other languages
+            {title}
           </DialogTitle>
-          <DialogDescription>
-            AI-translates the primary locale ({primaryLocale}) into every selected language and saves each
-            localization to App Store Connect. Char limits are enforced strictly
-            ({EVENT_LOCALIZATION_LIMITS.name}/{EVENT_LOCALIZATION_LIMITS.shortDescription}/{EVENT_LOCALIZATION_LIMITS.longDescription}).
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 py-2">

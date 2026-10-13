@@ -46,8 +46,11 @@ export default function ScreenshotsCard({
               <Image className="h-5 w-5 text-white" />
             </div>
             <div>
-              <CardTitle className="text-lg">Screenshots</CardTitle>
-              <CardDescription>View screenshots for each locale</CardDescription>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                Screenshots
+                <Badge variant="outline" className="text-[10px] font-normal">Legacy</Badge>
+              </CardTitle>
+              <CardDescription>Screenshot sets — deprecated by Apple in API 4.5.1, prefer Product Page Media</CardDescription>
             </div>
           </div>
           <Button

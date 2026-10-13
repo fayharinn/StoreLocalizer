@@ -40,13 +40,15 @@ The `screenshots` page is kept mounted but hidden when inactive (Three.js render
 - `useTranslationEditor` — editor UI state (filter, search, pagination, edit dialog) built on top of `useTranslation`'s data.
 - `useScreenshotData` — derives a `localizationPayload` from `xcstringsData` for the screenshot generator.
 
-`useAppStoreConnect` and `useGooglePlayConnect` are page-local (instantiated inside `components/appstore/index.jsx` and `components/googleplay/index.jsx`), not shared.
+`useAppStoreConnect` and `useGooglePlayConnect` are page-local (instantiated inside `components/appstore/index.jsx` and `components/googleplay/index.jsx`), not shared. The App Store page also instantiates `useAssetLibrary` (one per app, passed to every media surface), `useAppEvents`, `useCustomProductPages` and `useProductPageExperiments`; each media surface gets its own `useLocalizedMedia` (placements per locale for one placement type + device group).
 
 ### Service layer separates API/network from UI
 
 `src/services/` holds all external calls; components should never `fetch` directly:
 
 - `appStoreConnectService.js` — JWT signing with `jose` + every ASC endpoint (apps, versions, localizations, screenshots, ASO). Exports `ASC_LOCALES` (canonical locale list). Token is ES256-signed client-side and cached in `sessionStorage` with credential hash for ~19 min.
+- `appAssetLibraryService.js` — App Asset Library (API 4.5.1): per-app library, reserve → upload → commit for images/videos, placements on version / CPP / PPO treatment / In-App Event localizations, ordering requests, and `appAssetLibraryRefData` lookups. Placement groups and specs are read at runtime, never hard-coded. The older screenshot/preview *sets* are deprecated by Apple; `ScreenshotsCard` is kept as legacy.
+- `appStoreProductPagesService.js` — Custom Product Pages (page → version → localization) and Product Page Optimization (`/v2/appStoreVersionExperiments` → treatments → treatment localizations). `apiRequest` routes endpoints starting with `/v2/` to the v2 API root.
 - `googlePlayService.js` — OAuth2 JWT-bearer for service accounts, edit-session workflow (create edit → mutate → commit).
 - `translationService.js` — multi-provider AI translation (OpenAI, Azure OpenAI, AWS Bedrock, GitHub Models, …). Exports `PROVIDERS` registry, `SUPPORTED_LANGUAGES`, `translateStrings` (batched + concurrent: `DEFAULT_TEXTS_PER_BATCH=5`, `DEFAULT_CONCURRENT_REQUESTS=10`).
 - `subscriptionService.js` / `subscriptionPricingService.js` / `subscriptionTranslationService.js` — IAP CRUD, GDP-adjusted price recommendations, localized display name translation.

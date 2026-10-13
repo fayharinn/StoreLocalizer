@@ -17,14 +17,20 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CheckCircle2, AlertCircle, Clock, Terminal, Image } from 'lucide-react'
+import { useCallback } from 'react'
+import { CheckCircle2, AlertCircle, Clock, Terminal, Image, ExternalLink } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 import useAppStoreConnect from '@/hooks/useAppStoreConnect'
 import useAppEvents from '@/hooks/useAppEvents'
 import useAscTranslationPrompt from '@/hooks/useAscTranslationPrompt'
+import useAssetLibrary from '@/hooks/useAssetLibrary'
+import useLocalizedMedia from '@/hooks/useLocalizedMedia'
+import useCustomProductPages from '@/hooks/useCustomProductPages'
+import useProductPageExperiments from '@/hooks/useProductPageExperiments'
 import {
   EVENT_TRANSLATION_PROMPTS_KEY,
   VERSION_TRANSLATION_PROMPTS_KEY,
+  CPP_TRANSLATION_PROMPTS_KEY,
   LEGACY_EVENT_PROMPT_KEY,
   LEGACY_SHARED_PROMPT_KEY,
   isLocalEnvironment,
@@ -41,6 +47,10 @@ const VERSION_PROMPT_FIELDS = [
   { key: 'whatsNew', label: "What's new" },
   { key: 'promotionalText', label: 'Promotional text' },
   { key: 'keywords', label: 'Keywords' },
+]
+
+const CPP_PROMPT_FIELDS = [
+  { key: 'promotionalText', label: 'Promotional text' },
 ]
 
 const COPY_FIELD_LABELS = {
@@ -60,6 +70,10 @@ import ScreenshotsCard from './ScreenshotsCard'
 import TranslationCard from './TranslationCard'
 import EventsCard from './EventsCard'
 import TranslationPromptDialog from './TranslationPromptDialog'
+import AssetLibraryCard from './AssetLibraryCard'
+import ProductPageMediaCard from './ProductPageMediaCard'
+import CustomProductPagesCard from './CustomProductPagesCard'
+import ProductPageOptimizationCard from './ProductPageOptimizationCard'
 
 export default function AppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig, appCompeteConfig }) {
   // Each section has its own set of per-field prompts — different char limits, different content.
@@ -71,8 +85,59 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
     fields: VERSION_PROMPT_FIELDS.map(f => f.key),
     legacyKey: LEGACY_SHARED_PROMPT_KEY,
   })
+  const cppPrompt = useAscTranslationPrompt(CPP_TRANSLATION_PROMPTS_KEY, {
+    fields: CPP_PROMPT_FIELDS.map(f => f.key),
+  })
   const hook = useAppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig, appCompeteConfig, translationPrompts: versionPrompt.prompts })
-  const eventsHook = useAppEvents({ credentials, selectedApp: hook.selectedApp, aiConfig, translationPrompts: eventPrompt.prompts })
+  // iOS 27 App Asset Library — shared by every media surface below
+  const assetLibrary = useAssetLibrary({ credentials, selectedApp: hook.selectedApp })
+  const eventsHook = useAppEvents({ credentials, selectedApp: hook.selectedApp, assetLibrary, aiConfig, translationPrompts: eventPrompt.prompts })
+  const cppHook = useCustomProductPages({
+    credentials,
+    selectedApp: hook.selectedApp,
+    assetLibrary,
+    aiConfig,
+    translationPrompts: cppPrompt.prompts,
+    defaultLocale: hook.sourceLocale,
+  })
+  const ppoHook = useProductPageExperiments({
+    credentials,
+    selectedApp: hook.selectedApp,
+    assetLibrary,
+    defaultLocale: hook.sourceLocale,
+  })
+
+  const { versionLocalizations } = hook
+  const ensureVersionLocalization = useCallback(async (locale) => {
+    const existing = versionLocalizations.find(l => l.locale === locale)
+    if (!existing) throw new Error(`${locale} isn't a locale of this version — add it first`)
+    return existing
+  }, [versionLocalizations])
+  const versionMedia = useLocalizedMedia({
+    credentials,
+    library: assetLibrary,
+    surfaceType: 'appStoreVersionLocalizations',
+    scopeId: hook.selectedVersion?.id,
+    localizations: hook.versionLocalizations,
+    ensureLocalization: ensureVersionLocalization,
+    fallbackLocale: hook.sourceLocale,
+    log: hook.addLog,
+  })
+
+  // Library assets reuse the screenshot lightbox; videos show their preview frame
+  const { setScreenshotPreview } = hook
+  const handlePreviewAsset = useCallback((asset, label) => {
+    setScreenshotPreview({
+      open: true,
+      screenshot: {
+        fileName: asset.referenceName || asset.fileName,
+        imageAsset: asset.mediaType === 'VIDEO' ? asset.previewFrameImage?.image : asset.imageAsset,
+        videoUrl: asset.mediaType === 'VIDEO' ? asset.videoAsset : null,
+      },
+      locale: label,
+      deviceType: asset.mediaType === 'VIDEO' ? 'Video' : 'Image',
+    })
+  }, [setScreenshotPreview])
 
   return (
     <div className="space-y-8">
@@ -181,6 +246,16 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
       )}
 
       {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
+        <ProductPageMediaCard
+          selectedVersion={hook.selectedVersion}
+          versionLocalizations={hook.versionLocalizations}
+          media={versionMedia}
+          library={assetLibrary}
+          onPreview={handlePreviewAsset}
+        />
+      )}
+
+      {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
         <ScreenshotsCard
           versionLocalizations={hook.versionLocalizations}
           screenshotsByLocale={hook.screenshotsByLocale}
@@ -207,12 +282,45 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
       )}
 
       {hook.selectedApp && (
+        <AssetLibraryCard
+          selectedApp={hook.selectedApp}
+          library={assetLibrary}
+          onPreview={handlePreviewAsset}
+        />
+      )}
+
+      {hook.selectedApp && (
         <EventsCard
           selectedApp={hook.selectedApp}
           eventsHook={eventsHook}
+          assetLibrary={assetLibrary}
           aiConfig={aiConfig}
           promptIsCustom={eventPrompt.anyCustom}
           onEditPrompt={() => eventPrompt.setPromptDialog({ open: true, field: 'name' })}
+          onPreviewAsset={handlePreviewAsset}
+        />
+      )}
+
+      {hook.selectedApp && (
+        <CustomProductPagesCard
+          selectedApp={hook.selectedApp}
+          selectedVersion={hook.selectedVersion}
+          cppHook={cppHook}
+          assetLibrary={assetLibrary}
+          defaultLocale={hook.sourceLocale}
+          promptIsCustom={cppPrompt.anyCustom}
+          onEditPrompt={() => cppPrompt.setPromptDialog({ open: true, field: 'promotionalText' })}
+          onPreviewAsset={handlePreviewAsset}
+        />
+      )}
+
+      {hook.selectedApp && (
+        <ProductPageOptimizationCard
+          selectedApp={hook.selectedApp}
+          selectedVersion={hook.selectedVersion}
+          ppoHook={ppoHook}
+          assetLibrary={assetLibrary}
+          onPreviewAsset={handlePreviewAsset}
         />
       )}
 
@@ -559,6 +667,16 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                 <p className="text-white/80 text-sm text-center truncate">
                   {hook.screenshotPreview.screenshot.fileName}
                 </p>
+                {hook.screenshotPreview.screenshot.videoUrl && (
+                  <a
+                    href={hook.screenshotPreview.screenshot.videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 flex items-center justify-center gap-1 text-xs text-white/80 hover:text-white"
+                  >
+                    Open video <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             )}
           </div>
@@ -579,6 +697,23 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
           onReset={eventPrompt.reset}
           onResetAll={eventPrompt.resetAll}
           onClose={() => eventPrompt.setPromptDialog({ open: false, field: 'name' })}
+        />
+      )}
+
+      {cppPrompt.promptDialog.open && (
+        <TranslationPromptDialog
+          open
+          title="Custom product page prompt"
+          description="Prompt used to AI-translate the promotional text of custom product pages (170 chars)."
+          fields={CPP_PROMPT_FIELDS}
+          initialField={cppPrompt.promptDialog.field}
+          getPrompt={cppPrompt.getPromptFor}
+          getDefault={cppPrompt.getDefaultFor}
+          isCustom={cppPrompt.isCustom}
+          onSave={cppPrompt.setPrompt}
+          onReset={cppPrompt.reset}
+          onResetAll={cppPrompt.resetAll}
+          onClose={() => cppPrompt.setPromptDialog({ open: false, field: 'promotionalText' })}
         />
       )}
 
