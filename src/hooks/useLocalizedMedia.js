@@ -36,6 +36,8 @@ async function mapWithConcurrency(items, limit, fn) {
 // - `scopeId` identifies the owner; changing it resets the loaded placements.
 // - `ensureLocalization(locale)` returns the localization for a locale (creating
 //   it when the surface allows), so dropping a folder with new locales just works.
+// - `selectGroups(groups)` optionally narrows the ref-data placement groups
+//   (e.g. selectScreenshotTargetGroups); pass a stable function.
 export default function useLocalizedMedia({
   credentials,
   library,
@@ -45,6 +47,7 @@ export default function useLocalizedMedia({
   ensureLocalization,
   fallbackLocale,
   log,
+  selectGroups,
 }) {
   const { feature, orderable } = MEDIA_SURFACES[surfaceType]
   const { refData } = library
@@ -53,10 +56,10 @@ export default function useLocalizedMedia({
   const [placementType, setPlacementType] = useState('APP_SCREENSHOT')
   const effectiveType = placementTypes.includes(placementType) ? placementType : placementTypes[0] || null
 
-  const groups = useMemo(
-    () => effectiveType ? getPlacementGroups(refData, feature, effectiveType) : [],
-    [refData, feature, effectiveType]
-  )
+  const groups = useMemo(() => {
+    const all = effectiveType ? getPlacementGroups(refData, feature, effectiveType) : []
+    return selectGroups ? selectGroups(all) : all
+  }, [refData, feature, effectiveType, selectGroups])
   const [placementGroup, setPlacementGroup] = useState(null)
   // Default to the first iPhone group — the one every product page needs
   const effectiveGroup = groups.some(g => g.groupId === placementGroup)

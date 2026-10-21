@@ -27,6 +27,7 @@ import useAssetLibrary from '@/hooks/useAssetLibrary'
 import useLocalizedMedia from '@/hooks/useLocalizedMedia'
 import useCustomProductPages from '@/hooks/useCustomProductPages'
 import useProductPageExperiments from '@/hooks/useProductPageExperiments'
+import { selectScreenshotTargetGroups } from '@/services/appAssetLibraryService'
 import {
   EVENT_TRANSLATION_PROMPTS_KEY,
   VERSION_TRANSLATION_PROMPTS_KEY,
@@ -123,6 +124,25 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
     fallbackLocale: hook.sourceLocale,
     log: hook.addLog,
   })
+  // The Screenshots card's folder upload also goes through the library: screenshot
+  // sets are deprecated and can't target newer devices such as iPhone Duo
+  const screenshotUpload = useLocalizedMedia({
+    credentials,
+    library: assetLibrary,
+    surfaceType: 'appStoreVersionLocalizations',
+    scopeId: hook.selectedVersion?.id,
+    localizations: hook.versionLocalizations,
+    ensureLocalization: ensureVersionLocalization,
+    fallbackLocale: hook.sourceLocale,
+    log: hook.addLog,
+    selectGroups: selectScreenshotTargetGroups,
+  })
+  const handleUploadScreenshots = async () => {
+    const placed = await screenshotUpload.handleUpload()
+    if (!placed) return
+    if (versionMedia.hasLoaded) versionMedia.loadPlacements()
+    if (Object.keys(hook.screenshotsByLocale).length > 0) hook.handleLoadScreenshots()
+  }
 
   // Library assets reuse the screenshot lightbox; videos show their preview frame
   const { setScreenshotPreview } = hook
@@ -264,20 +284,8 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
           handleLoadScreenshots={hook.handleLoadScreenshots}
           toggleScreenshotLocale={hook.toggleScreenshotLocale}
           setScreenshotPreview={hook.setScreenshotPreview}
-          isDraggingScreenshots={hook.isDraggingScreenshots}
-          setIsDraggingScreenshots={hook.setIsDraggingScreenshots}
-          screenshotUploadQueue={hook.screenshotUploadQueue}
-          setScreenshotUploadQueue={hook.setScreenshotUploadQueue}
-          isUploadingScreenshots={hook.isUploadingScreenshots}
-          uploadProgress={hook.uploadProgress}
-          selectedDisplayType={hook.selectedDisplayType}
-          setSelectedDisplayType={hook.setSelectedDisplayType}
-          deleteExistingScreenshots={hook.deleteExistingScreenshots}
-          setDeleteExistingScreenshots={hook.setDeleteExistingScreenshots}
-          handleScreenshotDrop={hook.handleScreenshotDrop}
-          removeFromUploadQueue={hook.removeFromUploadQueue}
-          formatFileSize={hook.formatFileSize}
-          handleUploadScreenshots={hook.handleUploadScreenshots}
+          upload={screenshotUpload}
+          onUpload={handleUploadScreenshots}
         />
       )}
 

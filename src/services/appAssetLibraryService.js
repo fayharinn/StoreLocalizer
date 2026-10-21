@@ -10,7 +10,8 @@ import { apiRequest, generateToken } from './appStoreConnectService'
 //
 // Placement groups, specs and limits come from `appAssetLibraryRefData` at
 // runtime — Apple adds device families (e.g. iPhone Duo) without an API change,
-// so nothing here hard-codes a device list.
+// so nothing here hard-codes a group ID or spec. The Screenshots card's curated
+// device list (SCREENSHOT_TARGET_DEVICES) is matched to groups by display class.
 
 export const ASSET_CATEGORIES = {
   APP_SCREENSHOTS_AND_PREVIEWS: 'Screenshots & previews',
@@ -36,6 +37,23 @@ export const CREATIVE_PLACEMENT_TYPES = [
   'APP_STORE_SEARCH_RESULTS_ASSET',
   'EVENT_CARD_ASSET',
   'EVENT_DETAILS_PAGE_ASSET',
+]
+
+// Current devices offered by the Screenshots card's folder upload, in menu order.
+// `displayClass` is an AppAssetLibraryDisplayClass; platforms with a single
+// group (Mac, TV, Vision Pro) match on platform alone. Older classes (Face ID,
+// Home Button, iPad 12.9"/10.5"/9.7", Watch Series 7 and earlier) are left out.
+export const SCREENSHOT_TARGET_DEVICES = [
+  { platform: 'IPHONE_APP_STORE', displayClass: 'IPHONE_DYNAMIC_ISLAND_LARGE_DISPLAY', name: 'iPhone 6.9"', device: 'iPhone 18 Pro Max, 17 Pro Max, Air' },
+  { platform: 'IPHONE_APP_STORE', displayClass: 'IPHONE_DYNAMIC_ISLAND_MEDIUM_DISPLAY', name: 'iPhone 6.3"', device: 'iPhone 18 Pro, 17 Pro, 17' },
+  { platform: 'IPHONE_APP_STORE', displayClass: 'IPHONE_DUO', name: 'iPhone Duo', device: 'Inner and outer displays' },
+  { platform: 'IPAD_APP_STORE', displayClass: 'IPAD_13_DISPLAY', name: 'iPad 13"', device: 'iPad Pro M5, iPad Air M4' },
+  { platform: 'IPAD_APP_STORE', displayClass: 'IPAD_11_DISPLAY', name: 'iPad 11"', device: 'iPad Pro M5, iPad Air M4, iPad A16, iPad mini' },
+  { platform: 'MAC_APP_STORE', name: 'Mac', device: 'macOS' },
+  { platform: 'WATCH_APP_STORE', displayClass: 'WATCH_ULTRA', name: 'Watch Ultra 4', device: 'Apple Watch Ultra 4, Ultra 3' },
+  { platform: 'WATCH_APP_STORE', displayClass: 'WATCH_SERIES_10', name: 'Watch Series 12', device: 'Apple Watch Series 12, 11, 10' },
+  { platform: 'TV_APP_STORE', name: 'Apple TV', device: 'tvOS' },
+  { platform: 'VISION_PRO_APP_STORE', name: 'Vision Pro', device: 'visionOS' },
 ]
 
 export const ASSET_STATE_LABELS = {
@@ -350,6 +368,15 @@ export function getPlacementGroups(refData, feature, placementType) {
       specs: getGroupSpecs(refData, placementType, groupId),
     }
   }).filter(g => g.maxCount === null || g.maxCount > 0)
+}
+
+// Narrow placement groups to SCREENSHOT_TARGET_DEVICES (labelled, in menu order).
+// A device whose group isn't in the ref data for this feature is skipped.
+export function selectScreenshotTargetGroups(groups) {
+  return SCREENSHOT_TARGET_DEVICES.flatMap(({ platform, displayClass, name, device }) => {
+    const group = groups.find(g => g.platform === platform && (!displayClass || g.displayClassId === displayClass))
+    return group ? [{ ...group, name, device }] : []
+  })
 }
 
 export function getGroupSpecs(refData, placementType, groupId) {

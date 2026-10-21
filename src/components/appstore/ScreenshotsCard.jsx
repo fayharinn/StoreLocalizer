@@ -4,7 +4,8 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CheckCircle2, AlertCircle, Loader2, ChevronDown, RefreshCw, Image, Smartphone, Tablet, Monitor, Watch, Upload, FolderOpen, X } from 'lucide-react'
-import { ASC_LOCALES, SCREENSHOT_DISPLAY_TYPES } from '@/services/appStoreConnectService'
+import { ASC_LOCALES } from '@/services/appStoreConnectService'
+import { formatSpecDimensions } from '@/services/appAssetLibraryService'
 
 function getDeviceIcon(displayType) {
   if (displayType.includes('IPHONE')) return Smartphone
@@ -22,21 +23,17 @@ export default function ScreenshotsCard({
   handleLoadScreenshots,
   toggleScreenshotLocale,
   setScreenshotPreview,
-  isDraggingScreenshots,
-  setIsDraggingScreenshots,
-  screenshotUploadQueue,
-  setScreenshotUploadQueue,
-  isUploadingScreenshots,
-  uploadProgress,
-  selectedDisplayType,
-  setSelectedDisplayType,
-  deleteExistingScreenshots,
-  setDeleteExistingScreenshots,
-  handleScreenshotDrop,
-  removeFromUploadQueue,
-  formatFileSize,
-  handleUploadScreenshots,
+  // useLocalizedMedia for the version, narrowed to SCREENSHOT_TARGET_DEVICES
+  upload,
+  onUpload,
 }) {
+  const {
+    groups, placementGroup, setPlacementGroup, groupInfo,
+    replaceExisting, setReplaceExisting, isDragging, setIsDragging,
+    queue, isUploading, progress, handleDrop, removeFromQueue, clearQueue,
+  } = upload
+  const acceptedSizes = [...new Set((groupInfo?.specs || []).map(formatSpecDimensions).filter(Boolean))]
+
   return (
     <Card id="asc-screenshots" className="border-border/50 shadow-sm scroll-mt-6">
       <CardHeader className="pb-4">
@@ -50,7 +47,7 @@ export default function ScreenshotsCard({
                 Screenshots
                 <Badge variant="outline" className="text-[10px] font-normal">Legacy</Badge>
               </CardTitle>
-              <CardDescription>Screenshot sets — deprecated by Apple in API 4.5.1, prefer Product Page Media</CardDescription>
+              <CardDescription>Screenshot sets — deprecated by Apple in API 4.5.1; uploads below go through the Asset Library</CardDescription>
             </div>
           </div>
           <Button
@@ -209,66 +206,69 @@ export default function ScreenshotsCard({
 
           <div className="mb-4">
             <Label className="text-xs font-medium text-muted-foreground mb-2 block">Target Device</Label>
-            <Select value={selectedDisplayType} onValueChange={setSelectedDisplayType}>
+            <Select value={placementGroup || ''} onValueChange={setPlacementGroup} disabled={groups.length === 0}>
               <SelectTrigger className="h-9 bg-muted/30 border-border/50">
-                <SelectValue />
+                <SelectValue placeholder="Loading devices from the Asset Library…" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(SCREENSHOT_DISPLAY_TYPES).map(([key, info]) => (
-                  <SelectItem key={key} value={key}>{info.name} - {info.device}</SelectItem>
+                {groups.map(g => (
+                  <SelectItem key={g.groupId} value={g.groupId}>{g.name} - {g.device}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {acceptedSizes.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-2">Accepted sizes: {acceptedSizes.join(', ')}</p>
+            )}
           </div>
 
           <div className="mb-4 p-3 rounded-lg bg-muted/20 border border-border/30">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={deleteExistingScreenshots}
-                onChange={(e) => setDeleteExistingScreenshots(e.target.checked)}
+                checked={replaceExisting}
+                onChange={(e) => setReplaceExisting(e.target.checked)}
                 className="h-4 w-4 rounded border-border text-pink-500 focus:ring-pink-500"
               />
               <span className="text-sm">Replace existing screenshots</span>
             </label>
-            {deleteExistingScreenshots && (
+            {replaceExisting && (
               <p className="text-xs text-amber-500 flex items-center gap-1 mt-2">
                 <AlertCircle className="h-3 w-3" />
-                Existing screenshots for the selected device type will be deleted before uploading
+                Existing screenshots for the selected device will be removed before uploading
               </p>
             )}
           </div>
 
           <div
-            onDragOver={(e) => { e.preventDefault(); setIsDraggingScreenshots(true) }}
-            onDragLeave={(e) => { e.preventDefault(); setIsDraggingScreenshots(false) }}
-            onDrop={handleScreenshotDrop}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }}
+            onDrop={handleDrop}
             className={`
               relative rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200
-              ${isDraggingScreenshots
+              ${isDragging
                 ? 'border-pink-500 bg-pink-500/10 scale-[1.02]'
                 : 'border-border/50 hover:border-pink-500/50 hover:bg-muted/30'
               }
             `}
           >
-            <FolderOpen className={`h-10 w-10 mx-auto mb-3 ${isDraggingScreenshots ? 'text-pink-500' : 'text-muted-foreground/50'}`} />
-            <p className={`font-medium ${isDraggingScreenshots ? 'text-pink-500' : 'text-muted-foreground'}`}>
-              {isDraggingScreenshots ? 'Drop your folder here!' : 'Drop screenshot folder here'}
+            <FolderOpen className={`h-10 w-10 mx-auto mb-3 ${isDragging ? 'text-pink-500' : 'text-muted-foreground/50'}`} />
+            <p className={`font-medium ${isDragging ? 'text-pink-500' : 'text-muted-foreground'}`}>
+              {isDragging ? 'Drop your folder here!' : 'Drop screenshot folder here'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Folder structure: /en/*.png, /fr/*.png, /de/*.png...
             </p>
           </div>
 
-          {screenshotUploadQueue.length > 0 && (
+          {queue.length > 0 && (
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h5 className="text-sm font-medium">Upload Queue</h5>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setScreenshotUploadQueue([])}
-                  disabled={isUploadingScreenshots}
+                  onClick={clearQueue}
+                  disabled={isUploading}
                   className="h-7 text-xs text-muted-foreground hover:text-destructive"
                 >
                   Clear all
@@ -276,7 +276,7 @@ export default function ScreenshotsCard({
               </div>
 
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {screenshotUploadQueue.map(({ locale, files, status }) => {
+                {queue.map(({ locale, files, status }) => {
                   const localeInfo = ASC_LOCALES.find(l => l.code === locale)
                   const localization = versionLocalizations.find(l => l.locale === locale)
 
@@ -315,7 +315,7 @@ export default function ScreenshotsCard({
                         <AlertCircle className="h-4 w-4 text-red-500" />
                       ) : (
                         <button
-                          onClick={() => removeFromUploadQueue(locale)}
+                          onClick={() => removeFromQueue(locale)}
                           className="p-1 rounded hover:bg-muted transition-colors"
                         >
                           <X className="h-4 w-4 text-muted-foreground" />
@@ -326,28 +326,28 @@ export default function ScreenshotsCard({
                 })}
               </div>
 
-              {isUploadingScreenshots && uploadProgress.total > 0 && (
+              {isUploading && progress.total > 0 && (
                 <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/30">
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-pink-500 font-medium">Uploading...</span>
-                    <span className="text-muted-foreground">{uploadProgress.current}/{uploadProgress.total}</span>
+                    <span className="text-muted-foreground">{progress.current}/{progress.total}</span>
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
                     <div
                       className="h-full bg-pink-500 transition-all duration-300"
-                      style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                      style={{ width: `${(progress.current / progress.total) * 100}%` }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2 truncate">{uploadProgress.currentFile}</p>
+                  <p className="text-xs text-muted-foreground mt-2 truncate">{progress.currentFile}</p>
                 </div>
               )}
 
               <Button
-                onClick={handleUploadScreenshots}
-                disabled={isUploadingScreenshots || screenshotUploadQueue.every(q => q.status === 'done')}
+                onClick={onUpload}
+                disabled={isUploading || !placementGroup || queue.every(q => q.status === 'done')}
                 className="w-full h-10 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 border-0"
               >
-                {isUploadingScreenshots ? (
+                {isUploading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Uploading...
@@ -355,7 +355,7 @@ export default function ScreenshotsCard({
                 ) : (
                   <>
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload {screenshotUploadQueue.reduce((sum, q) => sum + q.files.length, 0)} Screenshots
+                    Upload {queue.reduce((sum, q) => sum + q.files.length, 0)} Screenshots
                   </>
                 )}
               </Button>

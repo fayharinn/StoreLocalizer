@@ -12,19 +12,13 @@ import {
   createAppInfoLocalization,
   translateAllFields,
   createVersion,
-  getScreenshotSets,
   getAllScreenshotsForVersion,
-  createScreenshotSet,
-  uploadScreenshot,
-  deleteAllScreenshotsInSet,
   hasValidToken,
   getTokenTimeLeft,
-  SCREENSHOT_DISPLAY_TYPES,
   ASC_LOCALES,
 } from '@/services/appStoreConnectService'
 import { PROVIDERS } from '@/services/translationService'
 import { decrypt } from '@/utils/crypto'
-import { readLocalizedMediaDrop, formatFileSize } from '@/utils/mediaDrop'
 
 const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
 
@@ -167,13 +161,6 @@ export default function useAppStoreConnect({ credentials, onCredentialsChange, a
   const [isLoadingScreenshots, setIsLoadingScreenshots] = useState(false)
   const [expandedScreenshotLocales, setExpandedScreenshotLocales] = useState([])
   const [screenshotPreview, setScreenshotPreview] = useState({ open: false, screenshot: null, locale: '', deviceType: '' })
-
-  const [isDraggingScreenshots, setIsDraggingScreenshots] = useState(false)
-  const [screenshotUploadQueue, setScreenshotUploadQueue] = useState([])
-  const [isUploadingScreenshots, setIsUploadingScreenshots] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, currentFile: '' })
-  const [selectedDisplayType, setSelectedDisplayType] = useState('APP_IPHONE_67')
-  const [deleteExistingScreenshots, setDeleteExistingScreenshots] = useState(true)
 
   const [logs, setLogs] = useState([])
 
@@ -902,102 +889,6 @@ Respond with ONLY the keywords, nothing else:`
     )
   }
 
-  const handleScreenshotDrop = async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDraggingScreenshots(false)
-
-    const queue = await readLocalizedMediaDrop(e.dataTransfer, sourceLocale || 'en-US')
-
-    if (queue.length > 0) {
-      setScreenshotUploadQueue(queue)
-      addLog(`Detected ${queue.length} locale(s) with screenshots to upload`, 'info')
-    } else {
-      addLog('No valid screenshot images found in dropped items', 'error')
-    }
-  }
-
-  const removeFromUploadQueue = (locale) => {
-    setScreenshotUploadQueue(prev => prev.filter(q => q.locale !== locale))
-  }
-
-  const handleUploadScreenshots = async () => {
-    if (screenshotUploadQueue.length === 0) return
-
-    setIsUploadingScreenshots(true)
-    const totalFiles = screenshotUploadQueue.reduce((sum, q) => sum + q.files.length, 0)
-    let uploadedCount = 0
-
-    for (const queueItem of screenshotUploadQueue) {
-      const { locale, files } = queueItem
-
-      const localization = versionLocalizations.find(l => l.locale === locale)
-      if (!localization) {
-        addLog(`Locale ${locale} not found in current version, skipping`, 'error')
-        setScreenshotUploadQueue(prev =>
-          prev.map(q => q.locale === locale ? { ...q, status: 'error' } : q)
-        )
-        continue
-      }
-
-      setScreenshotUploadQueue(prev =>
-        prev.map(q => q.locale === locale ? { ...q, status: 'uploading' } : q)
-      )
-
-      try {
-        const existingSets = await getScreenshotSets(credentials, localization.id)
-        let screenshotSetId = existingSets.find(s => s.displayType === selectedDisplayType)?.id
-
-        if (!screenshotSetId) {
-          addLog(`Creating screenshot set for ${locale} (${SCREENSHOT_DISPLAY_TYPES[selectedDisplayType]?.name})...`, 'info')
-          screenshotSetId = await createScreenshotSet(credentials, localization.id, selectedDisplayType)
-        } else if (deleteExistingScreenshots) {
-          const existingSet = existingSets.find(s => s.displayType === selectedDisplayType)
-          if (existingSet && existingSet.screenshots.length > 0) {
-            addLog(`Deleting ${existingSet.screenshots.length} existing screenshot(s) for ${locale}...`, 'info')
-            const deletedCount = await deleteAllScreenshotsInSet(credentials, screenshotSetId)
-            addLog(`Deleted ${deletedCount} screenshot(s) for ${locale}`, 'success')
-          }
-        }
-
-        for (const file of files) {
-          setUploadProgress({ current: uploadedCount + 1, total: totalFiles, currentFile: file.name })
-
-          addLog(`Uploading ${file.name} to ${locale} (${formatFileSize(file.size)})...`, 'info')
-
-          const result = await uploadScreenshot(credentials, screenshotSetId, file, (progress) => {
-            if (progress.status === 'error') {
-              addLog(`Error uploading ${file.name}: ${progress.error}`, 'error')
-            }
-          })
-
-          if (result.success) {
-            addLog(`Uploaded ${file.name} to ${locale}`, 'success')
-          } else {
-            addLog(`Failed to upload ${file.name}: ${result.error}`, 'error')
-          }
-
-          uploadedCount++
-        }
-
-        setScreenshotUploadQueue(prev =>
-          prev.map(q => q.locale === locale ? { ...q, status: 'done' } : q)
-        )
-      } catch (error) {
-        addLog(`Error uploading to ${locale}: ${error.message}`, 'error')
-        setScreenshotUploadQueue(prev =>
-          prev.map(q => q.locale === locale ? { ...q, status: 'error' } : q)
-        )
-      }
-    }
-
-    setIsUploadingScreenshots(false)
-    setUploadProgress({ current: 0, total: 0, currentFile: '' })
-    addLog(`Screenshot upload complete! ${uploadedCount} files uploaded.`, 'success')
-
-    handleLoadScreenshots()
-  }
-
   const handleLocaleToggle = (localeCode) => {
     setTargetLocales(prev =>
       prev.includes(localeCode)
@@ -1620,16 +1511,6 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
     expandedScreenshotLocales,
     screenshotPreview,
     setScreenshotPreview,
-    isDraggingScreenshots,
-    setIsDraggingScreenshots,
-    screenshotUploadQueue,
-    setScreenshotUploadQueue,
-    isUploadingScreenshots,
-    uploadProgress,
-    selectedDisplayType,
-    setSelectedDisplayType,
-    deleteExistingScreenshots,
-    setDeleteExistingScreenshots,
     logs,
     addLog,
     currentAiApiKey,
@@ -1652,10 +1533,6 @@ ${sourceLoc.subtitle ? `Subtitle: ${sourceLoc.subtitle}` : ''}`
     saveEditedKeywords,
     handleLoadScreenshots,
     toggleScreenshotLocale,
-    handleScreenshotDrop,
-    removeFromUploadQueue,
-    formatFileSize,
-    handleUploadScreenshots,
     handleLocaleToggle,
     handleFieldToggle,
     handleTranslate,
