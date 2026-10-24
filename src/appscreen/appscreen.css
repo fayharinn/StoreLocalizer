@@ -984,7 +984,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
     position: absolute;
     bottom: calc(100% + 4px);
     left: 0;
-    right: 0;
+    min-width: 100%;
+    width: max-content;
+    max-width: min(340px, 90vw);
+    /* opens upward from the footer: keep it inside the viewport and scroll the rest */
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -1007,6 +1013,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     padding: 8px 10px;
     border-radius: 6px;
     cursor: pointer;
@@ -1026,11 +1033,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .output-size-menu .device-option-name {
     font-size: 12px;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .output-size-menu .device-option-size {
     font-size: 10px;
     color: var(--text-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .output-size-divider {
