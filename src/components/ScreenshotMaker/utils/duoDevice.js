@@ -4,9 +4,10 @@
 //  - inner: 7.6" open display, corners ~9.6 % of the short side, a fold crease
 //    across the middle of the long edge (vertical when held landscape,
 //    horizontal in tabletop portrait).
-//  - outer: 5.4" cover display, square corners on the hinge side, a camera hole
-//    in the top trailing corner when portrait. Landscape is the same panel
-//    turned clockwise (hinge on top, hole bottom-right).
+//  - outer: 5.4" cover display, square corners on the hinge side. Landscape is
+//    the same panel turned clockwise (hinge on top).
+//
+// The camera hole is not drawn: the captured screenshot already contains it.
 
 import { duoPanels, deviceDimensions } from '../constants';
 
@@ -46,34 +47,29 @@ function panelMetrics(panel, w, h) {
       bezel,
       pad: { top: bezel, right: bezel, bottom: bezel, left: bezel },
       radii: [r, r, r, r], // tl, tr, br, bl
-      hole: null,
       hingeSide: null,
     };
   }
 
-  // Outer panel, portrait reference: hinge left, camera hole top-right.
+  // Outer panel, portrait reference: hinge left.
   const r = 0.115 * short;
   const sq = 0.012 * short;
   const bezel = 0.022 * short;
   const spine = bezel * 2.4;
-  const holeR = 0.0397 * short; // 111 px disc on a 1398 px wide capture
-  const holeInset = 0.075 * short;
 
   if (!landscape) {
     return {
       bezel,
       pad: { top: bezel, right: bezel, bottom: bezel, left: spine },
       radii: [sq, r, r, sq],
-      hole: { x: w - holeInset, y: holeInset, r: holeR },
       hingeSide: 'left',
     };
   }
-  // Turned clockwise: hinge on top, hole bottom-right.
+  // Turned clockwise: hinge on top.
   return {
     bezel,
     pad: { top: spine, right: bezel, bottom: bezel, left: bezel },
     radii: [sq, sq, r, r],
-    hole: { x: w - holeInset, y: h - holeInset, r: holeR },
     hingeSide: 'top',
   };
 }
@@ -81,10 +77,6 @@ function panelMetrics(panel, w, h) {
 function screenPath(context, x, y, w, h, m) {
   context.beginPath();
   context.roundRect(x, y, w, h, m.radii);
-  if (m.hole) {
-    context.moveTo(x + m.hole.x + m.hole.r, y + m.hole.y);
-    context.arc(x + m.hole.x, y + m.hole.y, m.hole.r, 0, Math.PI * 2);
-  }
 }
 
 function bodyPath(context, x, y, w, h, m) {
@@ -176,24 +168,6 @@ function drawSeams(context, x, y, w, h, m, seam) {
   }
 }
 
-function drawCamera(context, x, y, m) {
-  const { hole } = m;
-  if (!hole) return;
-  const cx = x + hole.x;
-  const cy = y + hole.y;
-  context.fillStyle = '#0b0b0d';
-  context.beginPath();
-  context.arc(cx, cy, hole.r, 0, Math.PI * 2);
-  context.fill();
-  const lens = context.createRadialGradient(cx - hole.r * 0.2, cy - hole.r * 0.2, 0, cx, cy, hole.r * 0.6);
-  lens.addColorStop(0, '#2b3350');
-  lens.addColorStop(1, '#0b0b0d');
-  context.fillStyle = lens;
-  context.beginPath();
-  context.arc(cx, cy, hole.r * 0.55, 0, Math.PI * 2);
-  context.fill();
-}
-
 /**
  * Draws the screenshot inside the Duo mockup. The (x, y, w, h) rectangle is the
  * display itself; the body extends around it. The caller owns rotation and
@@ -238,10 +212,10 @@ export function drawDuoMockup(context, img, x, y, w, h, panel, settings) {
   context.stroke();
   context.restore();
 
-  // Display: panel shape with the camera hole cut out.
+  // Display: panel shape.
   context.save();
   screenPath(context, x, y, w, h, m);
-  context.clip('evenodd');
+  context.clip();
   context.fillStyle = '#000';
   context.fillRect(x, y, w, h);
   context.drawImage(img, x, y, w, h);
@@ -252,5 +226,4 @@ export function drawDuoMockup(context, img, x, y, w, h, panel, settings) {
   context.restore();
 
   if (panel.kind === 'inner') drawSeams(context, x, y, w, h, m, seam);
-  drawCamera(context, x, y, m);
 }
