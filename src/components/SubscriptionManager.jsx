@@ -44,7 +44,7 @@ import {
   SUBSCRIPTION_STATES
 } from '@/services/subscriptionService'
 import { listApps, ASC_LOCALES, hasValidToken, getTokenTimeLeft } from '@/services/appStoreConnectService'
-import { SUPPORTED_LANGUAGES } from '@/services/translationService'
+import { SUPPORTED_LANGUAGES, PROVIDERS } from '@/services/translationService'
 import { decrypt } from '@/utils/crypto'
 import PricingChart from './PricingChart'
 
@@ -578,7 +578,7 @@ export default function SubscriptionManager({ aiConfig, ascCredentials, onCreden
       const fullAiConfig = {
         provider: aiConfig.provider,
         apiKey: currentApiKey,
-        model: aiConfig.models?.[aiConfig.provider] || 'gpt-4o-mini',
+        model: aiConfig.models?.[aiConfig.provider] || PROVIDERS[aiConfig.provider]?.defaultModel,
         region: aiConfig.region
       }
 

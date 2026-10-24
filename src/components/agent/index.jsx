@@ -1003,7 +1003,7 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
           <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
           <span>
             {noProviderConfigured
-              ? 'No function-calling provider has an API key yet. Add one in the sidebar (OpenAI, Anthropic, Gemini, Azure, Bedrock, GitHub Models or DeepSeek).'
+              ? 'No function-calling provider has an API key yet. Add one in the sidebar (OpenAI, Anthropic, Gemini, xAI, Mistral, OpenRouter, Azure, Bedrock, GitHub Models or DeepSeek).'
               : `No API key configured for ${PROVIDERS[provider]?.name || provider}. Add it in the sidebar or pick another provider.`}
           </span>
         </div>

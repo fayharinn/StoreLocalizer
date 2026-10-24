@@ -142,11 +142,12 @@ export const llmProviders = {
         storageKey: 'claudeApiKey',
         modelStorageKey: 'anthropicModel',
         models: [
-            { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5 ($)' },
-            { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6 ($$)' },
-            { id: 'claude-opus-4-8', name: 'Claude Opus 4.8 ($$$)' },
+            { id: 'claude-haiku-5-5', name: 'Claude Haiku 5.5 ($)' },
+            { id: 'claude-sonnet-5-5', name: 'Claude Sonnet 5.5 ($$)' },
+            { id: 'claude-opus-5-5', name: 'Claude Opus 5.5 ($$$)' },
+            { id: 'claude-fable-5-1', name: 'Claude Fable 5.1 ($$$$)' },
         ],
-        defaultModel: 'claude-haiku-4-5'
+        defaultModel: 'claude-haiku-5-5'
     },
     openai: {
         name: 'OpenAI (GPT)',
@@ -154,11 +155,11 @@ export const llmProviders = {
         storageKey: 'openaiApiKey',
         modelStorageKey: 'openaiModel',
         models: [
-            { id: 'gpt-5.1-2025-11-13', name: 'GPT-5.1 ($$$)' },
-            { id: 'gpt-5-mini-2025-08-07', name: 'GPT-5 Mini ($$)' },
-            { id: 'gpt-5-nano-2025-08-07', name: 'GPT-5 Nano ($)' }
+            { id: 'gpt-6-astra', name: 'GPT-6 Astra ($$$)' },
+            { id: 'gpt-6.1-sol', name: 'GPT-6.1 Sol ($$)' },
+            { id: 'gpt-6-luna', name: 'GPT-6 Luna ($)' }
         ],
-        defaultModel: 'gpt-5-mini-2025-08-07'
+        defaultModel: 'gpt-6-luna'
     },
     azure: {
         name: 'Azure OpenAI',
@@ -167,10 +168,11 @@ export const llmProviders = {
         modelStorageKey: 'azureModel',
         endpointStorageKey: 'azureEndpoint',
         models: [
-            { id: 'gpt-5-nano', name: 'GPT-5 Nano ($)' },
-            { id: 'gpt-5-mini', name: 'GPT-5 Mini ($$)' }
+            { id: 'gpt-6-luna', name: 'GPT-6 Luna ($)' },
+            { id: 'gpt-6.1-sol', name: 'GPT-6.1 Sol ($$)' },
+            { id: 'gpt-6-astra', name: 'GPT-6 Astra ($$$)' }
         ],
-        defaultModel: 'gpt-5-nano',
+        defaultModel: 'gpt-6-luna',
         needsEndpoint: true
     },
     google: {
@@ -179,11 +181,11 @@ export const llmProviders = {
         storageKey: 'googleApiKey',
         modelStorageKey: 'googleModel',
         models: [
-            { id: 'gemini-3.1-flash-lite', name: 'Gemini 3.1 Flash-Lite ($)' },
-            { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash ($$)' },
-            { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro ($$$)' }
+            { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite ($)' },
+            { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash ($$)' },
+            { id: 'gemini-4-argon', name: 'Gemini 4 Argon ($$$)' }
         ],
-        defaultModel: 'gemini-3.5-flash'
+        defaultModel: 'gemini-3.8-flash'
     },
     github: {
         name: 'GitHub Models',
@@ -204,11 +206,11 @@ export const llmProviders = {
         modelStorageKey: 'bedrockModel',
         regionStorageKey: 'bedrockRegion',
         models: [
-            { id: 'anthropic.claude-haiku-4-5-20251001-v1:0', name: 'Claude Haiku 4.5 ($)' },
-            { id: 'anthropic.claude-sonnet-4-6', name: 'Claude Sonnet 4.6 ($$)' },
-            { id: 'anthropic.claude-opus-4-5-20251101-v1:0', name: 'Claude Opus 4.5 ($$$)' }
+            { id: 'anthropic.claude-haiku-5-5', name: 'Claude Haiku 5.5 ($)' },
+            { id: 'anthropic.claude-sonnet-5-5', name: 'Claude Sonnet 5.5 ($$)' },
+            { id: 'anthropic.claude-opus-5-5', name: 'Claude Opus 5.5 ($$$)' }
         ],
-        defaultModel: 'anthropic.claude-haiku-4-5-20251001-v1:0',
+        defaultModel: 'anthropic.claude-haiku-5-5',
         needsRegion: true
     },
     deepseek: {

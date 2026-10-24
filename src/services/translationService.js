@@ -37,18 +37,27 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ca', name: 'Catalan', flag: '🏴' },
 ]
 
+// Providers that speak the OpenAI Chat Completions dialect on a fixed URL
+export const OPENAI_COMPATIBLE_URLS = {
+  deepseek: 'https://api.deepseek.com/chat/completions',
+  xai: 'https://api.x.ai/v1/chat/completions',
+  mistral: 'https://api.mistral.ai/v1/chat/completions',
+  openrouter: 'https://openrouter.ai/api/v1/chat/completions',
+}
+
 export const PROVIDERS = {
   openai: {
     name: 'OpenAI',
-    models: ['gpt-5.6-luna'],
-    defaultModel: 'gpt-5.6-luna',
+    models: ['gpt-6-luna', 'gpt-6.1-sol', 'gpt-6-astra', 'gpt-5.6-luna'],
+    defaultModel: 'gpt-6-luna',
     serviceTiers: ['auto', 'default', 'flex', 'priority'],
     defaultServiceTier: 'auto',
   },
   azure: {
     name: 'Azure OpenAI',
-    models: ['gpt-5-nano', 'gpt-5-mini', 'gpt-5.6-luna'],
-    defaultModel: 'gpt-5.6-luna',
+    // Azure deployment names are free-form — these are suggestions
+    models: ['gpt-6-luna', 'gpt-6.1-sol', 'gpt-6-astra', 'gpt-5.6-luna', 'gpt-5-mini', 'gpt-5-nano'],
+    defaultModel: 'gpt-6-luna',
     needsEndpoint: true,
     customModelInput: true,
     placeholder: 'https://xxx.openai.azure.com',
@@ -56,11 +65,14 @@ export const PROVIDERS = {
   bedrock: {
     name: 'AWS Bedrock',
     models: [
+      'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-haiku-5-5',
+      'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-sonnet-5-5',
+      'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-opus-5-5',
+      'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-fable-5-1',
       'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-haiku-4-5-20251001-v1:0',
       'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-sonnet-4-6',
-      'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-opus-4-6-v1',
     ],
-    defaultModel: 'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-haiku-4-5-20251001-v1:0',
+    defaultModel: 'arn:aws:bedrock:us-east-1:471112516430:inference-profile/global.anthropic.claude-haiku-5-5',
     needsRegion: true,
   },
   github: {
@@ -70,18 +82,47 @@ export const PROVIDERS = {
   },
   anthropic: {
     name: 'Anthropic (Claude)',
-    models: ['claude-haiku-4-5', 'claude-sonnet-4-6', 'claude-opus-4-8'],
-    defaultModel: 'claude-haiku-4-5',
+    models: ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5', 'claude-fable-5-1', 'claude-haiku-4-5', 'claude-sonnet-4-6'],
+    defaultModel: 'claude-haiku-5-5',
   },
   google: {
     name: 'Google (Gemini)',
-    models: ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.1-pro'],
+    models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-4-argon', 'gemini-3.1-pro-preview'],
     defaultModel: 'gemini-3.5-flash-lite',
   },
   deepseek: {
     name: 'DeepSeek',
     models: ['deepseek-v4-flash', 'deepseek-v4-pro'],
     defaultModel: 'deepseek-v4-flash',
+  },
+  xai: {
+    name: 'xAI (Grok)',
+    models: ['grok-4.3', 'grok-4.7', 'grok-4.6', 'grok-4.5', 'grok-4.20-0309-non-reasoning'],
+    defaultModel: 'grok-4.3',
+  },
+  mistral: {
+    name: 'Mistral',
+    // -latest aliases always point at the current generation of each tier
+    models: ['mistral-small-latest', 'mistral-medium-latest', 'mistral-large-latest'],
+    defaultModel: 'mistral-small-latest',
+  },
+  openrouter: {
+    name: 'OpenRouter',
+    // One key, any model (Claude, GPT, Gemini, Grok, Kimi, Qwen, GLM, ...): type a slug or pick a suggestion
+    models: [
+      'google/gemini-3.8-flash',
+      'anthropic/claude-sonnet-5.5',
+      'anthropic/claude-opus-5.5',
+      'openai/gpt-6.1-sol',
+      'x-ai/grok-4.7',
+      'moonshotai/kimi-k3.1-pro',
+      'qwen/qwen3.8-max-0902',
+      'z-ai/glm-5.3',
+      'deepseek/deepseek-v4-pro',
+      'mistralai/mistral-large-4-0',
+    ],
+    defaultModel: 'google/gemini-3.8-flash',
+    customModelInput: true,
   },
   cloudflare: {
     name: 'Cloudflare Workers AI',
@@ -322,7 +363,7 @@ async function callOpenAI(apiKey, model, systemMessage, userMessage, serviceTier
   return result.choices[0].message.content
 }
 
-// Generic OpenAI-compatible chat completion (used by DeepSeek and Cloudflare Workers AI)
+// Generic OpenAI-compatible chat completion (DeepSeek, xAI, Mistral, OpenRouter, Cloudflare Workers AI)
 async function callOpenAICompatible(url, apiKey, model, systemMessage, userMessage, jsonMode = true) {
   const body = {
     model,
@@ -352,7 +393,7 @@ async function callOpenAICompatible(url, apiKey, model, systemMessage, userMessa
 
 // DeepSeek API (OpenAI-compatible)
 async function callDeepSeek(apiKey, model, systemMessage, userMessage, jsonMode = true) {
-  return callOpenAICompatible('https://api.deepseek.com/chat/completions', apiKey, model, systemMessage, userMessage, jsonMode)
+  return callOpenAICompatible(OPENAI_COMPATIBLE_URLS.deepseek, apiKey, model, systemMessage, userMessage, jsonMode)
 }
 
 // Cloudflare Workers AI (OpenAI-compatible endpoint). `accountId` is the Cloudflare account id.
@@ -554,6 +595,12 @@ export async function callChatCompletion(config, systemMessage, userMessage, jso
       return callGitHubModels(apiKey, model, systemMessage, userMessage)
     case 'deepseek':
       return callDeepSeek(apiKey, model, systemMessage, userMessage, jsonMode)
+    case 'xai':
+    case 'mistral':
+      return callOpenAICompatible(OPENAI_COMPATIBLE_URLS[provider], apiKey, model, systemMessage, userMessage, jsonMode)
+    case 'openrouter':
+      // json_object support varies per routed model — rely on the prompt + fence stripping instead
+      return callOpenAICompatible(OPENAI_COMPATIBLE_URLS.openrouter, apiKey, model, systemMessage, userMessage, false)
     case 'cloudflare':
       return callCloudflare(apiKey, model, endpoint, systemMessage, userMessage)
     case 'anthropic':
@@ -734,7 +781,10 @@ export async function testApiConnection(config) {
         break
 
       case 'deepseek':
-        response = await fetch('https://api.deepseek.com/chat/completions', {
+      case 'xai':
+      case 'mistral':
+      case 'openrouter':
+        response = await fetch(OPENAI_COMPATIBLE_URLS[provider], {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,

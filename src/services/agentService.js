@@ -15,9 +15,9 @@
 // (e.g. Cloudflare Workers AI, where support varies per open-weight model)
 // are excluded from the agent page.
 
-import { PROVIDERS } from './translationService'
+import { PROVIDERS, OPENAI_COMPATIBLE_URLS } from './translationService'
 
-export const TOOL_CAPABLE_PROVIDERS = ['openai', 'anthropic', 'google', 'azure', 'bedrock', 'github', 'deepseek']
+export const TOOL_CAPABLE_PROVIDERS = ['openai', 'anthropic', 'google', 'azure', 'bedrock', 'github', 'deepseek', 'xai', 'mistral', 'openrouter']
 
 export function getToolCapableProviders() {
   return TOOL_CAPABLE_PROVIDERS.filter((id) => PROVIDERS[id]).map((id) => ({ id, name: PROVIDERS[id].name }))
@@ -35,7 +35,7 @@ function safeParseJson(text, fallback = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// OpenAI-style Chat Completions (openai, azure, github, deepseek)
+// OpenAI-style Chat Completions (openai, azure, github, deepseek, xai, mistral, openrouter)
 // ---------------------------------------------------------------------------
 
 function toOpenAIMessages(systemPrompt, messages) {
@@ -73,7 +73,7 @@ function toOpenAIMessages(systemPrompt, messages) {
 function openAIStyleUrl(config) {
   const { provider, model, endpoint } = config
   if (provider === 'openai') return 'https://api.openai.com/v1/chat/completions'
-  if (provider === 'deepseek') return 'https://api.deepseek.com/chat/completions'
+  if (OPENAI_COMPATIBLE_URLS[provider]) return OPENAI_COMPATIBLE_URLS[provider]
   if (provider === 'github') return 'https://models.inference.ai.azure.com/chat/completions'
   if (provider === 'azure') {
     let baseUrl = (endpoint || '').replace(/\/+$/, '')
@@ -95,9 +95,9 @@ async function callOpenAIStyle(config, systemPrompt, messages, tools, signal) {
   if (config.provider === 'openai' && config.serviceTier && config.serviceTier !== 'auto') {
     body.service_tier = config.serviceTier
   }
-  // gpt-5.6 models default to a non-"none" reasoning effort, and Chat Completions
-  // rejects function tools in that mode — pin it to "none" when tools are used.
-  if (config.provider === 'openai' && tools?.length && /^gpt-5\.6/.test(config.model)) {
+  // gpt-5.6 and gpt-6 models default to a non-"none" reasoning effort, and Chat
+  // Completions only accepts function tools with reasoning_effort "none".
+  if (config.provider === 'openai' && tools?.length && /^gpt-(5\.6|6)/.test(config.model)) {
     body.reasoning_effort = 'none'
   }
 
@@ -405,6 +405,9 @@ export async function callAgentModel(config, systemPrompt, messages, tools, sign
     case 'azure':
     case 'github':
     case 'deepseek':
+    case 'xai':
+    case 'mistral':
+    case 'openrouter':
       return callOpenAIStyle(config, systemPrompt, messages, tools, signal)
     case 'anthropic':
       return callAnthropicAgent(config, systemPrompt, messages, tools, signal)

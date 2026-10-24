@@ -55,6 +55,9 @@ const PROVIDER_COLORS = {
   bedrock: '#ff9900',
   github: '#8b5cf6',
   deepseek: '#4d6bfe',
+  xai: '#71717a',
+  mistral: '#fa520f',
+  openrouter: '#6467f2',
   cloudflare: '#f38020',
 }
 
@@ -63,6 +66,8 @@ const PROVIDER_KEY_PLACEHOLDERS = {
   anthropic: 'sk-ant-...',
   google: 'AIza...',
   deepseek: 'sk-...',
+  xai: 'xai-...',
+  openrouter: 'sk-or-...',
 }
 
 const NAV_ITEMS = [
