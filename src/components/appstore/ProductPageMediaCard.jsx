@@ -17,7 +17,7 @@ export default function ProductPageMediaCard({ selectedVersion, versionLocalizat
   const editable = !selectedVersion?.state || EDITABLE_VERSION_STATES.includes(selectedVersion.state)
 
   return (
-    <Card id="asc-media" className="scroll-mt-6 border-border/50 shadow-sm">
+    <Card id="asc-media" className="scroll-mt-44 border-border/50 shadow-sm">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg">

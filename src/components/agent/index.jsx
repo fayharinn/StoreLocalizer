@@ -28,7 +28,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -847,6 +846,14 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
     }
   }
 
+  // Grow the composer with its content (capped by max-h) so long prompts stay visible
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`
+  }, [input])
+
   const noProviderConfigured = !capableProviders.some((id) => aiConfig.apiKeys[id])
 
   const approvalMode = autoApprove
@@ -856,354 +863,334 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
       : { label: 'Ask every write', icon: <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" /> }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 shrink-0">
-          <Bot className="h-6 w-6 text-primary" />
+    <div className="flex h-full min-h-[480px] flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+            <Bot className="h-5 w-5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold leading-tight tracking-tight">Agent</h1>
+            <p className="text-[11px] leading-tight text-muted-foreground">{AGENT_TOOL_COUNT} tools available to the model</p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight">Agent</h1>
-          <p className="text-sm text-muted-foreground">
-            Chat with an AI that can call functions to read and update your App Store Connect metadata,
-            Google Play listings and translations. Only providers with function-calling support are listed.
-          </p>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          {[
+            ['App Store Connect', ascReady],
+            ['Google Play', gpReady],
+            ['AppCompete', appCompeteReady],
+            [xcstringsData && fileName ? fileName : '.xcstrings', !!xcstringsData],
+          ].map(([label, ready]) => (
+            <Badge key={label} variant="outline" className={`h-6 gap-1.5 font-normal ${ready ? 'text-foreground' : 'text-muted-foreground'}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${ready ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
+              <span className="max-w-[160px] truncate">{label}</span>
+            </Badge>
+          ))}
+        </div>
+
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <Select value={provider} onValueChange={handleProviderChange} disabled={isRunning}>
+            <SelectTrigger className="h-8 w-[150px] text-xs" aria-label="Provider">
+              <SelectValue placeholder="Provider" />
+            </SelectTrigger>
+            <SelectContent>
+              {capableProviders.map((id) => (
+                <SelectItem key={id} value={id}>
+                  {PROVIDERS[id].name}
+                  {!aiConfig.apiKeys[id] && <span className="text-muted-foreground"> — no API key</span>}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={model} onValueChange={setModel} disabled={isRunning}>
+            <SelectTrigger className="h-8 w-[180px] text-xs" aria-label="Model">
+              <SelectValue placeholder="Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {modelOptions.map((m) => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 font-normal" aria-label="Write approvals">
+              {approvalMode.icon}
+              <span className="text-xs">{approvalMode.label}</span>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-[330px] p-0">
+            <div className="px-3 py-2.5">
+              <p className="text-sm font-medium">Write approvals</p>
+              <p className="text-[11px] text-muted-foreground">
+                Which actions on App Store Connect / Google Play can run without asking.
+              </p>
+            </div>
+            <Separator />
+            <div className="flex items-start gap-3 px-3 py-2.5">
+              <Switch id="agent-auto-approve" className="mt-0.5" checked={autoApprove} onCheckedChange={setAutoApprove} />
+              <div className="min-w-0 space-y-0.5">
+                <Label htmlFor="agent-auto-approve" className="cursor-pointer text-xs font-medium">
+                  {autoApprove ? <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> : <ShieldAlert className="h-3.5 w-3.5" />}
+                  Auto-approve every write
+                </Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Skips the prompt for all {WRITE_TOOL_NAMES.size} write tools, including ones you never allowed.
+                </p>
+              </div>
+            </div>
+            <Separator />
+            <div className="px-3 py-2.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium">Always allowed</p>
+                {alwaysAllow.size > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-1.5 text-[11px] text-muted-foreground"
+                    onClick={() => askTools(null)}
+                  >
+                    Revoke all
+                  </Button>
+                )}
+              </div>
+              {alwaysAllow.size === 0 ? (
+                <p className="text-[11px] text-muted-foreground">
+                  Nothing yet. Hit <span className="font-medium">Always allow</span> on an approval, or type{' '}
+                  <code className="rounded bg-muted px-1 py-0.5 font-mono">/allow &lt;tool&gt;</code>.
+                </p>
+              ) : (
+                <div className="max-h-44 space-y-1 overflow-y-auto">
+                  {[...alwaysAllow].sort().map((name) => (
+                    <div key={name} className="flex items-center gap-2 rounded-md bg-muted/50 px-2 py-1">
+                      <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                      <span className="truncate font-mono text-[11px]">{name}</span>
+                      <button
+                        type="button"
+                        onClick={() => askTools([name])}
+                        aria-label={`Ask again for ${name}`}
+                        className="ml-auto rounded p-0.5 text-muted-foreground/70 transition-colors hover:bg-background hover:text-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-muted-foreground"
+            onClick={handleClear}
+            disabled={isRunning || messages.length === 0}
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            Clear
+          </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="space-y-4 pb-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                Conversation
-              </CardTitle>
-              <CardDescription>{AGENT_TOOL_COUNT} tools available to the model</CardDescription>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={ascReady ? 'default' : 'secondary'} className="gap-1.5">
-                <span className={`h-1.5 w-1.5 rounded-full ${ascReady ? 'bg-emerald-400' : 'bg-muted-foreground/50'}`} />
-                App Store Connect
-              </Badge>
-              <Badge variant={gpReady ? 'default' : 'secondary'} className="gap-1.5">
-                <span className={`h-1.5 w-1.5 rounded-full ${gpReady ? 'bg-emerald-400' : 'bg-muted-foreground/50'}`} />
-                Google Play
-              </Badge>
-              <Badge variant={appCompeteReady ? 'default' : 'secondary'} className="gap-1.5">
-                <span className={`h-1.5 w-1.5 rounded-full ${appCompeteReady ? 'bg-emerald-400' : 'bg-muted-foreground/50'}`} />
-                AppCompete
-              </Badge>
-              <Badge variant={xcstringsData ? 'default' : 'secondary'} className="gap-1.5">
-                <span className={`h-1.5 w-1.5 rounded-full ${xcstringsData ? 'bg-emerald-400' : 'bg-muted-foreground/50'}`} />
-                {xcstringsData && fileName ? fileName : '.xcstrings'}
-              </Badge>
-            </div>
-          </div>
+      {!agentConfig.apiKey && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>
+            {noProviderConfigured
+              ? 'No function-calling provider has an API key yet. Add one in the sidebar (OpenAI, Anthropic, Gemini, Azure, Bedrock, GitHub Models or DeepSeek).'
+              : `No API key configured for ${PROVIDERS[provider]?.name || provider}. Add it in the sidebar or pick another provider.`}
+          </span>
+        </div>
+      )}
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Select value={provider} onValueChange={handleProviderChange} disabled={isRunning}>
-              <SelectTrigger className="w-[170px] h-9" aria-label="Provider">
-                <SelectValue placeholder="Provider" />
-              </SelectTrigger>
-              <SelectContent>
-                {capableProviders.map((id) => (
-                  <SelectItem key={id} value={id}>
-                    {PROVIDERS[id].name}
-                    {!aiConfig.apiKeys[id] && <span className="text-muted-foreground"> — no API key</span>}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={model} onValueChange={setModel} disabled={isRunning}>
-              <SelectTrigger className="w-[200px] h-9" aria-label="Model">
-                <SelectValue placeholder="Model" />
-              </SelectTrigger>
-              <SelectContent>
-                {modelOptions.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 gap-1.5 font-normal" aria-label="Write approvals">
-                  {approvalMode.icon}
-                  <span className="text-xs">{approvalMode.label}</span>
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-[330px] p-0">
-                <div className="px-3 py-2.5">
-                  <p className="text-sm font-medium">Write approvals</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Which actions on App Store Connect / Google Play can run without asking.
-                  </p>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto w-full max-w-3xl space-y-4 p-4">
+            {messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
+                  <Bot className="h-6 w-6 text-primary" />
                 </div>
-                <Separator />
-                <div className="flex items-start gap-3 px-3 py-2.5">
-                  <Switch id="agent-auto-approve" className="mt-0.5" checked={autoApprove} onCheckedChange={setAutoApprove} />
-                  <div className="min-w-0 space-y-0.5">
-                    <Label htmlFor="agent-auto-approve" className="cursor-pointer text-xs font-medium">
-                      {autoApprove ? <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> : <ShieldAlert className="h-3.5 w-3.5" />}
-                      Auto-approve every write
-                    </Label>
-                    <p className="text-[11px] text-muted-foreground">
-                      Skips the prompt for all {WRITE_TOOL_NAMES.size} write tools, including ones you never allowed.
-                    </p>
-                  </div>
+                <p className="text-sm font-medium mb-1">Ask the agent to do something</p>
+                <p className="text-xs text-muted-foreground mb-5 max-w-sm">
+                  It can list your apps, read and update store metadata, translate content, and more — with your approval on every write.
+                </p>
+                <div className="flex flex-col gap-2 w-full max-w-md">
+                  {SUGGESTIONS.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setInput(s)}
+                      className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
                 </div>
-                <Separator />
-                <div className="px-3 py-2.5 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-medium">Always allowed</p>
-                    {alwaysAllow.size > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-1.5 text-[11px] text-muted-foreground"
-                        onClick={() => askTools(null)}
-                      >
-                        Revoke all
-                      </Button>
-                    )}
-                  </div>
-                  {alwaysAllow.size === 0 ? (
-                    <p className="text-[11px] text-muted-foreground">
-                      Nothing yet. Hit <span className="font-medium">Always allow</span> on an approval, or type{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 font-mono">/allow &lt;tool&gt;</code>.
-                    </p>
-                  ) : (
-                    <div className="max-h-44 space-y-1 overflow-y-auto">
-                      {[...alwaysAllow].sort().map((name) => (
-                        <div key={name} className="flex items-center gap-2 rounded-md bg-muted/50 px-2 py-1">
-                          <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                          <span className="truncate font-mono text-[11px]">{name}</span>
-                          <button
-                            type="button"
-                            onClick={() => askTools([name])}
-                            aria-label={`Ask again for ${name}`}
-                            className="ml-auto rounded p-0.5 text-muted-foreground/70 transition-colors hover:bg-background hover:text-foreground"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto h-9 text-muted-foreground"
-              onClick={handleClear}
-              disabled={isRunning || messages.length === 0}
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Clear
-            </Button>
-          </div>
-
-          {!agentConfig.apiKey && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
-              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>
-                {noProviderConfigured
-                  ? 'No function-calling provider has an API key yet. Add one in the sidebar (OpenAI, Anthropic, Gemini, Azure, Bedrock, GitHub Models or DeepSeek).'
-                  : `No API key configured for ${PROVIDERS[provider]?.name || provider}. Add it in the sidebar or pick another provider.`}
-              </span>
-            </div>
-          )}
-        </CardHeader>
-
-        <CardContent className="space-y-3">
-          <ScrollArea className="h-[62vh] min-h-[400px] rounded-lg border border-border/50 bg-background/40">
-            <div className="p-4 space-y-4">
-              {messages.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
-                    <Bot className="h-6 w-6 text-primary" />
-                  </div>
-                  <p className="text-sm font-medium mb-1">Ask the agent to do something</p>
-                  <p className="text-xs text-muted-foreground mb-5 max-w-sm">
-                    It can list your apps, read and update store metadata, translate content, and more — with your approval on every write.
-                  </p>
-                  <div className="flex flex-col gap-2 w-full max-w-md">
-                    {SUGGESTIONS.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setInput(s)}
-                        className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-4 text-[11px] text-muted-foreground">
-                    Type <code className="rounded bg-muted px-1 py-0.5 font-mono">/help</code> for commands
-                    ({AGENT_COMMANDS.map((c) => c.name).join(', ')}).
-                  </p>
-                </div>
-              )}
-
-              {messages.map((m, i) => {
-                if (m.role === 'note') {
-                  return (
-                    <div key={i} className="flex justify-center">
-                      <div
-                        className={`w-full max-w-[92%] rounded-lg border px-3 py-2 text-xs ${
-                          m.tone === 'error'
-                            ? 'border-destructive/40 bg-destructive/5 text-destructive'
-                            : 'border-border/60 bg-muted/30 text-muted-foreground'
-                        }`}
-                      >
-                        {m.command && (
-                          <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] text-foreground/70">
-                            <Terminal className="h-3 w-3" />
-                            {m.command}
-                          </div>
-                        )}
-                        <Markdown>{m.content}</Markdown>
-                      </div>
-                    </div>
-                  )
-                }
-                if (m.role === 'user') {
-                  return (
-                    <div key={i} className="flex justify-end">
-                      <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground whitespace-pre-wrap break-words">
-                        {m.content}
-                      </div>
-                    </div>
-                  )
-                }
-                if (m.role === 'assistant') {
-                  const unconfigured = m.configNeeded || detectUnconfiguredService(m.content, { ascReady, gpReady, appCompeteReady })
-                  return (
-                    <div key={i} className="flex gap-3">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-0.5">
-                        <Bot className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-2">
-                        {m.content && (
-                          <div className="rounded-2xl rounded-tl-sm bg-muted/50 px-4 py-2.5 text-sm break-words max-w-[90%]">
-                            <Markdown>{m.content}</Markdown>
-                          </div>
-                        )}
-                        {unconfigured && !servicesWithConfigError.has(unconfigured) && (
-                          <ConfigNeededCard
-                            service={unconfigured}
-                            ready={serviceReady(unconfigured)}
-                            unlockable={unconfigured === 'asc' && ascUnlockable}
-                            onUnlockKey={handleUnlockKey}
-                            onRetry={handleRetry}
-                          />
-                        )}
-                        {(m.toolCalls || []).map((call) => (
-                          <ToolCallCard
-                            key={call.id}
-                            call={call}
-                            result={resultsByCallId[call.id]}
-                            isAwaitingApproval={pendingApproval?.call?.id === call.id}
-                            isRunning={isRunning}
-                            writeTool={WRITE_TOOL_NAMES.has(call.name)}
-                            ascCredentials={ascCredentials}
-                            ascUnlockable={ascUnlockable}
-                            onUnlockKey={handleUnlockKey}
-                            serviceReady={serviceReady}
-                            onRetry={handleRetry}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )
-                }
-                return null // tool results are rendered inside their ToolCallCard
-              })}
-
-              {isRunning && !pendingApproval && (
-                <div className="flex items-center gap-2 pl-10 text-xs text-muted-foreground">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Thinking…
-                </div>
-              )}
-              <div ref={bottomRef} />
-            </div>
-          </ScrollArea>
-
-          {pendingApproval && (
-            <ApprovalPanel
-              pending={pendingApproval}
-              alwaysAllow={alwaysAllow}
-              onDecide={handleApproval}
-              prettyJson={prettyJson}
-            />
-          )}
-
-          <div className="rounded-xl border border-border/60 bg-muted/30 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
-            {commandMatches.length > 0 && (
-              <div className="border-b border-border/60 p-1">
-                {commandMatches.map((c, idx) => (
-                  <button
-                    key={c.name}
-                    type="button"
-                    onClick={() => completeCommand(c)}
-                    className={`flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted ${idx === 0 ? 'bg-muted/60' : ''}`}
-                  >
-                    <span className="font-mono text-xs">{c.usage}</span>
-                    <span className="truncate text-[11px] text-muted-foreground">{c.description}</span>
-                    {idx === 0 && (
-                      <kbd className="ml-auto shrink-0 rounded border border-border px-1 text-[9px] leading-[14px] text-muted-foreground">Tab</kbd>
-                    )}
-                  </button>
-                ))}
+                <p className="mt-4 text-[11px] text-muted-foreground">
+                  Type <code className="rounded bg-muted px-1 py-0.5 font-mono">/help</code> for commands
+                  ({AGENT_COMMANDS.map((c) => c.name).join(', ')}).
+                </p>
               </div>
             )}
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder='e.g. "Translate the description of my latest version to Spanish and update it" — or / for commands'
-              rows={2}
-              className="resize-none border-0 bg-transparent shadow-none text-sm focus-visible:ring-0 min-h-[64px]"
-              disabled={isRunning}
-            />
-            <div className="flex items-center justify-between gap-2 px-3 pb-2.5">
-              <span className="text-[11px] text-muted-foreground">
-                Enter to send · Shift+Enter for a new line · <span className="font-mono">/</span> for commands
-              </span>
-              {isRunning ? (
-                <Button variant="destructive" size="sm" className="h-8" onClick={handleStop}>
-                  <Square className="h-3.5 w-3.5 mr-1.5" />
-                  Stop
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  className="h-8"
-                  onClick={handleSend}
-                  disabled={!input.trim() || !agentConfig.apiKey}
-                >
-                  <Send className="h-3.5 w-3.5 mr-1.5" />
-                  Send
-                </Button>
+
+            {messages.map((m, i) => {
+              if (m.role === 'note') {
+                return (
+                  <div key={i} className="flex justify-center">
+                    <div
+                      className={`w-full max-w-[92%] rounded-lg border px-3 py-2 text-xs ${
+                        m.tone === 'error'
+                          ? 'border-destructive/40 bg-destructive/5 text-destructive'
+                          : 'border-border/60 bg-muted/30 text-muted-foreground'
+                      }`}
+                    >
+                      {m.command && (
+                        <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] text-foreground/70">
+                          <Terminal className="h-3 w-3" />
+                          {m.command}
+                        </div>
+                      )}
+                      <Markdown>{m.content}</Markdown>
+                    </div>
+                  </div>
+                )
+              }
+              if (m.role === 'user') {
+                return (
+                  <div key={i} className="flex justify-end">
+                    <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground whitespace-pre-wrap break-words">
+                      {m.content}
+                    </div>
+                  </div>
+                )
+              }
+              if (m.role === 'assistant') {
+                const unconfigured = m.configNeeded || detectUnconfiguredService(m.content, { ascReady, gpReady, appCompeteReady })
+                return (
+                  <div key={i} className="flex gap-3">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-0.5">
+                      <Bot className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-2">
+                      {m.content && (
+                        <div className="rounded-2xl rounded-tl-sm bg-muted/50 px-4 py-2.5 text-sm break-words max-w-[90%]">
+                          <Markdown>{m.content}</Markdown>
+                        </div>
+                      )}
+                      {unconfigured && !servicesWithConfigError.has(unconfigured) && (
+                        <ConfigNeededCard
+                          service={unconfigured}
+                          ready={serviceReady(unconfigured)}
+                          unlockable={unconfigured === 'asc' && ascUnlockable}
+                          onUnlockKey={handleUnlockKey}
+                          onRetry={handleRetry}
+                        />
+                      )}
+                      {(m.toolCalls || []).map((call) => (
+                        <ToolCallCard
+                          key={call.id}
+                          call={call}
+                          result={resultsByCallId[call.id]}
+                          isAwaitingApproval={pendingApproval?.call?.id === call.id}
+                          isRunning={isRunning}
+                          writeTool={WRITE_TOOL_NAMES.has(call.name)}
+                          ascCredentials={ascCredentials}
+                          ascUnlockable={ascUnlockable}
+                          onUnlockKey={handleUnlockKey}
+                          serviceReady={serviceReady}
+                          onRetry={handleRetry}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )
+              }
+              return null // tool results are rendered inside their ToolCallCard
+            })}
+
+            {isRunning && !pendingApproval && (
+              <div className="flex items-center gap-2 pl-10 text-xs text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Thinking…
+              </div>
+            )}
+            <div ref={bottomRef} />
+          </div>
+        </div>
+
+        <div className="shrink-0 space-y-2 border-t border-border/60 bg-card/80 p-3">
+          <div className="mx-auto w-full max-w-3xl space-y-2">
+            {pendingApproval && (
+              <div className="max-h-[45vh] overflow-y-auto">
+                <ApprovalPanel
+                  pending={pendingApproval}
+                  alwaysAllow={alwaysAllow}
+                  onDecide={handleApproval}
+                  prettyJson={prettyJson}
+                />
+              </div>
+            )}
+
+            <div className="rounded-xl border border-border/60 bg-muted/30 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+              {commandMatches.length > 0 && (
+                <div className="border-b border-border/60 p-1">
+                  {commandMatches.map((c, idx) => (
+                    <button
+                      key={c.name}
+                      type="button"
+                      onClick={() => completeCommand(c)}
+                      className={`flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted ${idx === 0 ? 'bg-muted/60' : ''}`}
+                    >
+                      <span className="font-mono text-xs">{c.usage}</span>
+                      <span className="truncate text-[11px] text-muted-foreground">{c.description}</span>
+                      {idx === 0 && (
+                        <kbd className="ml-auto shrink-0 rounded border border-border px-1 text-[9px] leading-[14px] text-muted-foreground">Tab</kbd>
+                      )}
+                    </button>
+                  ))}
+                </div>
               )}
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder='e.g. "Translate the description of my latest version to Spanish and update it" — or / for commands'
+                rows={1}
+                className="max-h-40 min-h-[44px] resize-none border-0 bg-transparent shadow-none text-sm focus-visible:ring-0"
+                disabled={isRunning}
+              />
+              <div className="flex items-center justify-between gap-2 px-3 pb-2.5">
+                <span className="text-[11px] text-muted-foreground">
+                  Enter to send · Shift+Enter for a new line · <span className="font-mono">/</span> for commands
+                </span>
+                {isRunning ? (
+                  <Button variant="destructive" size="sm" className="h-8" onClick={handleStop}>
+                    <Square className="h-3.5 w-3.5 mr-1.5" />
+                    Stop
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="h-8"
+                    onClick={handleSend}
+                    disabled={!input.trim() || !agentConfig.apiKey}
+                  >
+                    <Send className="h-3.5 w-3.5 mr-1.5" />
+                    Send
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-          <p className="text-[11px] text-muted-foreground">
-            {autoApprove
-              ? 'Write actions (updates to App Store Connect / Google Play) run automatically — auto-approve is ON.'
-              : alwaysAllow.size > 0
-                ? `Write actions require your approval — except ${alwaysAllow.size} tool${alwaysAllow.size > 1 ? 's' : ''} you always allowed (${[...alwaysAllow].sort().join(', ')}).`
-                : 'Write actions (updates to App Store Connect / Google Play) require your approval before they run. Approve once, always, or the whole turn at a time.'}
-          </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

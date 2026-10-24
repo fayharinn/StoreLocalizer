@@ -37,7 +37,7 @@ export default function LocalizationsCard({
   editedAppInfo,
 }) {
   return (
-    <Card id="asc-localizations" className="border-border/50 shadow-sm scroll-mt-6">
+    <Card id="asc-localizations" className="border-border/50 shadow-sm scroll-mt-44">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

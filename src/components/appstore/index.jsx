@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
@@ -17,8 +16,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useCallback } from 'react'
-import { CheckCircle2, AlertCircle, Clock, Terminal, Image, ExternalLink } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Image, ExternalLink, FileText, Images, Megaphone, Terminal } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 import useAppStoreConnect from '@/hooks/useAppStoreConnect'
 import useAppEvents from '@/hooks/useAppEvents'
@@ -75,6 +74,80 @@ import AssetLibraryCard from './AssetLibraryCard'
 import ProductPageMediaCard from './ProductPageMediaCard'
 import CustomProductPagesCard from './CustomProductPagesCard'
 import ProductPageOptimizationCard from './ProductPageOptimizationCard'
+import ActivityLogCard from './ActivityLogCard'
+
+const ASC_TAB_KEY = 'asc-localizer-active-tab'
+
+const ASC_TABS = [
+  { value: 'listing', label: 'Listing', icon: FileText },
+  { value: 'media', label: 'Media', icon: Images },
+  { value: 'growth', label: 'Growth', icon: Megaphone },
+  { value: 'activity', label: 'Activity', icon: Terminal },
+]
+
+// Which tab hosts each card, so the sidebar quick nav can open the right one first
+const SECTION_TABS = {
+  'asc-localizations': 'listing',
+  'asc-aso-keywords': 'listing',
+  'asc-translation': 'listing',
+  'asc-media': 'media',
+  'asc-screenshots': 'media',
+  'asc-asset-library': 'media',
+  'asc-events': 'growth',
+  'asc-cpp': 'growth',
+  'asc-ppo': 'growth',
+  'asc-logs': 'activity',
+}
+
+function useAscTab() {
+  const [tab, setTab] = useState(() => {
+    try {
+      const saved = localStorage.getItem(ASC_TAB_KEY)
+      return ASC_TABS.some(t => t.value === saved) ? saved : 'listing'
+    } catch {
+      return 'listing'
+    }
+  })
+  const change = useCallback((next) => {
+    setTab(next)
+    try { localStorage.setItem(ASC_TAB_KEY, next) } catch { /* storage unavailable */ }
+  }, [])
+  return [tab, change]
+}
+
+// Tabs mount the first time they are opened and stay mounted afterwards, so
+// switching back keeps each card's local state without every card fetching at once
+function useVisitedTabs(activeTab) {
+  const [visited, setVisited] = useState(() => new Set([activeTab]))
+  if (!visited.has(activeTab)) setVisited(new Set([...visited, activeTab]))
+  return visited
+}
+
+function useAscSectionNavigation(setTab) {
+  useEffect(() => {
+    const onNavigate = (e) => {
+      const id = e.detail
+      const tab = SECTION_TABS[id]
+      if (tab) setTab(tab)
+      // wait for the target tab to mount before scrolling to its card
+      setTimeout(() => {
+        const el = document.getElementById(id)
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+        else if (!tab) window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, tab ? 120 : 0)
+    }
+    window.addEventListener('asc:navigate', onNavigate)
+    return () => window.removeEventListener('asc:navigate', onNavigate)
+  }, [setTab])
+}
+
+function TabEmpty({ text }) {
+  return (
+    <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
+      {text}
+    </div>
+  )
+}
 
 export default function AppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig, appCompeteConfig }) {
   // Each section has its own set of per-field prompts — different char limits, different content.
@@ -159,8 +232,13 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
     })
   }, [setScreenshotPreview])
 
+  const [activeTab, setActiveTab] = useAscTab()
+  const visitedTabs = useVisitedTabs(activeTab)
+  useAscSectionNavigation(setActiveTab)
+  const hasLocales = Boolean(hook.selectedVersion) && hook.versionLocalizations.length > 0
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <HeroSection
         apps={hook.apps}
         selectedVersion={hook.selectedVersion}
@@ -185,231 +263,221 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
         formatTimeLeft={hook.formatTimeLeft}
       />
 
+      {hook.apps.length === 0 && hook.logs.length > 0 && <ActivityLogCard logs={hook.logs} className="h-48" />}
+
       {hook.apps.length > 0 && (
-        <AppVersionSelector
-          apps={hook.apps}
-          selectedApp={hook.selectedApp}
-          appPickerOpen={hook.appPickerOpen}
-          setAppPickerOpen={hook.setAppPickerOpen}
-          isLoadingApps={hook.isLoadingApps}
-          versions={hook.versions}
-          selectedVersion={hook.selectedVersion}
-          isLoadingVersions={hook.isLoadingVersions}
-          handleAppSelect={hook.handleAppSelect}
-          handleVersionSelect={hook.handleVersionSelect}
-          setCreateVersionDialog={hook.setCreateVersionDialog}
-        />
-      )}
-
-      {hook.selectedVersion && (
-        <LocalizationsCard
-          selectedVersion={hook.selectedVersion}
-          versionLocalizations={hook.versionLocalizations}
-          appInfoLocalizations={hook.appInfoLocalizations}
-          isLoadingLocalizations={hook.isLoadingLocalizations}
-          localesNeedingCopy={hook.localesNeedingCopy}
-          hasPreviousVersion={hook.hasPreviousVersion}
-          isCopyingFromPrevious={hook.isCopyingFromPrevious}
-          handleCopyFromPreviousVersion={hook.handleCopyFromPreviousVersion}
-          handleEditLocalization={hook.handleEditLocalization}
-          isCopyingSupportUrl={hook.isCopyingSupportUrl}
-          handleCopySupportUrl={hook.handleCopySupportUrl}
-          isCopyingMarketingUrl={hook.isCopyingMarketingUrl}
-          handleCopyMarketingUrl={hook.handleCopyMarketingUrl}
-          sourceLocale={hook.sourceLocale}
-          hasAppInfoChanges={hook.hasAppInfoChanges}
-          isSavingAppInfo={hook.isSavingAppInfo}
-          handleSaveAllAppInfo={hook.handleSaveAllAppInfo}
-          editedFieldsCount={hook.editedFieldsCount}
-          isTranslatingAppInfo={hook.isTranslatingAppInfo}
-          currentAiApiKey={hook.currentAiApiKey}
-          appInfoProtectedWords={hook.appInfoProtectedWords}
-          setAppInfoProtectedWords={hook.setAppInfoProtectedWords}
-          handleTranslateAppInfo={hook.handleTranslateAppInfo}
-          handleAppInfoChange={hook.handleAppInfoChange}
-          getAppInfoValue={hook.getAppInfoValue}
-          isFieldEdited={hook.isFieldEdited}
-          editedAppInfo={hook.editedAppInfo}
-        />
-      )}
-
-      {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
-        <ASOKeywordsCard
-          versionLocalizations={hook.versionLocalizations}
-          generatingKeywordsFor={hook.generatingKeywordsFor}
-          asoExpandedLocales={hook.asoExpandedLocales}
-          editingKeywordsFor={hook.editingKeywordsFor}
-          editedKeywords={hook.editedKeywords}
-          setEditedKeywords={hook.setEditedKeywords}
-          isSavingKeywords={hook.isSavingKeywords}
-          currentAiApiKey={hook.currentAiApiKey}
-          astroEnabled={astroConfig?.enabled && isLocalEnvironment()}
-          astroSuggestions={hook.astroSuggestions}
-          onAstroSuggestionsClose={() => hook.setAstroSuggestions(null)}
-          onApplyAstroSuggestions={hook.handleApplyAstroSuggestions}
-          handleGenerateASOKeywords={hook.handleGenerateASOKeywords}
-          toggleAsoLocale={hook.toggleAsoLocale}
-          startEditingKeywords={hook.startEditingKeywords}
-          cancelEditingKeywords={hook.cancelEditingKeywords}
-          saveEditedKeywords={hook.saveEditedKeywords}
-          appCompeteEnabled={!!appCompeteConfig?.apiKey}
-          appCompeteLoadingFor={hook.appCompeteLoadingFor}
-          appCompetePicker={hook.appCompetePicker}
-          onCloseCompetitorPicker={() => hook.setAppCompetePicker(null)}
-          onPickCompetitor={hook.handlePickCompetitor}
-          onLoadCompetitors={hook.handleAppCompeteCompetitors}
-          keywordReview={hook.keywordReview}
-          onCloseKeywordReview={() => hook.setKeywordReview(null)}
-          onReviewKeywords={hook.handleReviewKeywords}
-          onTrackKeywords={hook.handleTrackKeywords}
-        />
-      )}
-
-      {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
-        <ProductPageMediaCard
-          selectedVersion={hook.selectedVersion}
-          versionLocalizations={hook.versionLocalizations}
-          media={versionMedia}
-          library={assetLibrary}
-          onPreview={handlePreviewAsset}
-        />
-      )}
-
-      {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
-        <ScreenshotsCard
-          versionLocalizations={hook.versionLocalizations}
-          screenshotsByLocale={hook.screenshotsByLocale}
-          isLoadingScreenshots={hook.isLoadingScreenshots}
-          expandedScreenshotLocales={hook.expandedScreenshotLocales}
-          handleLoadScreenshots={hook.handleLoadScreenshots}
-          toggleScreenshotLocale={hook.toggleScreenshotLocale}
-          setScreenshotPreview={hook.setScreenshotPreview}
-          upload={screenshotUpload}
-          onUpload={handleUploadScreenshots}
-        />
-      )}
-
-      {hook.selectedApp && (
-        <AssetLibraryCard
-          selectedApp={hook.selectedApp}
-          library={assetLibrary}
-          onPreview={handlePreviewAsset}
-        />
-      )}
-
-      {hook.selectedApp && (
-        <EventsCard
-          selectedApp={hook.selectedApp}
-          eventsHook={eventsHook}
-          assetLibrary={assetLibrary}
-          aiConfig={aiConfig}
-          promptIsCustom={eventPrompt.anyCustom}
-          onEditPrompt={() => eventPrompt.setPromptDialog({ open: true, field: 'name' })}
-          onPreviewAsset={handlePreviewAsset}
-        />
-      )}
-
-      {hook.selectedApp && (
-        <CustomProductPagesCard
-          selectedApp={hook.selectedApp}
-          selectedVersion={hook.selectedVersion}
-          cppHook={cppHook}
-          assetLibrary={assetLibrary}
-          defaultLocale={hook.sourceLocale}
-          promptIsCustom={cppPrompt.anyCustom}
-          onEditPrompt={() => cppPrompt.setPromptDialog({ open: true, field: 'promotionalText' })}
-          onPreviewAsset={handlePreviewAsset}
-        />
-      )}
-
-      {hook.selectedApp && (
-        <ProductPageOptimizationCard
-          selectedApp={hook.selectedApp}
-          selectedVersion={hook.selectedVersion}
-          ppoHook={ppoHook}
-          assetLibrary={assetLibrary}
-          onPreviewAsset={handlePreviewAsset}
-        />
-      )}
-
-      {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
-        <TranslationCard
-          versionLocalizations={hook.versionLocalizations}
-          aiConfig={hook.aiConfig}
-          currentAiApiKey={hook.currentAiApiKey}
-          currentAiModel={hook.currentAiModel}
-          sourceLocale={hook.sourceLocale}
-          setSourceLocale={hook.setSourceLocale}
-          targetLocales={hook.targetLocales}
-          setTargetLocales={hook.setTargetLocales}
-          fieldsToTranslate={hook.fieldsToTranslate}
-          isTranslating={hook.isTranslating}
-          translationProgress={hook.translationProgress}
-          translationAlert={hook.translationAlert}
-          setTranslationAlert={hook.setTranslationAlert}
-          availableTargetLocales={hook.availableTargetLocales}
-          existingLocales={hook.existingLocales}
-          TRANSLATABLE_FIELDS={hook.TRANSLATABLE_FIELDS}
-          handleFieldToggle={hook.handleFieldToggle}
-          handleLocaleToggle={hook.handleLocaleToggle}
-          handleTranslate={hook.handleTranslate}
-          promptIsCustom={versionPrompt.anyCustom}
-          onEditPrompt={() => versionPrompt.setPromptDialog({ open: true, field: 'description' })}
-        />
-      )}
-
-      <Card id="asc-logs" className="border-border/50 shadow-sm scroll-mt-6">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10">
-              <Terminal className="h-5 w-5 text-slate-500" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Activity Log</CardTitle>
-              <CardDescription>Track API calls and events</CardDescription>
-            </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
+          <div className="sticky top-16 z-20 -mx-1 space-y-2 rounded-2xl border border-border/60 bg-background/90 p-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/75">
+            <AppVersionSelector
+              apps={hook.apps}
+              selectedApp={hook.selectedApp}
+              appPickerOpen={hook.appPickerOpen}
+              setAppPickerOpen={hook.setAppPickerOpen}
+              isLoadingApps={hook.isLoadingApps}
+              versions={hook.versions}
+              selectedVersion={hook.selectedVersion}
+              isLoadingVersions={hook.isLoadingVersions}
+              handleAppSelect={hook.handleAppSelect}
+              handleVersionSelect={hook.handleVersionSelect}
+              setCreateVersionDialog={hook.setCreateVersionDialog}
+            />
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-muted/60 p-1 sm:grid-cols-4">
+              {ASC_TABS.map(({ value, label, icon: Icon }) => (
+                <TabsTrigger key={value} value={value} className="h-8 gap-1.5 text-xs sm:text-sm">
+                  <Icon className="h-4 w-4" />
+                  {label}
+                  {value === 'activity' && hook.logs.length > 0 && (
+                    <span className="rounded-full bg-muted px-1.5 text-[10px] font-semibold leading-4 text-muted-foreground">{hook.logs.length}</span>
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-48 rounded-xl border border-border/50 bg-muted/20">
-            {hook.logs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Terminal className="h-8 w-8 mb-2 opacity-50" />
-                <p className="text-sm">No activity yet</p>
-              </div>
-            ) : (
-              <div className="p-4 space-y-2">
-                {hook.logs.map((log, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-start gap-3 text-sm py-1.5 px-3 rounded-lg transition-colors ${
-                      log.type === 'error' ? 'bg-red-500/10' :
-                      log.type === 'success' ? 'bg-emerald-500/10' :
-                      'hover:bg-muted/50'
-                    }`}
-                  >
-                    <span className={`mt-0.5 ${
-                      log.type === 'error' ? 'text-red-500' :
-                      log.type === 'success' ? 'text-emerald-500' :
-                      'text-muted-foreground'
-                    }`}>
-                      {log.type === 'error' ? <AlertCircle className="h-4 w-4" /> :
-                       log.type === 'success' ? <CheckCircle2 className="h-4 w-4" /> :
-                       <Clock className="h-4 w-4" />}
-                    </span>
-                    <span className="font-mono text-xs text-muted-foreground shrink-0 pt-0.5">{log.timestamp}</span>
-                    <span className={`break-all ${
-                      log.type === 'error' ? 'text-red-400' :
-                      log.type === 'success' ? 'text-emerald-400' :
-                      'text-foreground'
-                    }`}>{log.message}</span>
-                  </div>
-                ))}
-              </div>
+
+          <TabsContent value="listing" forceMount className="space-y-5 data-[state=inactive]:hidden">
+            {visitedTabs.has('listing') && (
+              <>
+              {hook.selectedVersion && (
+                <LocalizationsCard
+                  selectedVersion={hook.selectedVersion}
+                  versionLocalizations={hook.versionLocalizations}
+                  appInfoLocalizations={hook.appInfoLocalizations}
+                  isLoadingLocalizations={hook.isLoadingLocalizations}
+                  localesNeedingCopy={hook.localesNeedingCopy}
+                  hasPreviousVersion={hook.hasPreviousVersion}
+                  isCopyingFromPrevious={hook.isCopyingFromPrevious}
+                  handleCopyFromPreviousVersion={hook.handleCopyFromPreviousVersion}
+                  handleEditLocalization={hook.handleEditLocalization}
+                  isCopyingSupportUrl={hook.isCopyingSupportUrl}
+                  handleCopySupportUrl={hook.handleCopySupportUrl}
+                  isCopyingMarketingUrl={hook.isCopyingMarketingUrl}
+                  handleCopyMarketingUrl={hook.handleCopyMarketingUrl}
+                  sourceLocale={hook.sourceLocale}
+                  hasAppInfoChanges={hook.hasAppInfoChanges}
+                  isSavingAppInfo={hook.isSavingAppInfo}
+                  handleSaveAllAppInfo={hook.handleSaveAllAppInfo}
+                  editedFieldsCount={hook.editedFieldsCount}
+                  isTranslatingAppInfo={hook.isTranslatingAppInfo}
+                  currentAiApiKey={hook.currentAiApiKey}
+                  appInfoProtectedWords={hook.appInfoProtectedWords}
+                  setAppInfoProtectedWords={hook.setAppInfoProtectedWords}
+                  handleTranslateAppInfo={hook.handleTranslateAppInfo}
+                  handleAppInfoChange={hook.handleAppInfoChange}
+                  getAppInfoValue={hook.getAppInfoValue}
+                  isFieldEdited={hook.isFieldEdited}
+                  editedAppInfo={hook.editedAppInfo}
+                />
+              )}
+
+              {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
+                <ASOKeywordsCard
+                  versionLocalizations={hook.versionLocalizations}
+                  generatingKeywordsFor={hook.generatingKeywordsFor}
+                  asoExpandedLocales={hook.asoExpandedLocales}
+                  editingKeywordsFor={hook.editingKeywordsFor}
+                  editedKeywords={hook.editedKeywords}
+                  setEditedKeywords={hook.setEditedKeywords}
+                  isSavingKeywords={hook.isSavingKeywords}
+                  currentAiApiKey={hook.currentAiApiKey}
+                  astroEnabled={astroConfig?.enabled && isLocalEnvironment()}
+                  astroSuggestions={hook.astroSuggestions}
+                  onAstroSuggestionsClose={() => hook.setAstroSuggestions(null)}
+                  onApplyAstroSuggestions={hook.handleApplyAstroSuggestions}
+                  handleGenerateASOKeywords={hook.handleGenerateASOKeywords}
+                  toggleAsoLocale={hook.toggleAsoLocale}
+                  startEditingKeywords={hook.startEditingKeywords}
+                  cancelEditingKeywords={hook.cancelEditingKeywords}
+                  saveEditedKeywords={hook.saveEditedKeywords}
+                  appCompeteEnabled={!!appCompeteConfig?.apiKey}
+                  appCompeteLoadingFor={hook.appCompeteLoadingFor}
+                  appCompetePicker={hook.appCompetePicker}
+                  onCloseCompetitorPicker={() => hook.setAppCompetePicker(null)}
+                  onPickCompetitor={hook.handlePickCompetitor}
+                  onLoadCompetitors={hook.handleAppCompeteCompetitors}
+                  keywordReview={hook.keywordReview}
+                  onCloseKeywordReview={() => hook.setKeywordReview(null)}
+                  onReviewKeywords={hook.handleReviewKeywords}
+                  onTrackKeywords={hook.handleTrackKeywords}
+                />
+              )}
+
+              {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
+                <TranslationCard
+                  versionLocalizations={hook.versionLocalizations}
+                  aiConfig={hook.aiConfig}
+                  currentAiApiKey={hook.currentAiApiKey}
+                  currentAiModel={hook.currentAiModel}
+                  sourceLocale={hook.sourceLocale}
+                  setSourceLocale={hook.setSourceLocale}
+                  targetLocales={hook.targetLocales}
+                  setTargetLocales={hook.setTargetLocales}
+                  fieldsToTranslate={hook.fieldsToTranslate}
+                  isTranslating={hook.isTranslating}
+                  translationProgress={hook.translationProgress}
+                  translationAlert={hook.translationAlert}
+                  setTranslationAlert={hook.setTranslationAlert}
+                  availableTargetLocales={hook.availableTargetLocales}
+                  existingLocales={hook.existingLocales}
+                  TRANSLATABLE_FIELDS={hook.TRANSLATABLE_FIELDS}
+                  handleFieldToggle={hook.handleFieldToggle}
+                  handleLocaleToggle={hook.handleLocaleToggle}
+                  handleTranslate={hook.handleTranslate}
+                  promptIsCustom={versionPrompt.anyCustom}
+                  onEditPrompt={() => versionPrompt.setPromptDialog({ open: true, field: 'description' })}
+                />
+              )}
+                {!hook.selectedVersion && <TabEmpty text="Select a version to edit its localizations." />}
+              </>
             )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
+          </TabsContent>
+
+          <TabsContent value="media" forceMount className="space-y-5 data-[state=inactive]:hidden">
+            {visitedTabs.has('media') && (
+              <>
+              {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
+                <ProductPageMediaCard
+                  selectedVersion={hook.selectedVersion}
+                  versionLocalizations={hook.versionLocalizations}
+                  media={versionMedia}
+                  library={assetLibrary}
+                  onPreview={handlePreviewAsset}
+                />
+              )}
+
+              {hook.selectedVersion && hook.versionLocalizations.length > 0 && (
+                <ScreenshotsCard
+                  versionLocalizations={hook.versionLocalizations}
+                  screenshotsByLocale={hook.screenshotsByLocale}
+                  isLoadingScreenshots={hook.isLoadingScreenshots}
+                  expandedScreenshotLocales={hook.expandedScreenshotLocales}
+                  handleLoadScreenshots={hook.handleLoadScreenshots}
+                  toggleScreenshotLocale={hook.toggleScreenshotLocale}
+                  setScreenshotPreview={hook.setScreenshotPreview}
+                  upload={screenshotUpload}
+                  onUpload={handleUploadScreenshots}
+                />
+              )}
+
+              {hook.selectedApp && (
+                <AssetLibraryCard
+                  selectedApp={hook.selectedApp}
+                  library={assetLibrary}
+                  onPreview={handlePreviewAsset}
+                />
+              )}
+                {!hasLocales && !hook.selectedApp && <TabEmpty text="Select an app to manage its media." />}
+              </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="growth" forceMount className="space-y-5 data-[state=inactive]:hidden">
+            {visitedTabs.has('growth') && (
+              <>
+              {hook.selectedApp && (
+                <EventsCard
+                  selectedApp={hook.selectedApp}
+                  eventsHook={eventsHook}
+                  assetLibrary={assetLibrary}
+                  aiConfig={aiConfig}
+                  promptIsCustom={eventPrompt.anyCustom}
+                  onEditPrompt={() => eventPrompt.setPromptDialog({ open: true, field: 'name' })}
+                  onPreviewAsset={handlePreviewAsset}
+                />
+              )}
+
+              {hook.selectedApp && (
+                <CustomProductPagesCard
+                  selectedApp={hook.selectedApp}
+                  selectedVersion={hook.selectedVersion}
+                  cppHook={cppHook}
+                  assetLibrary={assetLibrary}
+                  defaultLocale={hook.sourceLocale}
+                  promptIsCustom={cppPrompt.anyCustom}
+                  onEditPrompt={() => cppPrompt.setPromptDialog({ open: true, field: 'promotionalText' })}
+                  onPreviewAsset={handlePreviewAsset}
+                />
+              )}
+
+              {hook.selectedApp && (
+                <ProductPageOptimizationCard
+                  selectedApp={hook.selectedApp}
+                  selectedVersion={hook.selectedVersion}
+                  ppoHook={ppoHook}
+                  assetLibrary={assetLibrary}
+                  onPreviewAsset={handlePreviewAsset}
+                />
+              )}
+                {!hook.selectedApp && <TabEmpty text="Select an app to manage events and product pages." />}
+              </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="activity" forceMount className="data-[state=inactive]:hidden">
+            {visitedTabs.has('activity') && <ActivityLogCard logs={hook.logs} />}
+          </TabsContent>
+        </Tabs>
+      )}
+
 
       <AlertDialog
         open={hook.copyConfirm.open}

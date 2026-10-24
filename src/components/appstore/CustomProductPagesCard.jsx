@@ -62,7 +62,7 @@ export default function CustomProductPagesCard({
 
   return (
     <>
-      <Card id="asc-cpp" className="scroll-mt-6 border-border/50 shadow-sm">
+      <Card id="asc-cpp" className="scroll-mt-44 border-border/50 shadow-sm">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">

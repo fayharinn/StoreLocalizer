@@ -55,7 +55,7 @@ export default function EventsCard({ selectedApp, eventsHook, assetLibrary, aiCo
 
   return (
     <>
-      <Card id="asc-events" className="border-border/50 shadow-sm scroll-mt-6">
+      <Card id="asc-events" className="border-border/50 shadow-sm scroll-mt-44">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

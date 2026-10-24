@@ -76,6 +76,10 @@ const NAV_ITEMS = [
 import { encrypt, decrypt } from '@/utils/crypto'
 import { isLocalEnvironment } from '@/constants'
 
+// The App Store Connect page groups its cards in tabs, so jumping to a card means
+// switching tab first — the page listens for this event and handles both.
+const goToAscSection = (id) => window.dispatchEvent(new CustomEvent('asc:navigate', { detail: id }))
+
 const ENCRYPTED_KEY_STORAGE = 'asc-encrypted-p8-key'
 
 export function AppSidebar({
@@ -457,84 +461,84 @@ export function AppSidebar({
             {activePage === 'appstore' && (
               <div className="mt-3 ml-3 pl-3 border-l-2 border-primary/20 space-y-1 group-data-[collapsible=icon]:hidden">
                 <button
-                  onClick={() => document.getElementById('asc-connection')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-connection')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Link2 className="h-3.5 w-3.5" />
                   <span>Connection</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-app-version')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-app-version')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <AppWindow className="h-3.5 w-3.5" />
                   <span>App & Version</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-localizations')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-localizations')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Layers className="h-3.5 w-3.5" />
                   <span>Localizations</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-aso-keywords')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-aso-keywords')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <TrendingUp className="h-3.5 w-3.5" />
                   <span>ASO Keywords</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-media')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-media')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Images className="h-3.5 w-3.5" />
                   <span>Product Page Media</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-screenshots')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-screenshots')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Image className="h-3.5 w-3.5" />
                   <span>Screenshots</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-asset-library')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-asset-library')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Library className="h-3.5 w-3.5" />
                   <span>Asset Library</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-events')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-events')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <CalendarRange className="h-3.5 w-3.5" />
                   <span>In-App Events</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-cpp')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-cpp')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <PanelsTopLeft className="h-3.5 w-3.5" />
                   <span>Custom Product Pages</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-ppo')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-ppo')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <FlaskConical className="h-3.5 w-3.5" />
                   <span>Page Optimization</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-translation')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-translation')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   <span>AI Translation</span>
                 </button>
                 <button
-                  onClick={() => document.getElementById('asc-logs')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => goToAscSection('asc-logs')}
                   className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <Terminal className="h-3.5 w-3.5" />

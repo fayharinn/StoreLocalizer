@@ -113,13 +113,19 @@ function App() {
             </div>
           </header>
 
-          <main className={`flex-1 min-h-0 ${appState.activePage === 'screenshots' ? '' : 'p-6 md:p-8 lg:p-10'}`}>
+          <main className={`min-h-0 ${
+            appState.activePage === 'screenshots'
+              ? 'flex-1'
+              : appState.activePage === 'agent'
+                ? 'flex-none h-[calc(100svh-3.5rem)] md:h-[calc(100svh-4.5rem)] overflow-hidden p-3 md:p-4'
+                : 'flex-1 p-4 md:p-6 lg:p-8'
+          }`}>
             <div className={`mx-auto ${
               appState.activePage === 'screenshots'
                 ? 'w-full max-w-none h-full'
                 : appState.activePage === 'agent'
-                  ? 'w-full max-w-none space-y-8'
-                  : 'max-w-6xl space-y-8'
+                  ? 'w-full max-w-none h-full'
+                  : 'max-w-7xl space-y-6'
             }`}>
               {appState.activePage === 'appstore' && (
                 <Suspense fallback={<PageLoader />}>

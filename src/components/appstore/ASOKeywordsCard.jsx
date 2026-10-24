@@ -39,7 +39,7 @@ export default function ASOKeywordsCard({
 }) {
   return (
   <>
-    <Card id="asc-aso-keywords" className="border-border/50 shadow-sm scroll-mt-6">
+    <Card id="asc-aso-keywords" className="border-border/50 shadow-sm scroll-mt-44">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg">

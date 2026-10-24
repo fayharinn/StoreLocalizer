@@ -51,7 +51,7 @@ export default function AssetLibraryCard({ selectedApp, library, onPreview }) {
 
   return (
     <>
-      <Card id="asc-asset-library" className="scroll-mt-6 border-border/50 shadow-sm">
+      <Card id="asc-asset-library" className="scroll-mt-44 border-border/50 shadow-sm">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
