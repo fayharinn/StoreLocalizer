@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
-import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Images, Library, CalendarRange, PanelsTopLeft, FlaskConical, Moon, Sun, Monitor, DollarSign, Play, Loader2, Search, Bot } from 'lucide-react'
+import { FileText, Globe, ChevronDown, Key, Cpu, Trash2, ExternalLink, Lock, Unlock, Save, Languages, Store, Sparkles, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Images, Library, CalendarRange, PanelsTopLeft, FlaskConical, Moon, Sun, Monitor, DollarSign, Play, Loader2, Search, Bot, Download } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 import {
   Sidebar,
@@ -74,6 +74,7 @@ const NAV_ITEMS = [
   { id: 'agent', label: 'Agent', icon: Bot, tooltip: 'AI Agent — chat with function calling' },
 ]
 import { encrypt, decrypt } from '@/utils/crypto'
+import { downloadTextFile, serviceAccountFilename } from '@/utils/downloadFile'
 import { isLocalEnvironment } from '@/constants'
 
 // The App Store Connect page groups its cards in tabs, so jumping to a card means
@@ -333,6 +334,21 @@ export function AppSidebar({
     setKeyPassword('')
     setPasswordMode('')
     setKeyError('')
+  }
+
+  // Export the decrypted credentials currently held in memory as a plain file
+  const handleExportPrivateKey = () => {
+    if (!ascCredentials.privateKey) return
+    const name = ascCredentials.keyId ? `AuthKey_${ascCredentials.keyId}.p8` : 'AuthKey.p8'
+    downloadTextFile(name, ascCredentials.privateKey)
+    toast.success(`Exported ${name}`, { description: 'The file is not encrypted — store it somewhere safe.' })
+  }
+
+  const handleExportServiceAccount = () => {
+    if (!gpCredentials?.serviceAccountJson) return
+    const name = serviceAccountFilename(gpCredentials.serviceAccountJson)
+    downloadTextFile(name, gpCredentials.serviceAccountJson, 'application/json')
+    toast.success(`Exported ${name}`, { description: 'The file is not encrypted — store it somewhere safe.' })
   }
 
   // Google Play: Save service account encrypted with password
@@ -1001,6 +1017,18 @@ export function AppSidebar({
                         {hasStoredKey ? 'Change Password' : 'Save Encrypted'}
                       </Button>
                     )}
+                    {ascCredentials.privateKey && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs gap-1.5"
+                        onClick={handleExportPrivateKey}
+                        title="Download the decrypted .p8 key"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        Export
+                      </Button>
+                    )}
                     {hasStoredKey && !ascCredentials.privateKey && (
                       <Button
                         variant="outline"
@@ -1243,6 +1271,18 @@ export function AppSidebar({
                     >
                       <Save className="h-3.5 w-3.5 mr-1.5" />
                       {hasStoredGpKey ? 'Change Password' : 'Save Encrypted'}
+                    </Button>
+                  )}
+                  {gpCredentials?.serviceAccountJson && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleExportServiceAccount}
+                      className="h-8 text-xs"
+                      title="Download the decrypted service account JSON"
+                    >
+                      <Download className="h-3.5 w-3.5 mr-1.5" />
+                      Export
                     </Button>
                   )}
                   {hasStoredGpKey && !gpCredentials?.serviceAccountJson && (
