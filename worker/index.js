@@ -79,8 +79,8 @@ export default {
     let targetUrl
 
     // Route to appropriate API based on path
-    if (path.startsWith('/androidpublisher/')) {
-      // Google Play API
+    if (path.startsWith('/androidpublisher/') || path.startsWith('/upload/androidpublisher/')) {
+      // Google Play API (including the /upload/ root used for listing images)
       targetUrl = `${GP_API_BASE}${path}${url.search}`
     } else if (path.startsWith('/appcompete/')) {
       // AppCompete MCP (Rank Tracker / ASO) — /appcompete/mcp → https://appcompete.com/api/mcp

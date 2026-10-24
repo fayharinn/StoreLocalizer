@@ -10,16 +10,12 @@ import {
   translateAllFields,
   hasValidToken,
   getTokenTimeLeft,
-  listImages,
-  uploadImage,
-  deleteImage,
-  deleteAllImages,
   fetchDeveloperApps,
   GP_LOCALES,
-  GP_IMAGE_TYPES,
 } from '@/services/googlePlayService'
 import { PROVIDERS } from '@/services/translationService'
 import { decrypt } from '@/utils/crypto'
+import useGooglePlayImages from '@/hooks/useGooglePlayImages'
 
 const ENCRYPTED_GP_KEY_STORAGE = 'gp-encrypted-service-account'
 
@@ -78,11 +74,6 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     errorCount: 0,
   })
 
-  const [selectedImageLocale, setSelectedImageLocale] = useState('')
-  const [selectedImageType, setSelectedImageType] = useState('phoneScreenshots')
-  const [images, setImages] = useState([])
-  const [isLoadingImages, setIsLoadingImages] = useState(false)
-  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [fullscreenImage, setFullscreenImage] = useState(null)
 
   const [logs, setLogs] = useState([])
@@ -101,6 +92,14 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     if (type === 'error') toast.error(message)
     else if (type === 'success') toast.success(message)
   }, [])
+
+  const media = useGooglePlayImages({
+    credentials,
+    packageName: packageName.trim(),
+    editId,
+    listings,
+    log: addLog,
+  })
 
   const handleDecryptServiceAccount = async () => {
     if (!decryptPassword) {
@@ -386,65 +385,6 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     })
   }
 
-  const loadImages = async () => {
-    if (!selectedImageLocale || !selectedImageType) return
-
-    setIsLoadingImages(true)
-    try {
-      const imageList = await listImages(credentials, packageName.trim(), editId, selectedImageLocale, selectedImageType)
-      setImages(imageList)
-      addLog(`Loaded ${imageList.length} ${selectedImageType} for ${selectedImageLocale}`, 'success')
-    } catch (error) {
-      addLog(`Error loading images: ${error.message}`, 'error')
-      setImages([])
-    }
-    setIsLoadingImages(false)
-  }
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      addLog('Please select an image file', 'error')
-      return
-    }
-
-    setIsUploadingImage(true)
-    try {
-      const arrayBuffer = await file.arrayBuffer()
-      await uploadImage(credentials, packageName.trim(), editId, selectedImageLocale, selectedImageType, arrayBuffer)
-      addLog(`Uploaded ${file.name} to ${selectedImageLocale}/${selectedImageType}`, 'success')
-      await loadImages()
-    } catch (error) {
-      addLog(`Upload failed: ${error.message}`, 'error')
-    }
-    setIsUploadingImage(false)
-    e.target.value = ''
-  }
-
-  const handleDeleteImage = async (imageId) => {
-    try {
-      await deleteImage(credentials, packageName.trim(), editId, selectedImageLocale, selectedImageType, imageId)
-      addLog(`Deleted image ${imageId}`, 'success')
-      await loadImages()
-    } catch (error) {
-      addLog(`Delete failed: ${error.message}`, 'error')
-    }
-  }
-
-  const handleDeleteAllImages = async () => {
-    if (!confirm(`Delete all ${GP_IMAGE_TYPES[selectedImageType]?.name} for ${selectedImageLocale}?`)) return
-
-    try {
-      await deleteAllImages(credentials, packageName.trim(), editId, selectedImageLocale, selectedImageType)
-      addLog(`Deleted all ${selectedImageType} for ${selectedImageLocale}`, 'success')
-      setImages([])
-    } catch (error) {
-      addLog(`Delete all failed: ${error.message}`, 'error')
-    }
-  }
-
   const handleSaveEdit = async () => {
     if (!editDialog.listing) return
 
@@ -496,14 +436,7 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     editDialog,
     setEditDialog,
     translationAlert,
-    selectedImageLocale,
-    setSelectedImageLocale,
-    selectedImageType,
-    setSelectedImageType,
-    images,
-    setImages,
-    isLoadingImages,
-    isUploadingImage,
+    media,
     fullscreenImage,
     setFullscreenImage,
     logs,
@@ -526,10 +459,6 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     handleFieldToggle,
     handleTranslate,
     handleEditListing,
-    loadImages,
-    handleImageUpload,
-    handleDeleteImage,
-    handleDeleteAllImages,
     handleSaveEdit,
     existingLocales,
     availableTargetLocales,

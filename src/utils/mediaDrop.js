@@ -1,6 +1,6 @@
 import { normalizeLocaleCode } from '@/services/appStoreConnectService'
 
-async function readDirectoryRecursive(dirEntry, path = '') {
+export async function readDirectoryRecursive(dirEntry, path = '') {
   const files = []
   const reader = dirEntry.createReader()
 

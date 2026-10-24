@@ -62,19 +62,7 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
 
       {hook.listings.length > 0 && (
         <ImagesCard
-          existingLocales={hook.existingLocales}
-          selectedImageLocale={hook.selectedImageLocale}
-          setSelectedImageLocale={hook.setSelectedImageLocale}
-          selectedImageType={hook.selectedImageType}
-          setSelectedImageType={hook.setSelectedImageType}
-          images={hook.images}
-          setImages={hook.setImages}
-          isLoadingImages={hook.isLoadingImages}
-          isUploadingImage={hook.isUploadingImage}
-          loadImages={hook.loadImages}
-          handleImageUpload={hook.handleImageUpload}
-          handleDeleteImage={hook.handleDeleteImage}
-          handleDeleteAllImages={hook.handleDeleteAllImages}
+          media={hook.media}
           setFullscreenImage={hook.setFullscreenImage}
         />
       )}

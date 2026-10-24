@@ -116,6 +116,13 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/googleplay/, ''),
         secure: true,
       },
+      // Media uploads (listing images) use a separate /upload/ root on the same host
+      '/api/googleplay/upload/androidpublisher': {
+        target: 'https://androidpublisher.googleapis.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/googleplay/, ''),
+        secure: true,
+      },
       '/api/itunes': {
         target: 'https://itunes.apple.com',
         changeOrigin: true,

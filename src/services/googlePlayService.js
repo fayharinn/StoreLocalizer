@@ -8,6 +8,11 @@ const BASE_URL = import.meta.env.VITE_GP_PROXY_URL
   ? `${import.meta.env.VITE_GP_PROXY_URL}/androidpublisher/v3`
   : '/api/googleplay/androidpublisher/v3'
 
+// Media uploads live under a separate /upload/ root on the same API host
+const UPLOAD_URL = import.meta.env.VITE_GP_PROXY_URL
+  ? `${import.meta.env.VITE_GP_PROXY_URL}/upload/androidpublisher/v3`
+  : '/api/googleplay/upload/androidpublisher/v3'
+
 // Google Play supported locales with display info
 export const GP_LOCALES = [
   { code: 'en-US', name: 'English (US)', flag: '🇺🇸' },
@@ -408,18 +413,19 @@ export async function listImages(credentials, packageName, editId, language, ima
 }
 
 /**
- * Upload an image
+ * Upload an image (media upload — goes through the /upload/ root, not the JSON API root).
+ * `imageData` is a Blob/File/ArrayBuffer; `contentType` must be image/png or image/jpeg.
  */
-export async function uploadImage(credentials, packageName, editId, language, imageType, imageData) {
+export async function uploadImage(credentials, packageName, editId, language, imageType, imageData, contentType = 'image/png') {
   const token = await generateAccessToken(credentials.serviceAccountJson)
-  
-  const url = `${BASE_URL}/applications/${packageName}/edits/${editId}/listings/${language}/${imageType}`
-  
+
+  const url = `${UPLOAD_URL}/applications/${packageName}/edits/${editId}/listings/${language}/${imageType}?uploadType=media`
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'image/png'
+      'Content-Type': contentType,
     },
     body: imageData
   })
@@ -429,7 +435,8 @@ export async function uploadImage(credentials, packageName, editId, language, im
     throw new Error(error.error?.message || `Upload failed: ${response.status}`)
   }
 
-  return await response.json()
+  const data = await response.json()
+  return data.image || data
 }
 
 /**
@@ -456,16 +463,123 @@ export async function deleteAllImages(credentials, packageName, editId, language
   )
 }
 
-// Image types supported by Google Play
+// Image types supported by Google Play.
+// `spec` is what the Play Console documents for the type: accepted dimensions, file size and
+// how many images a listing holds. `minToPublish` only matters when releasing, not when uploading.
+const MB = 1024 * 1024
+const SCREENSHOT_SPEC = { minSide: 320, maxSide: 3840, maxRatio: 2, maxBytes: 8 * MB }
+
 export const GP_IMAGE_TYPES = {
-  'phoneScreenshots': { name: 'Phone Screenshots', max: 8 },
-  'sevenInchScreenshots': { name: '7" Tablet Screenshots', max: 8 },
-  'tenInchScreenshots': { name: '10" Tablet Screenshots', max: 8 },
-  'tvScreenshots': { name: 'TV Screenshots', max: 8 },
-  'wearScreenshots': { name: 'Wear OS Screenshots', max: 8 },
-  'icon': { name: 'App Icon', max: 1 },
-  'featureGraphic': { name: 'Feature Graphic', max: 1 },
-  'tvBanner': { name: 'TV Banner', max: 1 },
+  'phoneScreenshots': { name: 'Phone Screenshots', short: 'Phone', max: 8, minToPublish: 2, spec: SCREENSHOT_SPEC,
+    aliases: ['phone', 'phones', 'phonescreenshots', 'phone-screenshots'] },
+  'sevenInchScreenshots': { name: '7" Tablet Screenshots', short: '7" tablet', max: 8, minToPublish: 1, spec: SCREENSHOT_SPEC,
+    aliases: ['7inch', '7-inch', '7in', 'seveninch', 'seveninchscreenshots', 'tablet7', 'tablet-7', 'tablet7inch'] },
+  'tenInchScreenshots': { name: '10" Tablet Screenshots', short: '10" tablet', max: 8, minToPublish: 1, spec: SCREENSHOT_SPEC,
+    aliases: ['10inch', '10-inch', '10in', 'teninch', 'teninchscreenshots', 'tablet10', 'tablet-10', 'tablet10inch'] },
+  'tvScreenshots': { name: 'TV Screenshots', short: 'TV', max: 8, minToPublish: 1,
+    spec: { minWidth: 1920, minHeight: 1080, maxSide: 3840, ratio: 16 / 9, maxBytes: 8 * MB },
+    aliases: ['tv', 'tvscreenshots', 'tv-screenshots'] },
+  'wearScreenshots': { name: 'Wear OS Screenshots', short: 'Wear OS', max: 8, minToPublish: 1,
+    spec: { minSide: 384, maxSide: 3840, square: true, maxBytes: 8 * MB },
+    aliases: ['wear', 'wearos', 'wear-os', 'watch', 'wearscreenshots'] },
+  'icon': { name: 'App Icon', short: 'Icon', max: 1, minToPublish: 1,
+    spec: { exact: [512, 512], maxBytes: 1 * MB, formats: ['image/png'] },
+    aliases: ['icon', 'appicon', 'app-icon', 'hiresicon'] },
+  'featureGraphic': { name: 'Feature Graphic', short: 'Feature graphic', max: 1, minToPublish: 1,
+    spec: { exact: [1024, 500], maxBytes: 15 * MB },
+    aliases: ['featuregraphic', 'feature-graphic', 'feature'] },
+  'tvBanner': { name: 'TV Banner', short: 'TV banner', max: 1, minToPublish: 1,
+    spec: { exact: [1280, 720], maxBytes: 15 * MB },
+    aliases: ['tvbanner', 'tv-banner'] },
+}
+
+export const GP_IMAGE_FORMATS = ['image/png', 'image/jpeg']
+
+// Resolve a folder / file name ("phone", "7-inch", "featureGraphic.png") to a GP image type
+export function resolveImageType(name) {
+  const key = String(name || '').replace(/\.[a-z0-9]+$/i, '').trim().toLowerCase().replace(/[\s_]+/g, '-')
+  if (!key) return null
+  for (const [type, info] of Object.entries(GP_IMAGE_TYPES)) {
+    if (type.toLowerCase() === key || info.aliases.includes(key) || info.aliases.includes(key.replace(/-/g, ''))) return type
+  }
+  return null
+}
+
+// Human description of the rules of a type, for the UI
+export function describeImageSpec(imageType) {
+  const info = GP_IMAGE_TYPES[imageType]
+  if (!info) return ''
+  const { spec } = info
+  const parts = []
+  if (spec.exact) parts.push(`${spec.exact[0]}×${spec.exact[1]} px`)
+  else if (spec.square) parts.push(`square, ${spec.minSide}–${spec.maxSide} px`)
+  else if (spec.ratio) parts.push(`16:9, min ${spec.minWidth}×${spec.minHeight} px`)
+  else parts.push(`${spec.minSide}–${spec.maxSide} px per side, longest side ≤ ${spec.maxRatio}× the shortest`)
+  parts.push((spec.formats || GP_IMAGE_FORMATS).map(f => f.replace('image/', '').toUpperCase()).join(' or '))
+  parts.push(`≤ ${Math.round(spec.maxBytes / MB)} MB`)
+  parts.push(info.max === 1 ? '1 image' : `${info.minToPublish}–${info.max} images`)
+  return parts.join(' · ')
+}
+
+// Check one image file against the rules of a type. Returns an error message or null.
+export function validateImageForType(imageType, { width, height, size, mimeType }) {
+  const info = GP_IMAGE_TYPES[imageType]
+  if (!info) return `Unknown image type "${imageType}"`
+  const { spec } = info
+  if (!(spec.formats || GP_IMAGE_FORMATS).includes(mimeType)) {
+    return `${mimeType || 'unknown format'} not accepted — use ${(spec.formats || GP_IMAGE_FORMATS).map(f => f.replace('image/', '').toUpperCase()).join(' or ')}`
+  }
+  if (size > spec.maxBytes) return `${(size / MB).toFixed(1)} MB — max ${Math.round(spec.maxBytes / MB)} MB`
+  if (!width || !height) return 'Unreadable image'
+  const got = `${width}×${height}`
+  if (spec.exact) {
+    return width === spec.exact[0] && height === spec.exact[1] ? null : `${got} — expected ${spec.exact[0]}×${spec.exact[1]}`
+  }
+  if (spec.square) {
+    if (width !== height) return `${got} — must be square`
+    return width >= spec.minSide && width <= spec.maxSide ? null : `${got} — each side must be ${spec.minSide}–${spec.maxSide} px`
+  }
+  if (spec.ratio) {
+    if (width < spec.minWidth || height < spec.minHeight) return `${got} — min ${spec.minWidth}×${spec.minHeight}`
+    if (Math.max(width, height) > spec.maxSide) return `${got} — max ${spec.maxSide} px per side`
+    return Math.abs(width / height - spec.ratio) < 0.02 ? null : `${got} — must be 16:9`
+  }
+  const shortest = Math.min(width, height)
+  const longest = Math.max(width, height)
+  if (shortest < spec.minSide || longest > spec.maxSide) return `${got} — each side must be ${spec.minSide}–${spec.maxSide} px`
+  if (longest > shortest * spec.maxRatio) return `${got} — longest side can't exceed ${spec.maxRatio}× the shortest`
+  return null
+}
+
+// Languages Google Play accepts for a listing but that the translation UI doesn't offer
+const GP_EXTRA_LANGUAGE_CODES = [
+  'af', 'am', 'az-AZ', 'be', 'bn-BD', 'ca', 'en-SG', 'en-ZA', 'es-US', 'et', 'eu-ES', 'fa', 'fil', 'gl-ES',
+  'gu', 'hy-AM', 'is-IS', 'ka-GE', 'kk', 'km-KH', 'kn-IN', 'ky-KG', 'lo-LA', 'lt', 'lv', 'mk-MK', 'ml-IN',
+  'mn-MN', 'mr-IN', 'ms-MY', 'my-MM', 'ne-NP', 'pa', 'rm', 'si-LK', 'sl', 'sq', 'sr', 'sw', 'ta-IN',
+  'te-IN', 'ur', 'uz', 'zh-HK', 'zu',
+]
+
+const GP_LANGUAGE_BY_LOWERCASE = new Map(
+  [...GP_LOCALES.map(l => l.code), ...GP_EXTRA_LANGUAGE_CODES].map(code => [code.toLowerCase(), code])
+)
+
+// Folder names people actually use (Apple-style codes, bare languages, legacy ISO codes) → GP code
+const GP_LANGUAGE_ALIASES = {
+  'en': 'en-US', 'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'it': 'it-IT', 'pt': 'pt-BR', 'ja': 'ja-JP',
+  'ko': 'ko-KR', 'zh': 'zh-CN', 'zh-hans': 'zh-CN', 'zh-hant': 'zh-TW', 'ru': 'ru-RU', 'pl': 'pl-PL',
+  'tr': 'tr-TR', 'nl': 'nl-NL', 'sv': 'sv-SE', 'da': 'da-DK', 'fi': 'fi-FI', 'no': 'no-NO', 'nb': 'no-NO',
+  'cs': 'cs-CZ', 'hu': 'hu-HU', 'el': 'el-GR', 'he': 'iw-IL', 'he-il': 'iw-IL', 'hi': 'hi-IN', 'ar-sa': 'ar',
+  'cmn': 'zh-CN', 'zh-hans-cn': 'zh-CN', 'zh-hant-tw': 'zh-TW', 'fil-ph': 'fil', 'tl': 'fil', 'id-id': 'id',
+  'th-th': 'th', 'vi-vn': 'vi', 'uk-ua': 'uk', 'ro-ro': 'ro', 'sk-sk': 'sk', 'hr-hr': 'hr', 'bg-bg': 'bg',
+  'ms-my': 'ms-MY', 'es-la': 'es-419', 'es-latam': 'es-419', 'pt-br': 'pt-BR', 'pt-pt': 'pt-PT',
+}
+
+// Turn a folder name into a Google Play language code, or null when it isn't one.
+// Accepts underscores, any casing and Apple-style variants ("fr_FR", "zh-Hans", "he").
+export function resolveLocaleCode(name) {
+  const key = String(name || '').trim().replace(/_/g, '-').toLowerCase()
+  if (!key) return null
+  return GP_LANGUAGE_BY_LOWERCASE.get(key) || GP_LANGUAGE_ALIASES[key] || null
 }
 
 /**
