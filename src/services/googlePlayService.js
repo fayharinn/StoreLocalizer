@@ -740,3 +740,16 @@ export async function fetchDeveloperApps(developerUrl) {
     apps: data.apps
   }
 }
+
+/**
+ * Look up an app's public name and icon from its Play Store page.
+ * Best effort — returns nulls when the page can't be read.
+ * @param {string} packageName
+ * @returns {Promise<{packageName: string, name: string|null, icon: string|null}>}
+ */
+export async function fetchAppMeta(packageName) {
+  const proxyBase = import.meta.env.VITE_GP_PROXY_URL || '/api/googleplay'
+  const response = await fetch(`${proxyBase}/playstore/app/${encodeURIComponent(packageName)}`)
+  if (!response.ok) throw new Error(`Lookup failed: ${response.status}`)
+  return response.json()
+}

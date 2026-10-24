@@ -37,6 +37,8 @@ export default function GooglePlayConnect({ credentials, onCredentialsChange, ai
         <AppSelectionCard
           packageName={hook.packageName}
           setPackageName={hook.setPackageName}
+          savedApps={hook.savedApps}
+          onRemoveSavedApp={hook.handleRemoveSavedApp}
           editId={hook.editId}
           isCreatingEdit={hook.isCreatingEdit}
           developerUrl={hook.developerUrl}

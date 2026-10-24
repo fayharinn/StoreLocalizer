@@ -4,9 +4,26 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose, DialogTrigger } from '@/components/ui/dialog'
 import { AppWindow, Store, AlertCircle, Loader2, RefreshCw, X, Save, ExternalLink } from 'lucide-react'
 
+function AppIcon({ app, className = 'h-8 w-8' }) {
+  return app?.icon ? (
+    <img
+      src={app.icon}
+      alt=""
+      className={`${className} shrink-0 rounded-lg object-cover`}
+      onError={(e) => { e.target.style.display = 'none' }}
+    />
+  ) : (
+    <div className={`${className} flex shrink-0 items-center justify-center rounded-lg bg-muted`}>
+      <AppWindow className="h-4 w-4 text-muted-foreground" />
+    </div>
+  )
+}
+
 export default function AppSelectionCard({
   packageName,
   setPackageName,
+  savedApps,
+  onRemoveSavedApp,
   editId,
   isCreatingEdit,
   developerUrl,
@@ -33,6 +50,57 @@ export default function AppSelectionCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {editId && (() => {
+          const current = savedApps.find((a) => a.packageName === packageName.trim())
+          return (
+            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 p-3">
+              <AppIcon app={current} className="h-10 w-10" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{current?.name || packageName}</p>
+                <p className="truncate text-xs text-muted-foreground">{packageName}</p>
+              </div>
+            </div>
+          )
+        })()}
+
+        {!editId && savedApps.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">Recent apps — click to load</p>
+            <div className="flex flex-wrap gap-2">
+              {savedApps.map((app) => (
+                <div
+                  key={app.packageName}
+                  className={`group flex items-center gap-2 rounded-xl border bg-card py-1.5 pl-1.5 pr-1 transition-colors hover:border-primary/50 hover:bg-muted/50 ${
+                    packageName.trim() === app.packageName ? 'border-primary/60' : 'border-border/60'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleCreateEdit(app.packageName)}
+                    disabled={isCreatingEdit}
+                    className="flex min-w-0 items-center gap-2 text-left disabled:opacity-60"
+                    title={`Load ${app.packageName}`}
+                  >
+                    <AppIcon app={app} />
+                    <span className="min-w-0 pr-1">
+                      <span className="block max-w-[180px] truncate text-sm font-medium leading-tight">{app.name || app.packageName}</span>
+                      {app.name && <span className="block max-w-[180px] truncate text-[11px] leading-tight text-muted-foreground">{app.packageName}</span>}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveSavedApp(app.packageName)}
+                    aria-label={`Forget ${app.name || app.packageName}`}
+                    className="rounded-md p-1 text-muted-foreground/50 opacity-0 transition-opacity hover:bg-muted hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-3">
           <div className="flex-1 max-w-md relative">
             <Input

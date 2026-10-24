@@ -137,6 +137,34 @@ export default {
  * Fetches the public developer page and extracts app package names
  */
 async function handlePlayStoreScrape(path, url, corsOrigin) {
+  // Single app lookup (name + icon from the public store page): /playstore/app/{packageName}
+  const appMatch = path.match(/^\/playstore\/app\/([a-zA-Z0-9._]+)$/)
+  if (appMatch) {
+    const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
+    try {
+      const response = await fetch(`${GP_STORE_BASE}/store/apps/details?id=${appMatch[1]}&hl=en`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml',
+          'Accept-Language': 'en-US,en;q=0.9',
+        }
+      })
+      if (!response.ok) {
+        return new Response(JSON.stringify({ error: `Failed to fetch app page: ${response.status}` }), { status: response.status, headers })
+      }
+      const html = await response.text()
+      const title = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1]
+      const image = html.match(/<meta property="og:image" content="([^"]*)"/)?.[1]
+      return new Response(JSON.stringify({
+        packageName: appMatch[1],
+        name: title ? title.replace(/ - Apps on Google Play$/, '').replace(/&amp;/g, '&').replace(/&#39;/g, "'") : null,
+        icon: image ? image.replace(/=[^=]*$/, '=s128') : null,
+      }), { status: 200, headers })
+    } catch (error) {
+      return new Response(JSON.stringify({ error: `Lookup failed: ${error.message}` }), { status: 500, headers })
+    }
+  }
+
   // Extract developer ID from path: /playstore/dev/{developerId}
   const match = path.match(/^\/playstore\/dev\/(\d+)$/)
   

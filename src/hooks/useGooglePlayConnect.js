@@ -11,6 +11,7 @@ import {
   hasValidToken,
   getTokenTimeLeft,
   fetchDeveloperApps,
+  fetchAppMeta,
   GP_LOCALES,
 } from '@/services/googlePlayService'
 import { PROVIDERS } from '@/services/translationService'
@@ -18,6 +19,21 @@ import { decrypt } from '@/utils/crypto'
 import useGooglePlayImages from '@/hooks/useGooglePlayImages'
 
 const ENCRYPTED_GP_KEY_STORAGE = 'gp-encrypted-service-account'
+const SAVED_APPS_KEY = 'gp-saved-apps'
+const LAST_PACKAGE_KEY = 'gp-last-package'
+
+function readStorage(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw === null ? fallback : JSON.parse(raw)
+  } catch {
+    return fallback
+  }
+}
+
+function writeStorage(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* storage unavailable */ }
+}
 
 export default function useGooglePlayConnect({ credentials, onCredentialsChange, aiConfig }) {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -39,7 +55,34 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const [packageName, setPackageName] = useState('')
+  // Package names the user has loaded before (with name + icon), so they never retype them
+  const [savedApps, setSavedApps] = useState(() => {
+    const apps = readStorage(SAVED_APPS_KEY, [])
+    return Array.isArray(apps) ? apps : []
+  })
+  const [packageName, setPackageName] = useState(() => {
+    const last = readStorage(LAST_PACKAGE_KEY, '')
+    return typeof last === 'string' ? last : ''
+  })
+
+  useEffect(() => { writeStorage(SAVED_APPS_KEY, savedApps) }, [savedApps])
+  useEffect(() => { writeStorage(LAST_PACKAGE_KEY, packageName) }, [packageName])
+
+  const upsertSavedApp = useCallback((app) => {
+    setSavedApps((prev) => {
+      const existing = prev.find((a) => a.packageName === app.packageName)
+      const merged = {
+        ...existing,
+        ...Object.fromEntries(Object.entries(app).filter(([, v]) => v)),
+        lastUsed: Date.now(),
+      }
+      return [merged, ...prev.filter((a) => a.packageName !== app.packageName)]
+    })
+  }, [])
+
+  const handleRemoveSavedApp = (pkg) => {
+    setSavedApps((prev) => prev.filter((a) => a.packageName !== pkg))
+  }
   const [editId, setEditId] = useState(null)
   const [isCreatingEdit, setIsCreatingEdit] = useState(false)
 
@@ -153,17 +196,28 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     setIsConnecting(false)
   }
 
-  const handleCreateEdit = async () => {
-    if (!packageName.trim()) {
+  // `pkgOverride` lets a saved-app click load straight away; as a button handler it receives an event
+  const handleCreateEdit = async (pkgOverride) => {
+    const pkg = (typeof pkgOverride === 'string' ? pkgOverride : packageName).trim()
+    if (!pkg) {
       addLog('Please enter a package name', 'error')
       return
     }
+    if (pkg !== packageName) setPackageName(pkg)
 
     setIsCreatingEdit(true)
     try {
-      const newEditId = await createEdit(credentials, packageName.trim())
+      const newEditId = await createEdit(credentials, pkg)
       setEditId(newEditId)
       addLog(`Created edit session: ${newEditId}`, 'success')
+
+      // Remember the app; name/icon come from the developer profile list when known,
+      // otherwise from the public store page (best effort, never blocks the load)
+      const known = developerApps.find((a) => a.packageName === pkg)
+      upsertSavedApp({ packageName: pkg, name: known?.name !== pkg ? known?.name : null, icon: known?.icon })
+      fetchAppMeta(pkg)
+        .then((meta) => upsertSavedApp({ packageName: pkg, name: meta.name, icon: meta.icon }))
+        .catch(() => { /* icon is optional */ })
 
       await loadListings(newEditId)
     } catch (error) {
@@ -418,6 +472,8 @@ export default function useGooglePlayConnect({ credentials, onCredentialsChange,
     formatTimeLeft,
     packageName,
     setPackageName,
+    savedApps,
+    handleRemoveSavedApp,
     editId,
     isCreatingEdit,
     developerUrl,

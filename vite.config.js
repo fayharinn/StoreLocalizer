@@ -7,6 +7,36 @@ import { defineConfig } from "vite"
 const playstoreScraperPlugin = () => ({
   name: 'playstore-scraper',
   configureServer(server) {
+    // Single app lookup (name + icon from the public store page): /playstore/app/{packageName}
+    server.middlewares.use(async (req, res, next) => {
+      const appMatch = req.url?.match(/^\/api\/googleplay\/playstore\/app\/([a-zA-Z0-9._]+)/)
+      if (!appMatch) return next()
+
+      res.setHeader('Content-Type', 'application/json')
+      try {
+        const response = await fetch(`https://play.google.com/store/apps/details?id=${appMatch[1]}&hl=en`, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36', 'Accept': 'text/html' },
+        })
+        if (!response.ok) {
+          res.statusCode = response.status
+          res.end(JSON.stringify({ error: `Failed to fetch: ${response.status}` }))
+          return
+        }
+        const html = await response.text()
+        const title = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1]
+        const image = html.match(/<meta property="og:image" content="([^"]*)"/)?.[1]
+        res.statusCode = 200
+        res.end(JSON.stringify({
+          packageName: appMatch[1],
+          name: title ? title.replace(/ - Apps on Google Play$/, '').replace(/&amp;/g, '&').replace(/&#39;/g, "'") : null,
+          icon: image ? image.replace(/=[^=]*$/, '=s128') : null,
+        }))
+      } catch (error) {
+        res.statusCode = 500
+        res.end(JSON.stringify({ error: error.message }))
+      }
+    })
+
     server.middlewares.use(async (req, res, next) => {
       if (!req.url?.startsWith('/api/googleplay/playstore/dev/')) {
         return next()
