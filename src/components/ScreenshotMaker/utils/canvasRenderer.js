@@ -4,6 +4,8 @@
  * They do not depend on DOM or React state directly.
  */
 
+import { drawDuoMockup, getDuoPanelForDims } from './duoDevice';
+
 // ─── Utility helpers ───────────────────────────────────────────────
 
 export function hexToRgba(hex, alpha) {
@@ -354,6 +356,14 @@ export function drawScreenshotToContext(context, dims, img, settings) {
 
   context.translate(-centerX, -centerY);
 
+  // iPhone Duo output sizes get the real panel shape and body instead of a rounded rect
+  const duoPanel = getDuoPanelForDims(dims);
+  if (duoPanel) {
+    drawDuoMockup(context, img, x, y, imgWidth, imgHeight, duoPanel, settings);
+    context.restore();
+    return;
+  }
+
   // Scale corner radius with image size
   const radius = (settings.cornerRadius || 0) * (imgWidth / 400);
 
@@ -602,7 +612,8 @@ export function renderScreenshotToCanvas(canvas, screenshot, outputWidth, output
 
   // Draw screenshot - 3D if active for this screenshot, otherwise 2D
   const settings = screenshot.screenshot;
-  const use3D = settings.use3D || false;
+  // No 3D model exists for the iPhone Duo: its sizes always use the 2D vector mockup
+  const use3D = (settings.use3D || false) && !getDuoPanelForDims(dims);
 
   if (use3D && threeRenderer && typeof threeRenderer.renderToCanvas === 'function' && threeRenderer.isLoaded && threeRenderer.isLoaded()) {
     // Update screen texture with the localized image for this screenshot

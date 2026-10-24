@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import { deviceDimensions } from '../constants';
+import { getDuoPanelForDims } from '../utils/duoDevice';
 import { SELECT_SCREENSHOT, SET_SCREENSHOT_SETTING } from '../hooks/useAppState';
 import {
   drawBackgroundToContext,
@@ -82,8 +83,9 @@ export default function CanvasArea({ state, dispatch, threeRenderer, getScreensh
 
   const use3D = useMemo(() => {
     const ss = getScreenshotSettings(state);
-    return ss?.use3D || false;
-  }, [state.screenshots, state.selectedIndex, state.defaults]);
+    // No 3D model exists for the iPhone Duo: its sizes use the 2D vector mockup
+    return (ss?.use3D || false) && !getDuoPanelForDims(dims);
+  }, [state.screenshots, state.selectedIndex, state.defaults, dims]);
 
   // -----------------------------------------------------------------------
   // Initialize Three.js when 3D mode is activated
@@ -266,7 +268,7 @@ export default function CanvasArea({ state, dispatch, threeRenderer, getScreensh
     // Draw screenshot (2D) or 3D phone model
     if (state.screenshots.length > 0) {
       const ss = getScreenshotSettings(state);
-      const is3D = ss.use3D || false;
+      const is3D = (ss.use3D || false) && !getDuoPanelForDims(dims);
 
       if (is3D && threeRenderer && typeof threeRenderer.renderToCanvas === 'function' && threeRenderer.isLoaded && threeRenderer.isLoaded()) {
         // 3D mode – render to canvas with current screenshot settings

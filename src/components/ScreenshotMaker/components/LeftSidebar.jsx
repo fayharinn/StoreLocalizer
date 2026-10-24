@@ -48,6 +48,12 @@ const deviceOptions = [
     { id: 'iphone-6.5', name: 'iPhone 6.5"' },
     { id: 'iphone-5.5', name: 'iPhone 5.5"' },
   ]},
+  { group: 'iPhone Duo', items: [
+    { id: 'iphone-duo-inner-landscape', name: 'iPhone Duo Inner (landscape)' },
+    { id: 'iphone-duo-inner-portrait', name: 'iPhone Duo Inner (portrait)' },
+    { id: 'iphone-duo-outer-portrait', name: 'iPhone Duo Outer (portrait)' },
+    { id: 'iphone-duo-outer-landscape', name: 'iPhone Duo Outer (landscape)' },
+  ]},
   { group: 'iPad', items: [
     { id: 'ipad-12.9', name: 'iPad 12.9"' },
     { id: 'ipad-11', name: 'iPad 11"' },

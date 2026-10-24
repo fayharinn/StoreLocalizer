@@ -38,6 +38,11 @@ export const deviceDimensions = {
     'iphone-6.7': { width: 1290, height: 2796 },
     'iphone-6.5': { width: 1284, height: 2778 },
     'iphone-5.5': { width: 1242, height: 2208 },
+    // iPhone Duo slot (App Store Connect): inner = open 7.6" display, outer = cover 5.4" display
+    'iphone-duo-inner-landscape': { width: 2853, height: 2007 },
+    'iphone-duo-inner-portrait': { width: 2007, height: 2853 },
+    'iphone-duo-outer-portrait': { width: 1398, height: 2034 },
+    'iphone-duo-outer-landscape': { width: 2034, height: 1398 },
     'ipad-12.9': { width: 2048, height: 2732 },
     'ipad-11': { width: 1668, height: 2388 },
     'android-phone': { width: 1080, height: 1920 },
@@ -48,6 +53,17 @@ export const deviceDimensions = {
     'web-twitter': { width: 1200, height: 675 },
     'web-hero': { width: 1920, height: 1080 },
     'web-feature': { width: 1024, height: 500 },
+};
+
+// =============================================================================
+// iPhone Duo panels - which display each Duo output size is drawn on
+// (the mockup itself lives in utils/duoDevice.js)
+// =============================================================================
+export const duoPanels = {
+    'iphone-duo-inner-landscape': { kind: 'inner' },
+    'iphone-duo-inner-portrait': { kind: 'inner' },
+    'iphone-duo-outer-portrait': { kind: 'outer' },
+    'iphone-duo-outer-landscape': { kind: 'outer' },
 };
 
 // =============================================================================
