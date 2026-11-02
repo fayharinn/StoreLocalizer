@@ -1,207 +1,170 @@
 <div align="center">
 
-# 🌍 StoreLocalizer
+# StoreLocalizer
 
-**Ship your app worldwide — translate, price, and design your store listings with AI.**
+**Your App Store and Google Play pages, in every language.**
 
-[![Try it live](https://img.shields.io/badge/▶_Try_it_live-storelocalizer.com-7c5cff?style=for-the-badge)](https://storelocalizer.com/)
+Connect App Store Connect and the Google Play Console with your own keys, translate your listings with the AI provider you choose, build screenshots for each locale, drop an `.ipa` to get a TestFlight build, and let an agent handle the repetitive parts. Subscription pricing and `.xcstrings` catalogs come along. Open source, runs in your browser.
 
-[![GitHub Stars](https://badgen.net/github/stars/fayharinn/StoreLocalizer?color=ffd166&icon=github)](https://github.com/fayharinn/StoreLocalizer/stargazers)
-[![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
-[![Last Commit](https://badgen.net/github/last-commit/fayharinn/StoreLocalizer/main?color=4ade80)](https://github.com/fayharinn/StoreLocalizer/commits/main)
-[![Follow on X](https://img.shields.io/badge/Follow-@fayhecode-black?style=flat&logo=x)](https://x.com/fayhecode)
+[**Open the app**](https://storelocalizer.com/) · [Run it locally](#run-it-locally) · [How your keys stay safe](#your-keys-stay-in-the-browser)
 
-*One tool for the whole store pipeline: `.xcstrings` translation · App Store Connect & Google Play sync ·
-ASO keywords · device screenshots · GDP-fair subscription pricing — plus an AI agent that drives it all by chat.*
+Works with App Store Connect, the Google Play Console and [AppCompete](https://appcompete.com) for ASO keyword data.
 
-<img src="docs/screenshots/xcstrings-editor.png" width="900" alt="StoreLocalizer — translations editor" />
+[![GitHub stars](https://img.shields.io/github/stars/fayharinn/StoreLocalizer?style=flat&label=stars&color=2b2b2e&labelColor=141415)](https://github.com/fayharinn/StoreLocalizer/stargazers)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-2b2b2e?style=flat&labelColor=141415)](https://www.gnu.org/licenses/agpl-3.0.html)
+[![Last commit](https://img.shields.io/github/last-commit/fayharinn/StoreLocalizer/main?style=flat&label=last%20commit&color=2b2b2e&labelColor=141415)](https://github.com/fayharinn/StoreLocalizer/commits/main)
+
+<img src="docs/readme/hero.png" width="900" alt="StoreLocalizer: one App Store subtitle written for seven storefronts, each within Apple’s 30 characters" />
 
 </div>
 
----
+## How it works
 
-## Why?
+<div align="center"><img src="docs/readme/how-it-works.png" width="900" alt="Three steps: connect your stores with keys kept in your browser, translate with your AI provider within store limits, push to App Store Connect and Google Play" /></div>
 
-Going global is brutal when you do it by hand:
+## Why
 
-|  | The manual way | With StoreLocalizer |
+Shipping an app in another country is mostly copy and paste:
+
+|  | By hand | With StoreLocalizer |
 |---|---|---|
-| 🌍 Localizing 40+ languages | Weeks of copy-paste | **Minutes** — batched AI translation, synced to your stores |
-| 💸 Pricing in 175 countries | Guesswork | **GDP-adjusted** recommendations per market |
-| 📸 Screenshots per language | A designer's nightmare | **Generated** for every locale from one template |
-| 🔑 ASO keywords per locale | Spreadsheets | **Suggested, scored & reviewed** per keyword |
+| Store listings in every locale | Pasting into App Store Connect and the Play Console, field by field | Written per locale and pushed through the official APIs |
+| Screenshots per language | A designer and a lot of exports | One template, a headline per language, placed per locale or exported as one ZIP |
+| Builds | Xcode Organizer or Transporter on a Mac | Drop the `.ipa` in the browser, follow it to TestFlight |
+| The repetitive parts | Clicking through the same screens every release | An agent that does it from one sentence and asks before every write |
+| ASO keywords per locale | A spreadsheet that goes stale | Suggestions scored by popularity and difficulty with [AppCompete](https://appcompete.com) data, reviewed one by one |
+| Prices in 175 storefronts | Guesswork, or the same price everywhere | A price per storefront from your US base price, adjusted to local purchasing power |
+| Your app’s own strings | Weeks of spreadsheets and copy-paste | One `.xcstrings` file in, the same file out with every missing string filled |
 
-Everything talks **directly** to App Store Connect and Google Play Console — no exports, no copy-paste.
+It talks to App Store Connect and the Google Play Console directly, with your own keys. No account, no export step.
 
----
+## What it does
 
-## ✨ The toolkit
+Everything starts from Home: your two stores, the screenshot studio and the agent, each one click away.
 
-### 🤖 The Agent — run the whole pipeline by chat
+### App Store Connect and Google Play
 
-Tell it what you want in plain words and it calls **24 functions** against your real accounts: list apps and versions, audit localizations, translate and push "What's New" to five locales, mine ASO keywords from AppCompete, or find what's missing in your `.xcstrings`. It can even **see your App Store screenshots** — ask for feedback and it reviews each one, with an in-chat gallery to switch locales and a lightbox to zoom in.
+Connect once with your API keys, then translate name, subtitle, description, keywords, promotional text and What’s New across every locale, create versions, and push it all back without leaving the browser.
 
-<div align="center"><img src="docs/screenshots/agent.png" width="860" alt="AI agent reviewing App Store screenshots in chat" /></div>
+- **Asset Library** — upload screenshots, app previews and creative assets once, then place them on any surface. Sizes and device groups come live from Apple’s spec catalog, iPhone Duo included, and a dropped `/en-US`, `/fr-FR`… folder is checked, uploaded and placed per locale in one go.
+- **Custom Product Pages** — create, publish or hide and deep-link page variants, translate their promotional text, and fill their media from the library.
+- **Product Page Optimization** — set up A/B tests with up to three treatments (alternate icon and media per locale) and start them once Apple accepts them.
+- **In-App Events** — create, localize and translate events, with their card and details page artwork.
 
-### 🔤 XCStrings Translator
+<div align="center"><img src="docs/readme/listing.png" width="900" alt="Subtitle, keywords and What’s New for six locales with their character counts, three locales still empty and being translated" /></div>
 
-Drop an `.xcstrings` file from Xcode, pick your target languages, translate everything with AI, and export straight back to your project. Format specifiers (`%lld`, `%@`) and protected brand words are preserved, and batched + concurrent requests make 1,000 strings a coffee-break job. Every translation stays one click away from a manual fix:
+### Builds, like EAS Submit
 
-<div align="center"><img src="docs/screenshots/feature-edit-translation.png" width="620" alt="Edit translation dialog" /></div>
+Drop an `.ipa` on the Builds tab of the App Store page. StoreLocalizer reads the bundle ID, version and build number from its `Info.plist`, checks it matches the selected app, sends it through the App Store Connect build upload API and follows it until Apple has processed it for TestFlight. No Xcode, no Transporter, no CI step.
 
-### 🔑 ASO keywords that earn their 100 characters
+<div align="center"><img src="docs/readme/builds.png" width="900" alt="Drop FitTrack.ipa, read version 2.4 build 142 from Info.plist, upload it, then follow it to TestFlight" /></div>
 
-Generate keywords with AI — or plug your **[AppCompete](https://appcompete.com)** account and work with real data: suggestions scored by popularity & difficulty with a live capacity gauge, keywords mined from the competitors you track, and a **per-keyword review** that tells you what to keep, replace, or stop dreaming about:
+### Screenshot studio
 
-<table align="center"><tr>
-<td><img src="docs/screenshots/feature-keyword-suggestions.png" alt="AppCompete keyword suggestions with popularity and difficulty scores" /></td>
-<td><img src="docs/screenshots/feature-keyword-review.png" alt="Keyword review verdicts: great, ok, weak, hard, untracked" /></td>
-</tr><tr>
-<td align="center"><em>Suggestions scored by opportunity, capped at Apple's 100 chars</em></td>
-<td align="center"><em>One verdict + one advice per keyword — track the missing ones</em></td>
-</tr></table>
+A device-frame screenshot generator next to your translations: 2D and 3D frames, background presets, headlines generated for your app and translated into every project language, then one ZIP per store size.
 
-### 🏪 App Store Connect & Google Play sync
+<div align="center"><img src="docs/readme/screenshots.png" width="900" alt="The same screenshot template in English, French, Japanese and German, each with its own headline" /></div>
 
-Connect once with your API keys — then translate descriptions, what's new, keywords and promotional text across every locale, manage screenshots, create versions, and push everything back **without leaving the browser**.
+### An agent for the busywork
 
-- **Asset Library (iOS 27)** — upload screenshots, app previews and the new *creative assets* (product page header, search results, In-App Event cards) once, then place them on any surface. Sizes and device groups (iPhone Duo included) come live from Apple's spec catalog, and a dropped `/en-US`, `/fr-FR`… folder is validated, uploaded and placed per locale in one go.
-- **Custom Product Pages** — create, publish/hide and deep-link page variants, AI-translate their promotional text, and fill their media from the library.
-- **Product Page Optimization** — set up A/B tests with up to 3 treatments (alternate icon + media per locale) and start them once Apple accepts them.
-- **In-App Events** — create, localize and AI-translate events, with their card and details page artwork.
+Ask in plain words and it calls 24 functions against your real accounts: list apps and versions, audit localizations, translate and push What’s New to five locales, mine ASO keywords from [AppCompete](https://appcompete.com), or find what is missing in your `.xcstrings`. It can look at your App Store screenshots and review each one. Every write waits for your approval.
 
-<div align="center"><img src="docs/screenshots/app-store-connect.png" width="860" alt="App Store Connect integration" /></div>
+<div align="center"><img src="docs/readme/agent.png" width="900" alt="The agent reads the localizations, translates What’s New into French and German, then waits for approval before writing to App Store Connect" /></div>
 
-### 📸 Screenshot Studio
+### ASO keywords that earn their 100 characters
 
-A device-frame screenshot generator that lives next to your translations. Gradient preset galleries, 2D/3D frames (Three.js), AI-generated marketing headlines, one-click caption translation to every project language — then export all locales as a ZIP, sized for any store format.
+Generate keywords per locale, or connect your [AppCompete](https://appcompete.com) account to work with real data: suggestions scored by popularity and difficulty against Apple’s 100-character limit, keywords mined from the competitors you track, and a review of every keyword that tells you what to keep and what to replace.
 
-<table align="center"><tr>
-<td width="62%"><img src="docs/screenshots/screenshot-studio.png" alt="Screenshot studio workspace" /></td>
-<td><img src="docs/screenshots/feature-canvas.png" alt="Rendered device frame on gradient background" /></td>
-</tr><tr>
-<td align="center"><em>The studio: projects, languages, style presets, batch export</em></td>
-<td align="center"><em>What ships to the store</em></td>
-</tr></table>
+### Subscription prices by purchasing power
 
-### 💰 GDP-fair subscription pricing
+Set your US base price and get a recommended price for each of the 175 storefronts, adjusted to local GDP per capita. Push them to App Store Connect and translate your subscription display names on the way.
 
-Set your USA base price and get a recommended price for every storefront based on local purchasing power — then push them to App Store Connect and translate your subscription display names while you're at it.
+<div align="center"><img src="docs/readme/pricing.png" width="900" alt="Recommended prices from a 9.99 dollar base: lower in Japan, Brazil and India, close to the base in Germany, the UK and France" /></div>
 
-<div align="center"><img src="docs/screenshots/feature-gdp-chart.png" width="820" alt="GDP-adjusted recommended prices by country" /></div>
+### String catalogs
 
----
+Your app’s own strings come along too. Drop the `Localizable.xcstrings` file from your Xcode project, tick the languages you want, and translate. Each language shows how much of the catalog is already done. Format specifiers like `%lld` and `%@` and the brand words you protect stay exactly as they are, and batched, parallel requests get through a thousand strings in a few minutes. Every cell stays one click away from a manual fix, then the file goes back to Xcode.
 
-## 🤖 Bring your own AI
+## Bring your own AI
 
-Pick a provider in the sidebar, paste a key, done — keys never leave your browser.
+Pick a provider in the sidebar and paste a key. Keys go from your browser to the provider and nowhere else.
 
 | Provider | Models | Notes |
 |---|---|---|
-| **OpenAI** | gpt-5.6-luna | model list fetched live from your account |
-| **Anthropic (Claude)** | haiku-4.5 · sonnet-4.6 · opus-4.8 | direct browser access |
-| **Google (Gemini)** | 3.1-flash-lite · 3.5-flash · 3.1-pro | JSON-native responses |
-| **DeepSeek** | v4-flash · v4-pro | |
-| **Cloudflare Workers AI** | Llama 3.3/4 · GPT-OSS · Mistral… | 13 open-weight LLMs |
-| **AWS Bedrock** | Claude family | bearer-token auth |
-| **Azure OpenAI** | your deployments | |
-| **GitHub Models** | gpt-4o · gpt-4.1 | free-tier friendly |
+| OpenAI | gpt-6-luna · gpt-6.1-sol · gpt-6-astra | model list read from your account |
+| Anthropic | claude-haiku-5-5 · claude-sonnet-5-5 · claude-opus-5-5 | direct browser access |
+| Google Gemini | gemini-3.8-flash · gemini-3.6-flash · gemini-3.1-pro-preview | JSON-native responses |
+| xAI | grok-4.7 · grok-4.6 · grok-4.3 | |
+| Mistral | mistral-small · mistral-medium · mistral-large | |
+| DeepSeek | deepseek-v4-flash · deepseek-v4-pro | |
+| OpenRouter | any model on your account | |
+| Cloudflare Workers AI | Llama 3.3 and 4 · GPT-OSS · Qwen 3 | open-weight models |
+| AWS Bedrock | Claude family | bearer-token auth |
+| Azure OpenAI | your deployments | |
+| GitHub Models | gpt-4o · gpt-5.6-luna | free tier friendly |
 
-*The Agent needs function calling — it works with OpenAI, Anthropic, Gemini, Azure, Bedrock, GitHub Models and DeepSeek.*
+The agent needs function calling: OpenAI, Anthropic, Gemini, xAI, Mistral, OpenRouter, Azure, Bedrock, GitHub Models and DeepSeek all work.
 
----
-
-## 🚀 Quick start
+## Run it locally
 
 ```bash
 git clone https://github.com/fayharinn/StoreLocalizer.git
 cd StoreLocalizer
 bun install        # or npm install
-bun run dev        # → http://localhost:5173
+bun run dev        # http://localhost:5173
 ```
 
-That's it for local use — the dev server proxies all App Store Connect / Google Play calls for you.
+The dev server proxies every App Store Connect and Google Play call for you, so that is all you need for local use. Nothing to install? Use the hosted version at [storelocalizer.com](https://storelocalizer.com/).
 
-**No install?** Use the hosted version at **[storelocalizer.com](https://storelocalizer.com/)**.
-
-**Desktop app** (Tauri 2, Rust toolchain required):
+Desktop app (Tauri 2, needs the Rust toolchain):
 
 ```bash
 bun run tauri:dev      # develop
 bun run tauri:build    # package
 ```
 
----
+## Connect your stores
 
-## ⚙️ Connect your stores
+Add as many App Store Connect keys and Google Play service accounts as you need, one per developer account or client, and switch between them from the sidebar. They are all saved encrypted under one password.
 
 <details>
 <summary><b>App Store Connect API key</b></summary>
 
-1. Go to [App Store Connect → Integrations → API Keys](https://appstoreconnect.apple.com/access/integrations/api)
-2. Create a key with **Admin** or **App Manager** role
-3. Note your **Key ID** and **Issuer ID**, download the `.p8` file
-4. Drop everything in the app sidebar — the `.p8` is encrypted with your password before being stored
+1. Open [App Store Connect, Integrations, API Keys](https://appstoreconnect.apple.com/access/integrations/api)
+2. Create a key with the **Admin** or **App Manager** role
+3. Note the **Key ID** and **Issuer ID**, and download the `.p8` file
+4. Drop everything in the sidebar. The `.p8` is encrypted with your password before it is stored
 
 </details>
 
 <details>
 <summary><b>Google Play service account</b></summary>
 
-1. In [Google Cloud Console](https://console.cloud.google.com/), create a service account with the **Google Play Developer API** enabled and download its JSON key
-2. In Play Console → **Users and permissions**, invite the service account email
+1. In the [Google Cloud Console](https://console.cloud.google.com/), create a service account with the **Google Play Developer API** enabled and download its JSON key
+2. In the Play Console, under **Users and permissions**, invite the service account email
 3. Grant **Admin** or **Release manager** for your app
-4. Upload the JSON key in the app sidebar
+4. Drop the JSON key in the sidebar
 
 </details>
 
 <details>
-<summary><b>App Store Connect auth flow (how your .p8 stays safe)</b></summary>
+<summary><b>AppCompete API key (optional, for ASO data)</b></summary>
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         App Store Connect Auth Flow                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌──────────┐    password     ┌──────────────┐                              │
-│  │  .p8 Key │ ──────────────► │  Encrypted   │ ◄─── Stored in localStorage  │
-│  │  (file)  │    encrypt      │   .p8 Key    │      (persistent)            │
-│  └────┬─────┘                 └──────┬───────┘                              │
-│       │                              │                                      │
-│       │ sign                         │ password                             │
-│       │                              │ decrypt                              │
-│       ▼                              ▼                                      │
-│  ┌──────────┐                 ┌──────────────┐                              │
-│  │   JWT    │ ◄───────────────│  Decrypted   │                              │
-│  │  Token   │     sign        │   .p8 Key    │ ◄─── In memory only          │
-│  └────┬─────┘                 └──────────────┘      (cleared on reload)     │
-│       │                                                                     │
-│       │ cache                                                               │
-│       ▼                                                                     │
-│  ┌──────────────┐                                                           │
-│  │ sessionStorage│ ◄─── JWT cached for ~19 min                              │
-│  │  (JWT only)   │      Auto-reconnect on page reload                       │
-│  └──────┬───────┘                                                           │
-│         │                                                                   │
-│         │ Bearer token                                                      │
-│         ▼                                                                   │
-│  ┌──────────────┐                                                           │
-│  │  App Store   │                                                           │
-│  │ Connect API  │                                                           │
-│  └──────────────┘                                                           │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+1. Sign in on [appcompete.com](https://appcompete.com)
+2. Open **Connect AppCompete to your AI client** and click **Generate**. The key (`ac_live_…`) shows only once, so copy it right away
+3. Paste it in the AppCompete section of the sidebar. Keyword suggestions, competitor mining, keyword review and the rank tracker use it from then on
 
 </details>
 
-**Security model in one paragraph:** your `.p8` key is encrypted in-browser (AES-GCM, PBKDF2 100k iterations) before touching `localStorage`; the decrypted key only ever exists in memory. JWTs are signed client-side with [jose](https://github.com/panva/jose). AI provider keys go straight from your browser to the provider. The only backend is a thin CORS proxy that forwards your `Authorization` header — it stores nothing. It's all open source: audit it.
+## Your keys stay in the browser
 
----
+<div align="center"><img src="docs/readme/keys.png" width="900" alt="The .p8 key is encrypted with AES-GCM before it is stored; when calling Apple it is decrypted in memory, a JWT is signed in the browser and a CORS proxy that stores nothing forwards the request" /></div>
 
-## 🛠️ Production deployment
+**In one paragraph:** your `.p8` key is encrypted in the browser (AES-GCM, PBKDF2 with 100k iterations) before it touches `localStorage`, and the decrypted key only ever exists in memory. JWTs are signed client side with [jose](https://github.com/panva/jose). AI provider keys go straight from your browser to the provider. The only backend is a thin CORS proxy that forwards your `Authorization` header and stores nothing. It is all open source, so you can check every line.
 
-The web app is static (Vite). Apple & Google block browser CORS, so production needs the bundled Cloudflare Worker as a proxy:
+## Production deployment
+
+The web app is static (Vite). Apple and Google block browser CORS, so production needs the bundled Cloudflare Worker as a proxy:
 
 ```bash
 # 1. Deploy the CORS proxy worker
@@ -213,30 +176,26 @@ echo 'VITE_GP_PROXY_URL=https://your-worker.workers.dev'  >> .env.production
 
 # 3. Ship the site
 bun run deploy:cloudflare   # Cloudflare Pages
-bun run deploy              # …or GitHub Pages
+bun run deploy              # or GitHub Pages
 ```
 
-Remember to add your domain to `ALLOWED_ORIGINS` in [worker/index.js](worker/index.js).
+Add your domain to `ALLOWED_ORIGINS` in [worker/index.js](worker/index.js).
 
----
+## Tech stack
 
-## 🧱 Tech stack
-
-**React 19** + **Vite** · **Tailwind** + **shadcn/ui** · **Three.js** (3D device frames) · **jose** (ES256 JWT signing in-browser) · **Tauri 2** (desktop) · **Cloudflare Workers** (CORS proxy)
+React 19 and Vite · Tailwind and shadcn/ui · Geist · Three.js for 3D device frames · jose for ES256 JWT signing in the browser · Tauri 2 for the desktop app · Cloudflare Workers for the CORS proxy
 
 ```text
 src/
 ├── components/        # six pages: agent · xcstrings · appstore · googleplay · screenshots · subscriptions
 ├── hooks/             # top-level state (useAppState, useTranslation, …)
-├── services/          # every external call: ASC, Google Play, 8 AI providers, AppCompete + the agent's tool registry
+├── services/          # every external call: ASC, Google Play, 11 AI providers, AppCompete and the agent's tools
 └── utils/             # xcstrings parser, AES-GCM crypto
 ```
 
----
+## Contributing
 
-## 🤝 Contributing
-
-Issues and PRs are welcome! Run `bun run lint` before submitting. The screenshots in this README are generated with `node scripts/take-screenshots.mjs` against the dev server (`scripts/take-agent-screenshot.mjs` for the agent shot).
+Issues and pull requests are welcome. Run `bun run lint` before you open one. The illustrations in this README are drawn in [docs/readme/cards.html](docs/readme/cards.html) and rendered with `node scripts/render-readme-cards.mjs`.
 
 ### Contributors
 
@@ -279,18 +238,16 @@ Issues and PRs are welcome! Run `bun run lint` before submitting. The screenshot
 </table>
 <!-- contributors:end -->
 
-*This grid refreshes automatically on every push.*
+*This grid refreshes on every push.*
 
-**Credits:** screenshot generator originally based on [appscreen](https://github.com/YUZU-Hub/appscreen) by Stefan from yuzuhub.com.
+**Credits:** the screenshot generator started from [appscreen](https://github.com/YUZU-Hub/appscreen) by Stefan from yuzuhub.com.
 
-## 📄 License
+## License
 
-[AGPLv3](LICENSE) — free to use, modify and self-host; derivatives must stay open source.
+[AGPL-3.0](LICENSE). Free to use, change and self-host; derivatives stay open source.
 
 <div align="center">
 
-Crafted with ❤️ by **[Fayhe](https://github.com/fayharinn)**
-
-⭐ *If this saves you a localization weekend, a star helps others find it.*
+Made by **[Fayhe](https://github.com/fayharinn)**. If it saves you a localization weekend, a star helps other developers find it.
 
 </div>

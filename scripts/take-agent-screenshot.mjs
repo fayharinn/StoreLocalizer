@@ -84,26 +84,19 @@ try {
     window.localStorage.setItem('xcstrings-localizer-agent-messages', JSON.stringify(msgs))
     window.localStorage.setItem(
       'xcstrings-localizer-agent-settings',
-      JSON.stringify({ provider: 'openai', model: 'gpt-5.6-luna', autoApprove: false })
+      JSON.stringify({ provider: 'anthropic', model: 'claude-sonnet-5-5', autoApprove: false })
     )
+    // A placeholder key so the page shows its ready state; nothing is sent
+    window.localStorage.setItem(
+      'xcstrings-localizer-provider-config',
+      JSON.stringify({ provider: 'anthropic', apiKeys: { anthropic: 'sk-ant-demo' }, models: { anthropic: 'claude-sonnet-5-5' } })
+    )
+    window.localStorage.setItem('xcstrings-localizer-active-page', 'agent')
+    window.localStorage.setItem('localizer-theme', 'dark')
+    window.sessionStorage.setItem('xcstrings-localizer-welcome-shown', 'true')
   }, seedMessages)
   await page.reload({ waitUntil: 'networkidle0' })
-  await page.evaluate(() => {
-    const el = [...document.querySelectorAll('button, a')].find((n) => /get started/i.test(n.textContent))
-    el?.click()
-  })
-  await sleep(1000)
-  await page.evaluate(() => {
-    const el = [...document.querySelectorAll('button, a')].find((n) => n.textContent.trim() === 'Agent')
-    el?.click()
-  })
   await sleep(2500)
-
-  // Hide the "no API key" demo banner for a cleaner README shot
-  await page.evaluate(() => {
-    document.querySelectorAll('div.border-amber-500\\/40').forEach((n) => { n.style.display = 'none' })
-  })
-  await sleep(300)
 
   const el = await page.$('main')
   await el.screenshot({ path: 'docs/screenshots/agent.png' })

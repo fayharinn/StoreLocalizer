@@ -1,0 +1,386 @@
+<!doctype html>
+<!--
+  Source of the README illustrations. Each .card is rendered to docs/readme/<data-name>.png
+  by `node scripts/render-readme-cards.mjs`. Edit here, then render again.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>StoreLocalizer README cards</title>
+<style>
+  @font-face { font-family: Geist; src: url("../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: Geist; src: url("../../node_modules/@fontsource-variable/geist/files/geist-latin-ext-wght-normal.woff2") format("woff2"); font-weight: 100 900; unicode-range: U+0100-024F, U+1E00-1EFF; }
+  @font-face { font-family: "Geist Mono"; src: url("../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+
+  :root {
+    --page: #0f0f10;
+    --bg: #141415;
+    --card: #19191b;
+    --raised: #232325;
+    --line: rgb(237 237 237 / 0.08);
+    --line-strong: rgb(237 237 237 / 0.14);
+    --fg: #ededed;
+    --fg-2: #a1a1a6;
+    --fg-3: #85858b;
+    --amber: #f5c542;
+    --amber-ink: #1a1406;
+    --green: #4cc38a;
+    --red: #e5484d;
+    --sans: Geist, -apple-system, "Hiragino Sans", "Apple SD Gothic Neo", "Geeza Pro", "Kohinoor Devanagari", sans-serif;
+    --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--page); color: var(--fg); font-family: var(--sans); -webkit-font-smoothing: antialiased; padding: 40px; display: grid; gap: 40px; justify-content: center; }
+
+  .card { width: 1280px; background: var(--bg); border: 1px solid var(--line); border-radius: 24px; padding: 56px; position: relative; overflow: hidden; }
+  .card.h640 { height: 640px; }
+  .card.h720 { height: 720px; }
+  .card.og { width: 1200px; height: 630px; border-radius: 0; border: none; padding: 64px; }
+  .card.og .spec li { grid-template-columns: 64px 1fr auto; height: 64px; }
+
+  .eyebrow { font-family: var(--mono); font-size: 14px; color: var(--fg-3); letter-spacing: 0.01em; }
+  h1 { font-size: 52px; line-height: 1.06; font-weight: 500; letter-spacing: -0.03em; }
+  h2 { font-size: 36px; line-height: 1.12; font-weight: 500; letter-spacing: -0.02em; }
+  .lead { font-size: 18px; line-height: 1.6; color: var(--fg-2); }
+  .small { font-size: 14px; line-height: 1.5; color: var(--fg-2); }
+  .faint { color: var(--fg-3); }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .keycap { display: inline-flex; align-items: center; height: 24px; padding: 0 7px; border-radius: 5px; border: 1px solid var(--line); background: var(--raised); color: var(--fg-2); font-family: var(--mono); font-size: 13px; white-space: nowrap; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04); }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex: none; }
+  .dot.amber { background: var(--amber); }
+  .mark { background: var(--amber); color: var(--amber-ink); border-radius: 4px; padding: 2px 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 9px; font-size: 15px; font-weight: 500; }
+  .btn.primary { background: var(--fg); color: var(--bg); }
+  .btn.amber { background: var(--amber); color: var(--amber-ink); }
+  .btn.ghost { border: 1px solid var(--line-strong); color: var(--fg); }
+  svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .arrow { color: var(--fg-3); display: flex; align-items: center; justify-content: center; }
+  .bar { height: 6px; border-radius: 3px; background: var(--raised); overflow: hidden; }
+  .bar > span { display: block; height: 100%; background: var(--amber); border-radius: 3px; }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1fr 560px; gap: 64px; align-items: center; height: 100%; }
+  .spec li { list-style: none; display: grid; grid-template-columns: 72px 1fr auto; align-items: center; gap: 16px; height: 66px; border-top: 1px solid var(--line); font-size: 28px; }
+  .spec li:last-child { border-bottom: 1px solid var(--line); }
+  .spec .n { font-family: var(--mono); font-size: 13px; color: var(--fg-3); }
+
+  /* how it works */
+  .steps { display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr; gap: 0; margin-top: 44px; align-items: stretch; }
+  .step { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+  .step h3 { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+  .line-row { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-size: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { height: 30px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); font-size: 14px; color: var(--fg-2); }
+
+  /* listing table */
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th { text-align: left; font-weight: 400; font-size: 13px; color: var(--fg-3); padding: 0 16px 12px; }
+  td { padding: 0 16px; height: 58px; border-top: 1px solid var(--line); white-space: nowrap; }
+  td .count { font-family: var(--mono); font-size: 12px; color: var(--fg-3); margin-left: 8px; }
+  .slot { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px dashed rgb(237 237 237 / 0.18); color: var(--fg-3); font-size: 14px; }
+
+  /* builds */
+  .flow { display: grid; grid-template-columns: 1fr 36px 1.25fr 36px 1.15fr 36px 1fr; align-items: stretch; margin-top: 48px; }
+  .flow .panel { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .flow .label { font-size: 13px; color: var(--fg-3); }
+  .ipa { width: 64px; height: 76px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--raised); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; font-family: var(--mono); font-size: 13px; color: var(--fg-2); position: relative; }
+  .ipa::before { content: ""; position: absolute; top: -1px; right: -1px; width: 18px; height: 18px; background: var(--bg); border-left: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); border-bottom-left-radius: 6px; }
+  dl.kv { display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; font-size: 14px; }
+  dl.kv dt { color: var(--fg-3); }
+  dl.kv dd { font-family: var(--mono); font-size: 14px; }
+
+  /* screenshots */
+  .phones { display: flex; gap: 28px; justify-content: center; margin-top: 40px; }
+  .shot { width: 210px; height: 380px; border-radius: 20px; background: #efe4d6; padding: 22px 18px 0; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+  .shot .headline { color: #1f1b16; font-size: 18px; line-height: 1.3; font-weight: 600; text-align: center; letter-spacing: -0.01em; height: 47px; display: flex; align-items: center; }
+  .device { margin-top: 18px; width: 158px; flex: 1; border-radius: 26px 26px 0 0; background: #101114; border: 5px solid #2b2b2e; border-bottom: none; padding: 26px 12px 0; display: flex; flex-direction: column; gap: 9px; }
+  .device .t { color: #f2f2f2; font-size: 15px; font-weight: 600; }
+  .device .blk { height: 54px; border-radius: 10px; background: #1c1c1f; padding: 9px; display: flex; flex-direction: column; justify-content: space-between; }
+  .device .blk i { display: block; height: 4px; border-radius: 2px; background: #2c2c30; }
+  .device .blk i.fill { background: #ffb547; width: 64%; }
+  .device .cta { height: 26px; border-radius: 9px; background: #f2f2f2; }
+  .shot-meta { display: flex; justify-content: center; gap: 28px; margin-top: 14px; }
+  .shot-meta > div { width: 210px; display: flex; justify-content: center; }
+
+  /* agent */
+  .chat { display: flex; flex-direction: column; gap: 14px; }
+  .bubble { align-self: flex-end; max-width: 760px; background: var(--raised); border-radius: 14px; padding: 14px 18px; font-size: 16px; line-height: 1.5; }
+  .tool { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); font-size: 14px; }
+  .tool .name { font-family: var(--mono); font-size: 14px; }
+  .tool .state { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--fg-3); font-size: 13px; }
+  .approve { border-color: rgb(245 197 66 / 0.35); background: rgb(245 197 66 / 0.06); height: auto; padding: 16px 18px; flex-wrap: wrap; }
+
+  /* pricing */
+  .chart { position: relative; height: 330px; margin-top: 36px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 28px; align-items: end; padding: 0 8px; border-bottom: 1px solid var(--line-strong); }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .col .price { font-family: var(--mono); font-size: 15px; }
+  .col .b { width: 100%; border-radius: 8px 8px 0 0; background: #5c5c62; }
+  .col .b.high { background: #a1a1a6; }
+  .col .b.low { background: #3a3a3e; }
+  .base { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--amber); }
+  .base span { position: absolute; right: 0; top: -30px; font-family: var(--mono); font-size: 14px; color: var(--amber); }
+  .axis { display: grid; grid-template-columns: repeat(7, 1fr); gap: 28px; padding: 14px 8px 0; }
+  .axis span { display: flex; justify-content: center; gap: 8px; align-items: center; font-size: 14px; color: var(--fg-2); }
+
+  /* keys */
+  .lane { display: grid; grid-template-columns: 1fr 36px 1fr 36px 1fr 36px 1fr; align-items: stretch; }
+  .node { padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; }
+  .node .k { font-size: 13px; color: var(--fg-3); }
+  .node .v { font-size: 17px; font-weight: 500; }
+  .node .s { font-size: 13px; color: var(--fg-2); line-height: 1.5; }
+  .lane-label { font-family: var(--mono); font-size: 13px; color: var(--fg-3); margin: 28px 0 12px; }
+</style>
+</head>
+<body>
+
+<!-- ─────────────────────────────── 1. Hero ─────────────────────────────── -->
+<section class="card h640" data-name="hero">
+  <div class="hero">
+    <div>
+      <div class="row" style="gap:14px;margin-bottom:56px">
+        <svg viewBox="0 0 64 64" width="40" height="40" fill="none"><rect width="64" height="64" rx="14" fill="#141415"/><rect x="1" y="1" width="62" height="62" rx="13" stroke="#ededed" stroke-opacity="0.16" stroke-width="2"/><rect x="14" y="15" width="30" height="7" rx="3.5" fill="#ededed"/><rect x="10" y="26.5" width="44" height="11" rx="3.5" fill="#f5c542"/><rect x="15" y="30" width="22" height="4" rx="2" fill="#141415"/><rect x="20" y="42" width="30" height="7" rx="3.5" fill="#ededed"/></svg>
+        <span style="font-size:20px;font-weight:500">StoreLocalizer</span>
+      </div>
+      <h1>Your App Store and Google&nbsp;Play pages, in every language</h1>
+      <p class="lead" style="margin-top:24px;max-width:540px">Translate listings, ship localized screenshots, upload builds and let an agent do the repetitive parts. Open source, runs in your browser.</p>
+    </div>
+    <div>
+      <ul class="spec">
+        <li><span class="keycap">en-US</span><span class="faint">Strength, runs and streaks</span><span class="n">26/30</span></li>
+        <li><span class="keycap">fr-FR</span><span>Muscu, course et séries</span><span class="n">23/30</span></li>
+        <li><span class="keycap">ja</span><span><span class="mark">筋トレ、ラン、連続記録</span></span><span class="n">11/30</span></li>
+        <li><span class="keycap">ar-SA</span><span dir="rtl" style="text-align:left">القوة والجري والاستمرار</span><span class="n">23/30</span></li>
+        <li><span class="keycap">ko</span><span>근력, 러닝, 연속 기록</span><span class="n">13/30</span></li>
+        <li><span class="keycap">pt-BR</span><span>Força, corridas e sequências</span><span class="n">28/30</span></li>
+      </ul>
+      <div class="row mono" style="justify-content:space-between;margin-top:14px;font-size:13px;color:var(--fg-3)"><span>App Store subtitle</span><span>Apple limit: 30 characters</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────── 2. How it works ─────────────────────────── -->
+<section class="card" data-name="how-it-works">
+  <span class="eyebrow">How it works</span>
+  <h2 style="margin-top:12px">Connect once, translate, push</h2>
+  <div class="steps">
+    <div class="panel step">
+      <span class="eyebrow">01</span>
+      <h3>Connect your stores</h3>
+      <div class="line-row"><svg class="i faint" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="mono">AuthKey_DEMO4KEY42.p8</span></div>
+      <div class="line-row"><svg class="i faint" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="mono">play-service-account.json</span></div>
+      <p class="small" style="margin-top:auto">Encrypted with your password, kept in your browser</p>
+    </div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel step">
+      <span class="eyebrow">02</span>
+      <h3>Translate with your AI</h3>
+      <div class="chips"><span class="chip">Claude</span><span class="chip">GPT</span><span class="chip">Gemini</span><span class="chip">Mistral</span><span class="chip">Grok</span><span class="chip faint">+6</span></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap"><span class="keycap">Name 30</span><span class="keycap">Subtitle 30</span><span class="keycap">Keywords 100</span></div>
+      <p class="small" style="margin-top:auto">Store limits and protected brand words are respected</p>
+    </div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel step">
+      <span class="eyebrow">03</span>
+      <h3>Push to the stores</h3>
+      <div class="line-row"><span class="dot"></span>App Store Connect<span class="mono faint" style="margin-left:auto">12 locales</span></div>
+      <div class="line-row"><span class="dot"></span>Google Play<span class="mono faint" style="margin-left:auto">edit committed</span></div>
+      <p class="small" style="margin-top:auto">Through the official APIs, nothing to copy and paste</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 3. Listing ────────────────────────────── -->
+<section class="card" data-name="listing">
+  <div class="row" style="justify-content:space-between;align-items:flex-end">
+    <div>
+      <span class="eyebrow">Store listings</span>
+      <h2 style="margin-top:12px">Every field, every locale, one screen</h2>
+    </div>
+    <span class="small">FitTrack: Workout Log <span class="faint">· version 2.4</span></span>
+  </div>
+  <div class="panel" style="margin-top:36px;padding:20px 8px 4px">
+    <table>
+      <tr><th>Locale</th><th>Subtitle</th><th>Keywords</th><th>What’s New</th></tr>
+      <tr><td><span class="keycap">en-US</span></td><td>Strength, runs and streaks<span class="count">26/30</span></td><td class="mono" style="font-size:13px;color:var(--fg-2)">workout,gym,strength,running…<span class="count">71/100</span></td><td style="color:var(--fg-2)">Weekly plans are here. Pick your…</td></tr>
+      <tr><td><span class="keycap">fr-FR</span></td><td>Muscu, course et séries<span class="count">23/30</span></td><td class="mono" style="font-size:13px;color:var(--fg-2)">musculation,salle,course…<span class="count">78/100</span></td><td style="color:var(--fg-2)">Les plans hebdomadaires arrivent…</td></tr>
+      <tr><td><span class="keycap">de-DE</span></td><td>Kraft, Läufe und Serien<span class="count">23/30</span></td><td class="mono" style="font-size:13px;color:var(--fg-2)">training,fitnessstudio,kraft…<span class="count">64/100</span></td><td style="color:var(--fg-2)">Wochenpläne sind da. Wähle deine…</td></tr>
+      <tr><td><span class="keycap">ja</span></td><td>筋トレ、ラン、連続記録<span class="count">11/30</span></td><td class="mono" style="font-size:13px;color:var(--fg-2)">ワークアウト,ジム,筋トレ…<span class="count">38/100</span></td><td><span class="slot">Empty</span></td></tr>
+      <tr><td><span class="keycap">ko</span></td><td>근력, 러닝, 연속 기록<span class="count">13/30</span></td><td class="mono" style="font-size:13px;color:var(--fg-2)">운동,헬스,근력,러닝…<span class="count">22/100</span></td><td><span class="slot">Empty</span></td></tr>
+      <tr><td><span class="keycap">pt-BR</span></td><td>Força, corridas e sequências<span class="count">28/30</span></td><td class="mono" style="font-size:13px;color:var(--fg-2)">treino,academia,força…<span class="count">35/100</span></td><td><span class="slot">Empty</span></td></tr>
+    </table>
+  </div>
+  <div class="row" style="margin-top:24px;justify-content:space-between">
+    <div class="row" style="gap:16px;flex:1;max-width:560px">
+      <span class="small" style="white-space:nowrap">Translating What’s New</span>
+      <div class="bar" style="flex:1"><span style="width:64%"></span></div>
+      <span class="mono small">2 of 3</span>
+    </div>
+    <span class="btn amber"><svg class="i" viewBox="0 0 24 24"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>Translate 3 locales</span>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 4. Builds ─────────────────────────────── -->
+<section class="card" data-name="builds">
+  <span class="eyebrow">Builds</span>
+  <h2 style="margin-top:12px">Drop an .ipa, get a TestFlight build</h2>
+  <p class="lead" style="margin-top:12px;max-width:760px">Like EAS Submit, from the browser. The version and build number are read from the file, the upload goes through the App Store Connect API.</p>
+  <div class="flow">
+    <div class="panel" style="align-items:flex-start">
+      <span class="label">Drop</span>
+      <div class="ipa">.ipa</div>
+      <span class="mono" style="font-size:14px">FitTrack.ipa</span>
+      <span class="mono faint" style="font-size:13px">182 MB</span>
+    </div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel">
+      <span class="label">Read from Info.plist</span>
+      <dl class="kv">
+        <dt>Bundle ID</dt><dd>com.example.fittrack</dd>
+        <dt>Version</dt><dd>2.4 <span class="faint">(142)</span></dd>
+        <dt>Platform</dt><dd><span class="keycap">iOS</span> <span class="faint" style="font-size:13px">17.0+</span></dd>
+      </dl>
+      <span class="row small" style="gap:8px;margin-top:auto"><span class="dot"></span>Matches the selected app</span>
+    </div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel">
+      <span class="label">Upload</span>
+      <span style="font-size:15px">Sending the .ipa</span>
+      <div class="bar"><span style="width:64%"></span></div>
+      <span class="mono faint" style="font-size:13px">117 MB of 182 MB</span>
+      <span class="small" style="margin-top:auto">Parts go straight to Apple</span>
+    </div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel">
+      <span class="label">TestFlight</span>
+      <div class="row" style="justify-content:space-between"><span class="mono" style="font-size:14px">2.4 (142)</span><span class="small">Processing</span></div>
+      <div class="row" style="justify-content:space-between"><span class="mono faint" style="font-size:14px">2.3.1 (138)</span><span style="font-size:13px;color:var(--green)">Ready</span></div>
+      <span class="small" style="margin-top:auto">Followed until Apple is done</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────── 5. Screenshots ──────────────────────────── -->
+<section class="card" data-name="screenshots">
+  <div class="row" style="justify-content:space-between;align-items:flex-end">
+    <div>
+      <span class="eyebrow">Screenshots</span>
+      <h2 style="margin-top:12px">One template, a headline per language</h2>
+    </div>
+    <div class="row" style="gap:8px"><span class="keycap">6.9″ 1320×2868</span><span class="keycap">6.5″</span><span class="keycap">iPad 13″</span><span class="keycap">Play</span></div>
+  </div>
+  <div class="phones">
+    <div class="shot"><div class="headline">Every workout in one log</div><div class="device"><div class="t">Today</div><div class="blk"><i style="width:40%"></i><i class="fill"></i></div><div class="blk"><i style="width:30%"></i><i style="width:55%"></i></div><div class="cta"></div></div></div>
+    <div class="shot"><div class="headline">Chaque séance dans un journal</div><div class="device"><div class="t">Aujourd’hui</div><div class="blk"><i style="width:40%"></i><i class="fill"></i></div><div class="blk"><i style="width:30%"></i><i style="width:55%"></i></div><div class="cta"></div></div></div>
+    <div class="shot"><div class="headline">ワークアウトを<br>ひとつの記録に</div><div class="device"><div class="t">今日</div><div class="blk"><i style="width:40%"></i><i class="fill"></i></div><div class="blk"><i style="width:30%"></i><i style="width:55%"></i></div><div class="cta"></div></div></div>
+    <div class="shot"><div class="headline">Jedes Training in einem Log</div><div class="device"><div class="t">Heute</div><div class="blk"><i style="width:40%"></i><i class="fill"></i></div><div class="blk"><i style="width:30%"></i><i style="width:55%"></i></div><div class="cta"></div></div></div>
+  </div>
+  <div class="shot-meta"><div><span class="keycap">en-US</span></div><div><span class="keycap">fr-FR</span></div><div><span class="keycap">ja</span></div><div><span class="keycap">de-DE</span></div></div>
+  <p class="small" style="text-align:center;margin-top:20px">2D and 3D frames · headlines written and translated · placed per locale or exported as one ZIP per size</p>
+</section>
+
+<!-- ────────────────────────────── 6. Agent ─────────────────────────────── -->
+<section class="card" data-name="agent">
+  <div class="row" style="justify-content:space-between;align-items:flex-end">
+    <div>
+      <span class="eyebrow">Agent</span>
+      <h2 style="margin-top:12px">Ask in one sentence, approve the writes</h2>
+    </div>
+    <span class="small">24 tools on your real accounts</span>
+  </div>
+  <div class="chat" style="margin-top:36px">
+    <div class="bubble">Translate the What’s New of 2.4 into French and German, then update those locales</div>
+    <div class="tool"><svg class="i faint" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="name">asc_get_version_localizations</span><span class="state">done <span class="dot"></span></span></div>
+    <div class="tool"><svg class="i faint" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="name">translate_texts</span><span class="keycap">fr-FR</span><span class="keycap">de-DE</span><span class="state">done <span class="dot"></span></span></div>
+    <div class="tool approve">
+      <svg class="i" viewBox="0 0 24 24" style="color:var(--amber)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+      <span class="name">asc_update_version_localization</span><span class="keycap">fr-FR</span><span class="keycap">de-DE</span>
+      <span class="state" style="color:var(--fg-2)">Writes to App Store Connect</span>
+      <div class="row" style="width:100%;margin-top:14px;gap:10px;padding-left:30px">
+        <span class="small" style="flex:1">“Les plans hebdomadaires arrivent. Choisissez vos jours…”</span>
+        <span class="btn ghost" style="height:36px">Skip</span>
+        <span class="btn amber" style="height:36px">Approve</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 7. Pricing ────────────────────────────── -->
+<section class="card" data-name="pricing">
+  <div class="row" style="justify-content:space-between;align-items:flex-end">
+    <div>
+      <span class="eyebrow">Subscription pricing</span>
+      <h2 style="margin-top:12px">A fair price in each of 175 storefronts</h2>
+    </div>
+    <span class="small">From your US price, adjusted to GDP per capita</span>
+  </div>
+  <div class="chart">
+    <div class="base" style="bottom:299px"><span>Base $9.99</span></div>
+    <div class="col"><span class="price">$9.99</span><div class="b high" style="height:299px"></div></div>
+    <div class="col"><span class="price">$7.99</span><div class="b high" style="height:239px"></div></div>
+    <div class="col"><span class="price">$7.99</span><div class="b high" style="height:239px"></div></div>
+    <div class="col"><span class="price">$6.99</span><div class="b high" style="height:209px"></div></div>
+    <div class="col"><span class="price">$5.99</span><div class="b" style="height:179px"></div></div>
+    <div class="col"><span class="price">$3.49</span><div class="b low" style="height:104px"></div></div>
+    <div class="col"><span class="price">$2.99</span><div class="b low" style="height:89px"></div></div>
+  </div>
+  <div class="axis"><span><span class="keycap">US</span></span><span><span class="keycap">DE</span></span><span><span class="keycap">GB</span></span><span><span class="keycap">FR</span></span><span><span class="keycap">JP</span></span><span><span class="keycap">BR</span></span><span><span class="keycap">IN</span></span></div>
+  <div class="row small" style="gap:24px;margin-top:28px;justify-content:center">
+    <span class="row" style="gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#a1a1a6"></span>High GDP</span>
+    <span class="row" style="gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#5c5c62"></span>Medium GDP</span>
+    <span class="row" style="gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#3a3a3e"></span>Low GDP</span>
+    <span>Then sent to App Store Connect</span>
+  </div>
+</section>
+
+<!-- ────────────────────────────── 8. Keys ──────────────────────────────── -->
+<section class="card" data-name="keys">
+  <span class="eyebrow">Security</span>
+  <h2 style="margin-top:12px">Your keys never leave the browser</h2>
+  <p class="lead" style="margin-top:12px;max-width:820px">The only server is a thin CORS proxy that forwards your request and stores nothing. Everything else happens on your machine.</p>
+  <div class="lane-label">Saving the key</div>
+  <div class="lane">
+    <div class="panel node"><span class="k">You drop</span><span class="v mono" style="font-size:15px">AuthKey_….p8</span><span class="s">and choose a password</span></div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel node"><span class="k">Encrypted</span><span class="v">AES-GCM</span><span class="s">PBKDF2, 100k iterations</span></div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel node"><span class="k">Stored</span><span class="v">localStorage</span><span class="s">only the encrypted copy</span></div>
+    <div></div><div></div>
+  </div>
+  <div class="lane-label">Calling Apple</div>
+  <div class="lane">
+    <div class="panel node"><span class="k">Decrypted</span><span class="v">In memory</span><span class="s">gone on reload</span></div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel node" style="border-color:rgb(245 197 66 / 0.35)"><span class="k">Signed here</span><span class="v">ES256 JWT</span><span class="s">cached 19 minutes</span></div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel node"><span class="k">Forwarded</span><span class="v">CORS proxy</span><span class="s">stores nothing</span></div>
+    <div class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    <div class="panel node"><span class="k">Answered by</span><span class="v">Apple</span><span class="s mono" style="font-size:12px">api.appstoreconnect.apple.com</span></div>
+  </div>
+</section>
+
+<!-- ─────────────── Social preview, rendered to public/og.png ─────────────── -->
+<section class="card og" data-name="og" data-file="public/og.png" data-scale="1">
+  <div style="display:grid;grid-template-columns:1fr 430px;gap:48px;height:100%;align-items:center">
+    <div>
+      <div class="row" style="gap:14px;margin-bottom:40px"><svg viewBox="0 0 64 64" width="44" height="44" fill="none"><rect width="64" height="64" rx="14" fill="#141415"/><rect x="1" y="1" width="62" height="62" rx="13" stroke="#ededed" stroke-opacity="0.16" stroke-width="2"/><rect x="14" y="15" width="30" height="7" rx="3.5" fill="#ededed"/><rect x="10" y="26.5" width="44" height="11" rx="3.5" fill="#f5c542"/><rect x="15" y="30" width="22" height="4" rx="2" fill="#141415"/><rect x="20" y="42" width="30" height="7" rx="3.5" fill="#ededed"/></svg><span style="font-size:22px;font-weight:500">StoreLocalizer</span></div>
+      <h1 style="font-size:50px">Your App Store and Google&nbsp;Play pages, in every language</h1>
+      <div class="row" style="gap:22px;margin-top:32px;font-size:17px;color:var(--fg-2)">
+        <span class="row" style="gap:8px"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.8086 14.9194l6.1107-11.0368c.0837-.1513.1682-.302.2437-.4584.0685-.142.1267-.2854.1646-.4403.0803-.3259.0588-.6656-.066-.9767-.1238-.3095-.3417-.5678-.6201-.7355a1.4175 1.4175 0 0 0-.921-.1924c-.3207.043-.6135.1935-.8443.4288-.1094.1118-.1996.2361-.2832.369-.092.1463-.175.2979-.259.4492l-.3864.6979-.3865-.6979c-.0837-.1515-.1667-.303-.2587-.4492-.0837-.1329-.1739-.2572-.2835-.369-.2305-.2353-.5233-.3857-.844-.429a1.4181 1.4181 0 0 0-.921.1926c-.2784.1677-.4964.426-.6203.7355-.1246.311-.1461.6508-.066.9767.038.155.0962.2984.1648.4403.0753.1564.1598.307.2437.4584l1.248 2.2543-4.8625 8.7825H2.0295c-.1676 0-.3351-.0007-.5026.0092-.1522.009-.3004.0284-.448.0714-.3108.0906-.5822.2798-.7783.548-.195.2665-.3006.5929-.3006.9279 0 .3352.1057.6612.3006.9277.196.2683.4675.4575.7782.548.1477.043.296.0623.4481.0715.1675.01.335.009.5026.009h13.0974c.0171-.0357.059-.1294.1-.2697.415-1.4151-.6156-2.843-2.0347-2.843zM3.113 18.5418l-.7922 1.5008c-.0818.1553-.1644.31-.2384.4705-.067.1458-.124.293-.1611.452-.0785.3346-.0576.6834.0645 1.0029.1212.3175.3346.583.607.7549.2727.172.5891.2416.9013.1975.3139-.044.6005-.1986.8263-.4402.1072-.1148.1954-.2424.2772-.3787.0902-.1503.1714-.3059.2535-.4612L6 19.4636c-.0896-.149-.9473-1.4704-2.887-.9218m20.5861-3.0056a1.4707 1.4707 0 0 0-.779-.5407c-.1476-.0425-.2961-.0616-.4483-.0705-.1678-.0099-.3352-.0091-.503-.0091H18.648l-4.3891-7.817c-.6655.7005-.9632 1.485-1.0773 2.1976-.1655 1.0333.0367 2.0934.546 3.0004l5.2741 9.3933c.084.1494.167.299.2591.4435.0837.131.1739.2537.2836.364.231.2323.5238.3809.8449.4232.3192.0424.643-.0244.9217-.1899.2784-.1653.4968-.4204.621-.7257.1246-.3072.146-.6425.0658-.9641-.0381-.1529-.0962-.2945-.165-.4346-.0753-.1543-.1598-.303-.2438-.4524l-1.216-2.1662h1.596c.1677 0 .3351.0009.5029-.009.1522-.009.3007-.028.4483-.0705a1.4707 1.4707 0 0 0 .779-.5407A1.5386 1.5386 0 0 0 24 16.452a1.539 1.539 0 0 0-.3009-.9158Z"/></svg>App Store Connect</span>
+        <span class="row" style="gap:8px"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z"/></svg>Google Play</span>
+        <span class="faint">Open source</span>
+      </div>
+    </div>
+    <ul class="spec">
+      <li><span class="keycap">en-US</span><span class="faint" style="font-size:24px">Strength, runs and streaks</span><span class="n">26/30</span></li>
+      <li><span class="keycap">fr-FR</span><span style="font-size:24px">Muscu, course et séries</span><span class="n">23/30</span></li>
+      <li><span class="keycap">ja</span><span style="font-size:24px"><span class="mark">筋トレ、ラン、連続記録</span></span><span class="n">11/30</span></li>
+      <li><span class="keycap">ko</span><span style="font-size:24px">근력, 러닝, 연속 기록</span><span class="n">13/30</span></li>
+      <li><span class="keycap">de-DE</span><span style="font-size:24px">Kraft, Läufe und Serien</span><span class="n">23/30</span></li>
+    </ul>
+  </div>
+</section>
+
+</body>
+</html>
