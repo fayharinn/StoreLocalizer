@@ -38,15 +38,15 @@ export default function AssetDialog({ open, asset, refData, isSaving, onClose, o
           <MediaThumb asset={asset} className="h-44" />
           <div className="flex-1 space-y-4">
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-              <dt className="text-muted-foreground">State</dt>
+              <dt className="text-faint">State</dt>
               <dd>{ASSET_STATE_LABELS[asset.state] || asset.state}</dd>
-              <dt className="text-muted-foreground">Category</dt>
+              <dt className="text-faint">Category</dt>
               <dd>{ASSET_CATEGORIES[asset.category] || asset.category || '—'}</dd>
-              <dt className="text-muted-foreground">Matched spec</dt>
-              <dd>{spec ? `${formatSpecDimensions(spec)} (${spec.shortName})` : '—'}</dd>
+              <dt className="text-faint">Matched spec</dt>
+              <dd className="tabular-nums">{spec ? `${formatSpecDimensions(spec)} (${spec.shortName})` : '—'}</dd>
             </dl>
             {asset.stateDetails?.length > 0 && (
-              <p className="text-xs text-red-500">{asset.stateDetails.map(d => d.description || d.code).join(' · ')}</p>
+              <p className="text-xs text-destructive">{asset.stateDetails.map(d => d.description || d.code).join(' · ')}</p>
             )}
 
             <div className="space-y-1.5">
@@ -69,7 +69,7 @@ export default function AssetDialog({ open, asset, refData, isSaving, onClose, o
                   placeholder="00:00:05:00"
                   className={timeCodeValid ? '' : 'border-destructive'}
                 />
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-faint">
                   The still shown before playback, on every placement of this video.
                 </p>
               </div>

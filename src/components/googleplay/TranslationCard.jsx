@@ -4,13 +4,13 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sparkles, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Languages, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { GP_LOCALES } from '@/services/googlePlayService'
 
 const TRANSLATABLE_FIELDS = [
   { key: 'title', label: 'Title', limit: 30 },
-  { key: 'shortDescription', label: 'Short Description', limit: 80 },
-  { key: 'fullDescription', label: 'Full Description', limit: 4000 },
+  { key: 'shortDescription', label: 'Short description', limit: 80 },
+  { key: 'fullDescription', label: 'Full description', limit: 4000 },
 ]
 
 export default function TranslationCard({
@@ -30,31 +30,24 @@ export default function TranslationCard({
   handleTranslate,
 }) {
   return (
-    <Card id="gp-translation" className="border-border/50 shadow-sm card-hover scroll-mt-6">
+    <Card id="gp-translation" className="scroll-mt-6">
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">AI Translation</CardTitle>
-            <CardDescription>Translate listings to multiple languages</CardDescription>
-          </div>
-        </div>
+        <CardTitle className="text-base font-medium">Translation</CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">Translate listings to multiple languages</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {translationAlert.show && (
-          <Alert className={translationAlert.success ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-amber-500/50 bg-amber-500/10'}>
-            {translationAlert.success ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <AlertCircle className="h-4 w-4 text-amber-500" />}
-            <AlertTitle className={translationAlert.success ? 'text-emerald-500' : 'text-amber-500'}>
-              {translationAlert.success ? 'Translation Complete' : 'Translation Completed with Errors'}
+          <Alert className={translationAlert.success ? 'border-positive/30 bg-positive/10' : 'border-highlight/30 bg-highlight/10'}>
+            {translationAlert.success ? <CheckCircle2 className="h-4 w-4 text-positive" /> : <AlertCircle className="h-4 w-4 text-highlight-ink" />}
+            <AlertTitle className={`font-medium ${translationAlert.success ? 'text-positive' : 'text-highlight-ink'}`}>
+              {translationAlert.success ? 'Translation complete' : 'Translation completed with errors'}
             </AlertTitle>
             <AlertDescription>{translationAlert.message}</AlertDescription>
           </Alert>
         )}
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Source Language</Label>
+          <Label className="text-sm font-medium">Source language</Label>
           <Select value={sourceLocale} onValueChange={setSourceLocale}>
             <SelectTrigger className="h-10 max-w-xs">
               <SelectValue />
@@ -73,16 +66,16 @@ export default function TranslationCard({
         </div>
 
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Fields to Translate</Label>
+          <Label className="text-sm font-medium">Fields to translate</Label>
           <div className="flex flex-wrap gap-2">
             {TRANSLATABLE_FIELDS.map(field => (
               <button
                 key={field.key}
                 onClick={() => handleFieldToggle(field.key)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
                   fieldsToTranslate.includes(field.key)
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border hover:border-primary/50'
+                    ? 'border-foreground/40 bg-secondary text-foreground'
+                    : 'border-border text-muted-foreground hover:border-foreground/30'
                 }`}
               >
                 <div className={`h-4 w-4 rounded border-2 flex items-center justify-center ${
@@ -95,7 +88,7 @@ export default function TranslationCard({
                   )}
                 </div>
                 {field.label}
-                <Badge variant="secondary" className="text-xs">{field.limit}</Badge>
+                <Badge variant="outline" className="text-xs font-mono tabular-nums">{field.limit.toLocaleString('en-US')}</Badge>
               </button>
             ))}
           </div>
@@ -103,7 +96,7 @@ export default function TranslationCard({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Target Languages</Label>
+            <Label className="text-sm font-medium">Target languages</Label>
             <Button
               variant="ghost"
               size="sm"
@@ -115,7 +108,7 @@ export default function TranslationCard({
                 }
               }}
             >
-              {targetLocales.length === availableTargetLocales.length ? 'Deselect All' : 'Select All'}
+              {targetLocales.length === availableTargetLocales.length ? 'Deselect all' : 'Select all'}
             </Button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto p-1">
@@ -126,12 +119,12 @@ export default function TranslationCard({
                 <button
                   key={locale.code}
                   onClick={() => handleLocaleToggle(locale.code)}
-                  className={`flex items-center gap-2 p-2 rounded-lg border text-left text-sm transition-all ${
+                  className={`flex items-center gap-2 p-2 rounded-lg border text-left text-sm transition-colors ${
                     isSelected
-                      ? 'border-primary bg-primary/5'
+                      ? 'border-foreground/40 bg-secondary'
                       : exists
-                        ? 'border-emerald-500/30 bg-emerald-500/5'
-                        : 'border-border hover:border-primary/50'
+                        ? 'border-border bg-secondary/40'
+                        : 'border-border hover:border-foreground/30'
                   }`}
                 >
                   <div className={`h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 ${
@@ -145,7 +138,7 @@ export default function TranslationCard({
                   </div>
                   <span>{locale.flag}</span>
                   <span className="truncate">{locale.name}</span>
-                  {exists && <CheckCircle2 className="h-3 w-3 text-emerald-500 ml-auto shrink-0" />}
+                  {exists && <CheckCircle2 className="h-3 w-3 text-faint ml-auto shrink-0" aria-label="Already listed" />}
                 </button>
               )
             })}
@@ -156,17 +149,18 @@ export default function TranslationCard({
           <Button
             onClick={handleTranslate}
             disabled={isTranslating || !currentAiApiKey || targetLocales.length === 0 || fieldsToTranslate.length === 0}
-            className="w-full h-12 text-base font-semibold gradient-primary hover:opacity-90 border-0"
+            variant="highlight"
+            className="w-full"
             size="lg"
           >
             {isTranslating ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Translating... ({translationProgress.current}/{translationProgress.total})
+              <span className="flex items-center gap-2 tabular-nums">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Translating ({translationProgress.current}/{translationProgress.total})
               </span>
             ) : (
-              <span className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
+              <span className="flex items-center gap-2 tabular-nums">
+                <Languages className="h-4 w-4" />
                 Translate {targetLocales.length > 0 && `(${targetLocales.length} languages)`}
               </span>
             )}

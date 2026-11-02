@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Images } from 'lucide-react'
 import LocalizedMediaPanel from './LocalizedMediaPanel'
 
 // Placements can only be added while the version hasn't been approved
@@ -17,22 +16,15 @@ export default function ProductPageMediaCard({ selectedVersion, versionLocalizat
   const editable = !selectedVersion?.state || EDITABLE_VERSION_STATES.includes(selectedVersion.state)
 
   return (
-    <Card id="asc-media" className="scroll-mt-44 border-border/50 shadow-sm">
+    <Card id="asc-media" className="scroll-mt-44">
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg">
-            <Images className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              Product Page Media
-              <Badge variant="secondary" className="text-[10px]">Asset Library</Badge>
-            </CardTitle>
-            <CardDescription>
-              Screenshots, app previews, and the iOS 27 header &amp; search results assets of version {selectedVersion.versionString}
-            </CardDescription>
-          </div>
-        </div>
+        <CardTitle className="flex items-center gap-2 text-base font-medium">
+          Product page media
+          <Badge variant="secondary" className="text-xs font-normal">Asset Library</Badge>
+        </CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">
+          Screenshots, app previews, and the iOS 27 header &amp; search results assets of version {selectedVersion.versionString}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <LocalizedMediaPanel

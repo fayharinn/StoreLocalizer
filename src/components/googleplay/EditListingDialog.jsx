@@ -15,13 +15,14 @@ export default function EditListingDialog({
   return (
     <Dialog open={editDialog.open} onOpenChange={(open) => !open && setEditDialog({ ...editDialog, open: false })}>
       <DialogContent className="sm:max-w-[600px] gap-0 p-0 overflow-hidden max-h-[90vh]">
-        <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/30">
+        <DialogHeader className="p-6 pb-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{GP_LOCALES.find(l => l.code === editDialog.locale)?.flag || '🌐'}</span>
+            <span className="text-2xl">{GP_LOCALES.find(l => l.code === editDialog.locale)?.flag || '🌐'}</span>
             <div>
-              <DialogTitle className="text-xl">Edit Listing</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-base font-medium">Edit listing</DialogTitle>
+              <DialogDescription className="flex items-center gap-2 text-sm text-muted-foreground">
                 {GP_LOCALES.find(l => l.code === editDialog.locale)?.name || editDialog.locale}
+                {editDialog.locale && <span className="keycap">{editDialog.locale}</span>}
               </DialogDescription>
             </div>
           </div>
@@ -29,7 +30,7 @@ export default function EditListingDialog({
         <ScrollArea className="max-h-[60vh]">
           <div className="p-6 space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">Title (max 30 chars)</Label>
+              <Label htmlFor="title" className="text-sm font-medium">Title (max 30 characters)</Label>
               <Input
                 id="title"
                 value={editDialog.listing?.title || ''}
@@ -40,12 +41,12 @@ export default function EditListingDialog({
                 maxLength={30}
                 className="text-base"
               />
-              <p className="text-xs text-muted-foreground text-right">
+              <p className="text-xs text-faint text-right tabular-nums">
                 {editDialog.listing?.title?.length || 0}/30
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="shortDescription" className="text-sm font-medium">Short Description (max 80 chars)</Label>
+              <Label htmlFor="shortDescription" className="text-sm font-medium">Short description (max 80 characters)</Label>
               <Textarea
                 id="shortDescription"
                 value={editDialog.listing?.shortDescription || ''}
@@ -57,12 +58,12 @@ export default function EditListingDialog({
                 rows={2}
                 className="resize-none"
               />
-              <p className="text-xs text-muted-foreground text-right">
+              <p className="text-xs text-faint text-right tabular-nums">
                 {editDialog.listing?.shortDescription?.length || 0}/80
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fullDescription" className="text-sm font-medium">Full Description (max 4000 chars)</Label>
+              <Label htmlFor="fullDescription" className="text-sm font-medium">Full description (max 4,000 characters)</Label>
               <Textarea
                 id="fullDescription"
                 value={editDialog.listing?.fullDescription || ''}
@@ -74,7 +75,7 @@ export default function EditListingDialog({
                 rows={10}
                 className="resize-none"
               />
-              <p className="text-xs text-muted-foreground text-right">
+              <p className="text-xs text-faint text-right tabular-nums">
                 {editDialog.listing?.fullDescription?.length || 0}/4000
               </p>
             </div>
@@ -87,18 +88,18 @@ export default function EditListingDialog({
                   ...prev,
                   listing: { ...prev.listing, video: e.target.value }
                 }))}
-                placeholder="https://youtube.com/watch?v=..."
+                placeholder="https://youtube.com/watch?v="
               />
             </div>
           </div>
         </ScrollArea>
-        <DialogFooter className="p-6 pt-4 border-t border-border/50 bg-muted/20">
+        <DialogFooter className="p-6 pt-4 border-t border-border">
           <Button variant="ghost" onClick={() => setEditDialog({ open: false, locale: '', listing: null })}>
             Cancel
           </Button>
-          <Button onClick={handleSaveEdit} className="gradient-primary border-0">
+          <Button onClick={handleSaveEdit}>
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            Save Changes
+            Save changes
           </Button>
         </DialogFooter>
       </DialogContent>

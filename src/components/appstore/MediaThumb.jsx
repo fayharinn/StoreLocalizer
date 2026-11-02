@@ -31,8 +31,8 @@ export default function MediaThumb({ asset, className = 'h-32', fill = false, on
       onClick={onClick}
       style={fill ? undefined : { aspectRatio: ratio }}
       className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted/40 ${fill ? '' : 'max-w-[20rem]'} ${className}
-        ${onClick ? 'cursor-pointer transition-all hover:border-primary/50' : ''}
-        ${selected ? 'border-primary ring-2 ring-primary/40' : 'border-border/50'}`}
+        ${onClick ? 'cursor-pointer transition-colors hover:border-foreground/30' : ''}
+        ${selected ? 'border-highlight ring-2 ring-highlight/40' : 'border-border'}`}
     >
       {url ? (
         <img
@@ -42,7 +42,7 @@ export default function MediaThumb({ asset, className = 'h-32', fill = false, on
           loading="lazy"
         />
       ) : (
-        <Placeholder className="h-6 w-6 text-muted-foreground/50" />
+        <Placeholder className="h-6 w-6 text-faint" />
       )}
       {isVideo && url && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -52,8 +52,8 @@ export default function MediaThumb({ asset, className = 'h-32', fill = false, on
         </div>
       )}
       {(processing || failed || incomplete) && (
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-black/60 py-0.5 text-[10px] text-white">
-          {processing ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertCircle className={`h-3 w-3 ${failed ? 'text-red-300' : ''}`} />}
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-black/60 py-0.5 text-xs text-white">
+          {processing ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertCircle className={`h-3 w-3 ${failed ? 'text-destructive' : ''}`} />}
           {processing ? 'Processing' : failed ? 'Failed' : 'Upload not finished'}
         </div>
       )}

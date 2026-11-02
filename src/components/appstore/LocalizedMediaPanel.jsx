@@ -67,10 +67,10 @@ export default function LocalizedMediaPanel({
 
   if (library.error) {
     return (
-      <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+      <div className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
         <div className="flex-1">
-          <p className="font-medium">Asset Library unavailable</p>
+          <p className="font-medium text-destructive">Asset Library unavailable</p>
           <p className="text-xs text-muted-foreground">{library.error}</p>
         </div>
         <Button size="sm" variant="outline" onClick={library.refresh}>Retry</Button>
@@ -81,14 +81,14 @@ export default function LocalizedMediaPanel({
   if (!library.isReady) {
     return (
       <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading Asset Library…
+        <Loader2 className="mr-2 h-4 w-4 animate-spin text-faint" />
+        Loading Asset Library
       </div>
     )
   }
 
   if (placementTypes.length === 0) {
-    return <p className="text-sm italic text-muted-foreground">Apple doesn't offer media placements for this surface on your account yet.</p>
+    return <p className="text-sm text-muted-foreground">Apple doesn't offer media placements for this surface on your account yet.</p>
   }
 
   const pickerLocalization = picker?.localization
@@ -108,7 +108,7 @@ export default function LocalizedMediaPanel({
               {placementTypes.map(type => (
                 <SelectItem key={type} value={type}>
                   {PLACEMENT_TYPE_LABELS[type] || type}
-                  {CREATIVE_PLACEMENT_TYPES.includes(type) ? '  ✦ iOS 27' : ''}
+                  {CREATIVE_PLACEMENT_TYPES.includes(type) ? ' · iOS 27' : ''}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -124,7 +124,7 @@ export default function LocalizedMediaPanel({
                 return (
                   <SelectItem key={g.groupId} value={g.groupId}>
                     {formatGroupName(g.groupId)}
-                    {dims.length > 0 && <span className="text-muted-foreground"> — {dims.slice(0, 2).join(', ')}{dims.length > 2 ? '…' : ''}</span>}
+                    {dims.length > 0 && <span className="tabular-nums text-faint"> — {dims.slice(0, 2).join(', ')}{dims.length > 2 ? '…' : ''}</span>}
                   </SelectItem>
                 )
               })}
@@ -143,7 +143,7 @@ export default function LocalizedMediaPanel({
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs tabular-nums text-faint">
         {sizes.length > 0 ? `Accepted sizes: ${sizes.join(', ')}` : 'Sizes are validated by Apple after upload'}
         {groupInfo?.maxCount != null && ` · max ${groupInfo.maxCount} per locale`}
         {acceptsVideos && !acceptsImages ? ' · video' : acceptsVideos ? ' · image or video' : ' · image'}
@@ -151,15 +151,15 @@ export default function LocalizedMediaPanel({
       </p>
 
       {readOnly && (
-        <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/40 p-3 text-xs text-muted-foreground">
-          <AlertCircle className="h-4 w-4 shrink-0" />
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+          <AlertCircle className="h-4 w-4 shrink-0 text-faint" />
           {readOnlyReason || 'This surface can no longer be edited.'}
         </div>
       )}
 
       {/* Per-locale placements */}
       {localizations.length === 0 ? (
-        <p className="text-sm italic text-muted-foreground">No locales yet.</p>
+        <p className="text-sm text-muted-foreground">No locales yet</p>
       ) : hasLoaded && (
         <div className="space-y-2">
           {localizations.map(loc => {
@@ -170,27 +170,28 @@ export default function LocalizedMediaPanel({
             const isBusy = busyLocalizationId === loc.id
             const isFull = groupInfo?.maxCount != null && slot.length >= groupInfo.maxCount
             return (
-              <div key={loc.id} className="overflow-hidden rounded-xl border border-border/50">
+              <div key={loc.id} className="overflow-hidden rounded-lg border border-border">
                 <div
                   className="flex cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-muted/30"
                   onClick={() => toggleLocale(loc.locale)}
                 >
                   <span className="text-lg">{info?.flag || '🌐'}</span>
                   <span className="flex-1 truncate text-sm font-medium">{info?.name || loc.locale}</span>
-                  {isBusy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                  <Badge variant={slot.length > 0 ? 'outline' : 'secondary'} className="text-xs">
+                  <span className="keycap">{loc.locale}</span>
+                  {isBusy && <Loader2 className="h-4 w-4 animate-spin text-faint" />}
+                  <Badge variant={slot.length > 0 ? 'outline' : 'secondary'} className="text-xs tabular-nums">
                     {slot.length}{groupInfo?.maxCount != null ? `/${groupInfo.maxCount}` : ''}
                   </Badge>
                   {counts.total > slot.length && (
-                    <span className="hidden text-[11px] text-muted-foreground sm:inline">{counts.total} placements in total</span>
+                    <span className="hidden text-xs tabular-nums text-faint sm:inline">{counts.total} placements in total</span>
                   )}
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-faint transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                 </div>
 
                 {isExpanded && (
-                  <div className="space-y-3 border-t border-border/50 bg-muted/20 p-3">
+                  <div className="space-y-3 border-t border-border bg-muted/20 p-3">
                     {slot.length === 0 ? (
-                      <p className="text-xs italic text-muted-foreground">Nothing in this slot yet.</p>
+                      <p className="text-xs text-muted-foreground">Nothing in this slot yet</p>
                     ) : (
                       <div className="flex gap-3 overflow-x-auto pb-1">
                         {slot.map((placement, index) => (
@@ -201,10 +202,10 @@ export default function LocalizedMediaPanel({
                               onClick={placement.asset && onPreview ? () => onPreview(placement.asset, info?.name || loc.locale) : undefined}
                             />
                             <div className="flex items-center justify-between gap-1">
-                              <span className="text-[10px] text-muted-foreground">#{index + 1}</span>
+                              <span className="text-xs tabular-nums text-faint">#{index + 1}</span>
                               <Badge
                                 variant="outline"
-                                className={`h-4 px-1 text-[9px] ${placement.state === 'FAILED' ? 'border-red-500/50 text-red-500' : ''}`}
+                                className={`h-5 px-1.5 text-xs ${placement.state === 'FAILED' ? 'border-destructive/50 text-destructive' : ''}`}
                                 title={placement.stateDetails?.map(d => d.description || d.code).join(', ')}
                               >
                                 {PLACEMENT_STATE_LABELS[placement.state] || placement.state || '—'}
@@ -225,7 +226,7 @@ export default function LocalizedMediaPanel({
                                   </button>
                                 )}
                                 <button type="button" disabled={isBusy} onClick={() => removePlacement(loc, placement)}
-                                  className="rounded bg-black/60 p-0.5 text-white hover:bg-red-600" title="Remove from this locale (the asset stays in the library)">
+                                  className="rounded bg-black/60 p-0.5 text-white hover:bg-destructive" title="Remove from this locale (the asset stays in the library)">
                                   <X className="h-3.5 w-3.5" />
                                 </button>
                               </div>
@@ -250,10 +251,10 @@ export default function LocalizedMediaPanel({
 
       {/* Folder upload */}
       {!readOnly && (
-        <div className="space-y-3 border-t border-border/50 pt-4">
+        <div className="space-y-3 border-t border-border pt-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Upload className="h-4 w-4 text-muted-foreground" />
+              <Upload className="h-4 w-4 text-faint" />
               <span className="text-sm font-medium">Upload to {slotLabel}</span>
             </div>
             <label className="flex cursor-pointer items-center gap-2 text-xs">
@@ -261,7 +262,7 @@ export default function LocalizedMediaPanel({
                 type="checkbox"
                 checked={replaceExisting}
                 onChange={(e) => setReplaceExisting(e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-border"
+                className="h-3.5 w-3.5 rounded border-border accent-foreground"
               />
               Replace what's in the slot
             </label>
@@ -271,14 +272,14 @@ export default function LocalizedMediaPanel({
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
             onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }}
             onDrop={handleDrop}
-            className={`rounded-xl border-2 border-dashed p-6 text-center transition-all
-              ${isDragging ? 'scale-[1.01] border-primary bg-primary/5' : 'border-border/50 hover:border-primary/40 hover:bg-muted/30'}`}
+            className={`rounded-lg border border-dashed p-6 text-center transition-colors
+              ${isDragging ? 'border-foreground/40 bg-muted/50' : 'border-border hover:border-foreground/30 hover:bg-muted/30'}`}
           >
-            <FolderOpen className={`mx-auto mb-2 h-8 w-8 ${isDragging ? 'text-primary' : 'text-muted-foreground/50'}`} />
+            <FolderOpen className={`mx-auto mb-2 h-6 w-6 ${isDragging ? 'text-foreground' : 'text-faint'}`} />
             <p className="text-sm font-medium text-muted-foreground">
-              {isDragging ? 'Drop it!' : `Drop ${acceptsVideos && !acceptsImages ? 'videos' : 'screenshots'} here`}
+              {isDragging ? 'Release to add the folder' : `Drop ${acceptsVideos && !acceptsImages ? 'videos' : 'screenshots'} here`}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">{dropHint}</p>
+            <p className="mt-1 text-xs text-faint">{dropHint}</p>
           </div>
 
           {queue.length > 0 && (
@@ -293,28 +294,29 @@ export default function LocalizedMediaPanel({
                   const known = localizations.some(l => l.locale === locale)
                   return (
                     <div key={locale} className={`flex items-center gap-3 rounded-lg border p-2.5 text-sm
-                      ${status === 'done' ? 'border-emerald-500/30 bg-emerald-500/10'
-                        : status === 'error' ? 'border-red-500/30 bg-red-500/10'
-                          : status === 'uploading' ? 'border-primary/30 bg-primary/5' : 'border-border/50 bg-muted/30'}`}
+                      ${status === 'done' ? 'border-positive/20 bg-positive/5'
+                        : status === 'error' ? 'border-destructive/30 bg-destructive/5'
+                          : status === 'uploading' ? 'border-foreground/20 bg-muted/50' : 'border-border bg-muted/30'}`}
                     >
                       <span className="text-lg">{info?.flag || '🌐'}</span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{info?.name || locale}</span>
-                          <Badge variant="outline" className="text-[10px]">{files.length} file{files.length === 1 ? '' : 's'}</Badge>
-                          {!info && <Badge variant="destructive" className="text-[10px]">Unknown locale</Badge>}
-                          {info && !known && <Badge variant="secondary" className="text-[10px]">new locale</Badge>}
+                          <span className="keycap">{locale}</span>
+                          <Badge variant="outline" className="text-xs tabular-nums">{files.length} file{files.length === 1 ? '' : 's'}</Badge>
+                          {!info && <Badge variant="destructive" className="text-xs">Unknown locale</Badge>}
+                          {info && !known && <Badge variant="secondary" className="text-xs font-normal">New locale</Badge>}
                         </div>
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        <p className="mt-0.5 truncate text-xs text-faint">
                           {files.map(f => `${f.name} (${formatFileSize(f.size)})`).join(', ')}
                         </p>
                       </div>
-                      {status === 'uploading' ? <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        : status === 'done' ? <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                          : status === 'error' ? <AlertCircle className="h-4 w-4 text-red-500" />
+                      {status === 'uploading' ? <Loader2 className="h-4 w-4 animate-spin text-faint" />
+                        : status === 'done' ? <CheckCircle2 className="h-4 w-4 text-positive" />
+                          : status === 'error' ? <AlertCircle className="h-4 w-4 text-destructive" />
                             : (
                               <button type="button" onClick={() => removeFromQueue(locale)} className="rounded p-1 hover:bg-muted">
-                                <X className="h-4 w-4 text-muted-foreground" />
+                                <X className="h-4 w-4 text-faint" />
                               </button>
                             )}
                     </div>
@@ -323,18 +325,19 @@ export default function LocalizedMediaPanel({
               </div>
 
               {isUploading && progress.total > 0 && (
-                <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5">
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
                   <div className="mb-1.5 flex justify-between text-xs">
-                    <span className="truncate text-muted-foreground">{progress.currentFile}</span>
-                    <span>{progress.current}/{progress.total}</span>
+                    <span className="truncate text-faint">{progress.currentFile}</span>
+                    <span className="tabular-nums">{progress.current}/{progress.total}</span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full bg-primary transition-all" style={{ width: `${(progress.current / progress.total) * 100}%` }} />
+                  <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+                    <div className="h-full bg-highlight transition-[width]" style={{ width: `${(progress.current / progress.total) * 100}%` }} />
                   </div>
                 </div>
               )}
 
               <Button
+                variant="highlight"
                 className="w-full"
                 onClick={handleUpload}
                 disabled={isUploading || queue.every(q => q.status === 'done')}
@@ -342,7 +345,7 @@ export default function LocalizedMediaPanel({
                 {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                 Upload & place {queue.reduce((sum, q) => sum + q.files.length, 0)} file(s)
               </Button>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-faint">
                 Files go into the Asset Library once, then get placed on each locale. Wrongly sized files are skipped before upload.
               </p>
             </div>
@@ -371,7 +374,7 @@ export default function LocalizedMediaPanel({
       )}
 
       {library.hasProcessing && (
-        <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <p className="flex items-center gap-1.5 text-xs text-faint">
           <Loader2 className="h-3 w-3 animate-spin" />
           Apple is still processing {library.assets.filter(isAssetProcessing).length} asset(s) — thumbnails appear when done.
         </p>

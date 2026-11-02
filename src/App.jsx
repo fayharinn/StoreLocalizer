@@ -4,11 +4,13 @@ import { Loader2 } from 'lucide-react'
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar'
 import { AppSidebar } from './components/AppSidebar'
 import { ThemeToggle } from './components/ThemeToggle'
+import { useTheme } from './components/ThemeProvider'
 import DemoShowcase from './components/DemoShowcase'
 import { useAppState } from './hooks/useAppState'
 import { useTranslation } from './hooks/useTranslation'
 import { useTranslationEditor } from './hooks/useTranslationEditor'
 import { useScreenshotData } from './hooks/useScreenshotData'
+import useAccounts from './hooks/useAccounts'
 
 // A failed chunk fetch (stale index.html right after a deploy) would otherwise
 // crash the whole tree into a black screen — reload once to pick up fresh assets.
@@ -31,6 +33,10 @@ function lazyRetry(importFn, key) {
 }
 
 const WelcomeScreen = lazyRetry(() => import('./components/WelcomeScreen'), 'welcome')
+const HomePage = lazyRetry(
+  () => import('./components/HomePage').then((m) => ({ default: m.HomePage })),
+  'home'
+)
 const AppStoreConnect = lazyRetry(() => import('./components/appstore'), 'appstore')
 const GooglePlayConnect = lazyRetry(() => import('./components/googleplay'), 'googleplay')
 const ScreenshotMaker = lazyRetry(() => import('./components/ScreenshotMaker'), 'screenshots')
@@ -50,9 +56,20 @@ function PageLoader() {
 }
 
 function App() {
+  const { resolvedTheme } = useTheme()
   const translation = useTranslation()
 
   const appState = useAppState(translation.addLog)
+
+  const accounts = useAccounts({
+    ascCredentials: appState.ascCredentials,
+    setAscCredentials: appState.setAscCredentials,
+    gpCredentials: appState.gpCredentials,
+    setGpCredentials: appState.setGpCredentials,
+  })
+  // Store pages start over when another account is picked in the sidebar
+  const ascAccountKey = accounts.activeAscId || 'unsaved'
+  const gpAccountKey = accounts.activeGpId || 'unsaved'
 
   const editor = useTranslationEditor(
     translation.xcstringsData,
@@ -87,7 +104,16 @@ function App() {
 
   return (
     <div className="min-h-svh bg-background">
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster
+        position="top-right"
+        theme={resolvedTheme}
+        closeButton
+        style={{
+          '--normal-bg': 'var(--popover)',
+          '--normal-text': 'var(--popover-foreground)',
+          '--normal-border': 'var(--border)',
+        }}
+      />
       {/* Feature-dialog showcase for README screenshots — dev only (?demo=…) */}
       {import.meta.env.DEV && <DemoShowcase />}
       <SidebarProvider>
@@ -104,9 +130,10 @@ function App() {
           onAstroConfigChange={appState.setAstroConfig}
           appCompeteConfig={appState.appCompeteConfig}
           onAppCompeteConfigChange={appState.setAppCompeteConfig}
+          accounts={accounts}
         />
         <SidebarInset>
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border/50 bg-background/80 px-6 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-background px-6">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
             <div className="ml-auto flex items-center gap-3">
               <ThemeToggle variant="compact" />
@@ -127,9 +154,21 @@ function App() {
                   ? 'w-full max-w-none h-full'
                   : 'max-w-7xl space-y-6'
             }`}>
+              {appState.activePage === 'home' && (
+                <Suspense fallback={<PageLoader />}>
+                  <HomePage
+                    onPageChange={appState.setActivePage}
+                    ascCredentials={appState.ascCredentials}
+                    gpCredentials={appState.gpCredentials}
+                    providerConfig={appState.providerConfig}
+                  />
+                </Suspense>
+              )}
+
               {appState.activePage === 'appstore' && (
                 <Suspense fallback={<PageLoader />}>
                   <AppStoreConnect
+                    key={ascAccountKey}
                     credentials={appState.ascCredentials}
                     onCredentialsChange={appState.setAscCredentials}
                     aiConfig={appState.providerConfig}
@@ -142,6 +181,7 @@ function App() {
               {appState.activePage === 'googleplay' && (
                 <Suspense fallback={<PageLoader />}>
                   <GooglePlayConnect
+                    key={gpAccountKey}
                     credentials={appState.gpCredentials}
                     onCredentialsChange={appState.setGpCredentials}
                     aiConfig={appState.providerConfig}
@@ -164,6 +204,7 @@ function App() {
               {appState.activePage === 'subscriptions' && (
                 <Suspense fallback={<PageLoader />}>
                   <SubscriptionManager
+                    key={ascAccountKey}
                     aiConfig={appState.providerConfig}
                     ascCredentials={appState.ascCredentials}
                     onCredentialsChange={appState.setAscCredentials}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>.ring { stroke-opacity: 0 } @media (prefers-color-scheme: dark) { .ring { stroke-opacity: 0.18 } }</style>
+  <rect width="64" height="64" rx="14" fill="#141415"/>
+  <rect class="ring" x="1" y="1" width="62" height="62" rx="13" stroke="#ededed" stroke-width="2"/>
+  <rect x="14" y="15" width="30" height="7" rx="3.5" fill="#ededed"/>
+  <rect x="10" y="26.5" width="44" height="11" rx="3.5" fill="#f5c542"/>
+  <rect x="15" y="30" width="22" height="4" rx="2" fill="#141415"/>
+  <rect x="20" y="42" width="30" height="7" rx="3.5" fill="#ededed"/>
+</svg>

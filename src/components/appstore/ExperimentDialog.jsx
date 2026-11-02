@@ -80,7 +80,7 @@ export default function ExperimentDialog({ mode = 'create', open, experiment, de
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Traffic in the test</Label>
-              <span className="text-sm font-semibold">{form.trafficProportion}%</span>
+              <span className="text-sm font-medium tabular-nums">{form.trafficProportion}%</span>
             </div>
             <Slider
               min={1}

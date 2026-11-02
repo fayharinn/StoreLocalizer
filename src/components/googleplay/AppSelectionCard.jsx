@@ -13,8 +13,8 @@ function AppIcon({ app, className = 'h-8 w-8' }) {
       onError={(e) => { e.target.style.display = 'none' }}
     />
   ) : (
-    <div className={`${className} flex shrink-0 items-center justify-center rounded-lg bg-muted`}>
-      <AppWindow className="h-4 w-4 text-muted-foreground" />
+    <div className={`${className} flex shrink-0 items-center justify-center rounded-lg bg-secondary`}>
+      <AppWindow className="h-4 w-4 text-faint" />
     </div>
   )
 }
@@ -37,27 +37,20 @@ export default function AppSelectionCard({
   handleDiscardEdit,
 }) {
   return (
-    <Card id="gp-app" className="border-border/50 shadow-sm card-hover scroll-mt-6">
+    <Card id="gp-app" className="scroll-mt-6">
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
-            <AppWindow className="h-5 w-5 text-violet-500" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">App Package</CardTitle>
-            <CardDescription>Enter your app's package name to manage listings</CardDescription>
-          </div>
-        </div>
+        <CardTitle className="text-base font-medium">App package</CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">Enter your app's package name to manage listings</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {editId && (() => {
           const current = savedApps.find((a) => a.packageName === packageName.trim())
           return (
-            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 p-3">
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-secondary/40 p-3">
               <AppIcon app={current} className="h-10 w-10" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{current?.name || packageName}</p>
-                <p className="truncate text-xs text-muted-foreground">{packageName}</p>
+                <p className="truncate font-mono text-xs text-faint">{packageName}</p>
               </div>
             </div>
           )
@@ -65,13 +58,13 @@ export default function AppSelectionCard({
 
         {!editId && savedApps.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Recent apps — click to load</p>
+            <p className="text-xs text-faint">Recent apps, click one to load it</p>
             <div className="flex flex-wrap gap-2">
               {savedApps.map((app) => (
                 <div
                   key={app.packageName}
-                  className={`group flex items-center gap-2 rounded-xl border bg-card py-1.5 pl-1.5 pr-1 transition-colors hover:border-primary/50 hover:bg-muted/50 ${
-                    packageName.trim() === app.packageName ? 'border-primary/60' : 'border-border/60'
+                  className={`group flex items-center gap-2 rounded-lg border bg-card py-1.5 pl-1.5 pr-1 transition-colors hover:border-foreground/30 hover:bg-secondary/50 ${
+                    packageName.trim() === app.packageName ? 'border-foreground/40' : 'border-border'
                   }`}
                 >
                   <button
@@ -84,14 +77,14 @@ export default function AppSelectionCard({
                     <AppIcon app={app} />
                     <span className="min-w-0 pr-1">
                       <span className="block max-w-[180px] truncate text-sm font-medium leading-tight">{app.name || app.packageName}</span>
-                      {app.name && <span className="block max-w-[180px] truncate text-[11px] leading-tight text-muted-foreground">{app.packageName}</span>}
+                      {app.name && <span className="block max-w-[180px] truncate font-mono text-xs leading-tight text-faint">{app.packageName}</span>}
                     </span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onRemoveSavedApp(app.packageName)}
                     aria-label={`Forget ${app.name || app.packageName}`}
-                    className="rounded-md p-1 text-muted-foreground/50 opacity-0 transition-opacity hover:bg-muted hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+                    className="rounded-md p-1 text-faint opacity-0 transition-[color,background-color,opacity] hover:bg-secondary hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -130,9 +123,9 @@ export default function AppSelectionCard({
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Find Apps from Developer Profile</DialogTitle>
+                  <DialogTitle className="text-base font-medium">Find apps from a developer profile</DialogTitle>
                   <DialogDescription>
-                    Enter your Google Play developer profile URL or ID to quickly find your apps.
+                    Enter your Google Play developer profile URL or ID to list your apps.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -155,20 +148,20 @@ export default function AppSelectionCard({
                       )}
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Example: https://play.google.com/store/apps/dev?id=123456789
+                  <p className="text-xs text-faint">
+                    Example: <span className="font-mono">https://play.google.com/store/apps/dev?id=123456789</span>
                   </p>
 
                   {developerApps.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">{developerApps.length} app(s) found:</p>
+                      <p className="text-sm font-medium tabular-nums">{developerApps.length} app(s) found</p>
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {developerApps.map((app) => (
                           <DialogClose key={app.packageName} asChild>
                             <button
                               onClick={() => handleSelectDeveloperApp(app)}
-                              className={`flex items-center gap-3 w-full p-3 rounded-lg border text-left transition-all hover:border-primary/50 hover:bg-muted/50 ${
-                                packageName === app.packageName ? 'border-primary bg-primary/5' : 'border-border'
+                              className={`flex items-center gap-3 w-full p-3 rounded-lg border text-left transition-colors hover:border-foreground/30 hover:bg-secondary/50 ${
+                                packageName === app.packageName ? 'border-foreground/40 bg-secondary' : 'border-border'
                               }`}
                             >
                               {app.icon ? (
@@ -179,19 +172,19 @@ export default function AppSelectionCard({
                                   onError={(e) => { e.target.style.display = 'none' }}
                                 />
                               ) : (
-                                <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                                  <AppWindow className="h-5 w-5 text-muted-foreground" />
+                                <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
+                                  <AppWindow className="h-4 w-4 text-faint" />
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium truncate">{app.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{app.packageName}</p>
+                                <p className="font-mono text-xs text-faint truncate">{app.packageName}</p>
                               </div>
                               <a
                                 href={app.storeUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                                className="p-2 rounded-md hover:bg-secondary text-faint hover:text-foreground transition-colors"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <ExternalLink className="h-4 w-4" />
@@ -215,15 +208,15 @@ export default function AppSelectionCard({
               {isCreatingEdit ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Loading...
+                  Loading
                 </>
-              ) : 'Load App'}
+              ) : 'Load app'}
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button onClick={handleCommitEdit} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={handleCommitEdit}>
                 <Save className="h-4 w-4 mr-2" />
-                Commit Changes
+                Commit changes
               </Button>
               <Button variant="outline" onClick={handleDiscardEdit}>
                 <X className="h-4 w-4 mr-2" />
@@ -233,9 +226,9 @@ export default function AppSelectionCard({
           )}
         </div>
         {editId && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 text-amber-500 text-sm">
-            <AlertCircle className="h-4 w-4" />
-            Edit session active. Remember to commit your changes!
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-highlight/10 text-highlight-ink text-sm">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            Edit session active. Commit your changes to publish them.
           </div>
         )}
       </CardContent>

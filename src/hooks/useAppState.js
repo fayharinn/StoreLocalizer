@@ -20,7 +20,7 @@ export function useAppState(addLog) {
   }
 
   const [activePage, setActivePage] = useState(() => {
-    return localStorage.getItem(ACTIVE_PAGE_KEY) || 'xcstrings'
+    return localStorage.getItem(ACTIVE_PAGE_KEY) || 'home'
   })
 
   useEffect(() => {

@@ -89,7 +89,7 @@ export default function CustomProductPageDialog({
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {ASC_LOCALES.map(loc => (
-                        <SelectItem key={loc.code} value={loc.code}>{loc.flag} {loc.name}</SelectItem>
+                        <SelectItem key={loc.code} value={loc.code}>{loc.flag} {loc.name} <span className="keycap">{loc.code}</span></SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -116,7 +116,7 @@ export default function CustomProductPageDialog({
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="cpp-promo">Promotional text</Label>
-                  <span className={`text-xs ${promoOver ? 'font-medium text-destructive' : 'text-muted-foreground'}`}>
+                  <span className={`text-xs tabular-nums ${promoOver ? 'font-medium text-destructive' : 'text-faint'}`}>
                     {form.promotionalText.length}/{CPP_PROMOTIONAL_TEXT_LIMIT}
                   </span>
                 </div>
@@ -126,12 +126,12 @@ export default function CustomProductPageDialog({
                   value={form.promotionalText}
                   onChange={(e) => update('promotionalText', e.target.value)}
                   className={promoOver ? 'border-destructive' : ''}
-                  placeholder="The hook shown at the top of this page — you can AI-translate it afterwards"
+                  placeholder="The hook shown at the top of this page, translatable afterwards"
                 />
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-between rounded-lg border border-border/50 p-3">
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <div>
                 <p className="text-sm font-medium">Visible on the App Store</p>
                 <p className="text-xs text-muted-foreground">Hidden pages keep their URL but aren't shown to users.</p>
@@ -150,7 +150,7 @@ export default function CustomProductPageDialog({
                 placeholder="myapp://campaign/fall"
                 className={deepLinkValid ? '' : 'border-destructive'}
               />
-              <p className="text-[11px] text-muted-foreground">Where users who already have the app land when they open this page.</p>
+              <p className="text-xs text-faint">Where users who already have the app land when they open this page.</p>
             </div>
           )}
         </div>

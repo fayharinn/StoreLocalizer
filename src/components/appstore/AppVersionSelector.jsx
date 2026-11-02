@@ -35,7 +35,7 @@ export default function AppVersionSelector({
                       <AppWindow className="h-4 w-4 shrink-0 text-muted-foreground" />
                     ) : null}
                     <span className="truncate">
-                      {selectedApp ? selectedApp.name : 'Select an app...'}
+                      {selectedApp ? selectedApp.name : 'Select an app'}
                     </span>
                   </span>
                   <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
@@ -43,9 +43,9 @@ export default function AppVersionSelector({
               </PopoverTrigger>
               <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                 <Command>
-                  <CommandInput placeholder="Search apps..." />
+                  <CommandInput placeholder="Search apps" />
                   <CommandList>
-                    <CommandEmpty>No apps found.</CommandEmpty>
+                    <CommandEmpty>No apps found</CommandEmpty>
                     <CommandGroup>
                       {apps.map(app => (
                         <CommandItem
@@ -67,7 +67,7 @@ export default function AppVersionSelector({
                             <span className="text-xs text-muted-foreground truncate">{app.bundleId}</span>
                           </div>
                           {selectedApp?.id === app.id && (
-                            <Check className="h-4 w-4 ml-auto shrink-0 text-primary" />
+                            <Check className="h-4 w-4 ml-auto shrink-0 text-foreground" />
                           )}
                         </CommandItem>
                       ))}
@@ -83,7 +83,7 @@ export default function AppVersionSelector({
                 disabled={isLoadingVersions || !selectedApp}
               >
                 <SelectTrigger className="h-9 w-full min-w-0">
-                  <SelectValue placeholder="Select a version..." />
+                  <SelectValue placeholder="Select a version" />
                 </SelectTrigger>
                 <SelectContent>
                   {versions.map(version => (

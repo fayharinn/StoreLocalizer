@@ -14,20 +14,20 @@ function TemplateSwatch({ template, onClick, onDelete }) {
 
   return (
     <button
-      className="group relative flex flex-col items-center gap-1.5 rounded-lg border border-transparent p-1.5 transition-all hover:border-border hover:bg-accent/50 cursor-pointer"
+      className="group relative flex flex-col items-center gap-1.5 rounded-lg border border-transparent p-1.5 transition-colors hover:border-border hover:bg-accent/50 cursor-pointer"
       onClick={() => onClick(template)}
       title={`Apply "${template.name}"`}
     >
       <div
-        className="w-full aspect-square rounded-md border border-border/30"
+        className="w-full aspect-square rounded-md border border-border"
         style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }}
       />
-      <span className="text-[10px] leading-tight text-muted-foreground group-hover:text-foreground truncate w-full text-center">
+      <span className="text-xs leading-4 text-muted-foreground group-hover:text-foreground truncate w-full text-center">
         {template.name}
       </span>
       {onDelete && (
         <span
-          className="absolute -top-1 -right-1 size-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-[9px] leading-none"
+          className="absolute -top-1 -right-1 size-4 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs leading-none"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(template.id);
@@ -81,8 +81,8 @@ export default function TemplatesPanel({ state, dispatch }) {
     <div className="flex flex-col gap-5">
       {/* Built-in Templates */}
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Built-in Templates
+        <h4 className="text-xs font-medium text-muted-foreground mb-2">
+          Built-in templates
         </h4>
         <div className="grid grid-cols-4 gap-1.5">
           {BUILT_IN_TEMPLATES.map((template) => (
@@ -97,8 +97,8 @@ export default function TemplatesPanel({ state, dispatch }) {
 
       {/* Custom Templates */}
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Custom Templates
+        <h4 className="text-xs font-medium text-muted-foreground mb-2">
+          Custom templates
         </h4>
         {customTemplates.length > 0 ? (
           <div className="grid grid-cols-4 gap-1.5">
@@ -131,13 +131,13 @@ export default function TemplatesPanel({ state, dispatch }) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
-            Save Current as Template
+            Save current as template
           </Button>
         ) : (
           <div className="flex items-center gap-2">
             <Input
               type="text"
-              placeholder="Template name..."
+              placeholder="Template name"
               value={saveName}
               onChange={(e) => setSaveName(e.target.value)}
               onKeyDown={(e) => {

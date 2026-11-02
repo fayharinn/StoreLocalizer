@@ -118,18 +118,11 @@ const scopeCss = (css, scope) => {
 };
 
 // =============================================================================
-// Theme variable mappings
+// Layout overrides (theme tokens live in the :root block of appscreen.css,
+// aliased to the app's graphite variables so .dark on <html> drives both)
 // =============================================================================
 
 const themeVars = `.appscreen-root{
-  --bg-primary: var(--background);
-  --bg-secondary: var(--card);
-  --bg-tertiary: var(--muted);
-  --border-color: var(--border);
-  --text-primary: var(--foreground);
-  --text-secondary: var(--muted-foreground);
-  --accent: var(--primary);
-  --accent-hover: var(--primary);
   --appscreen-height: calc(100svh - 3.5rem - 1px);
   width: 100%;
 }
@@ -446,7 +439,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     setExportLanguageModalVisible(false);
     setExportProgressVisible(true);
     setExportProgress(0);
-    setExportStatus('Exporting...');
+    setExportStatus('Exporting');
     setExportDetail('');
 
     try {
@@ -460,7 +453,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
         (current, total) => {
           const pct = Math.round((current / total) * 100);
           setExportProgress(pct);
-          setExportStatus(`Exporting screenshot ${current} of ${total}...`);
+          setExportStatus(`Exporting screenshot ${current} of ${total}`);
           setExportDetail(`${languageNames[state.currentLanguage] || state.currentLanguage}`);
         },
       );
@@ -476,7 +469,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
     setExportLanguageModalVisible(false);
     setExportProgressVisible(true);
     setExportProgress(0);
-    setExportStatus('Exporting all languages...');
+    setExportStatus('Exporting all languages');
     setExportDetail('');
 
     try {
@@ -492,7 +485,7 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
           setExportProgress(pct);
           const langIndex = Math.floor((current - 1) / state.screenshots.length);
           const lang = state.projectLanguages[langIndex] || '';
-          setExportStatus(`Exporting ${current} of ${total}...`);
+          setExportStatus(`Exporting ${current} of ${total}`);
           setExportDetail(`${languageNames[lang] || lang}`);
         },
       );
@@ -530,8 +523,8 @@ export default function ScreenshotMaker({ localizationPayload, aiConfig, active 
 
     setExportProgressVisible(true);
     setExportProgress(0);
-    setExportStatus('Generating magical titles...');
-    setExportDetail('Analysing your screenshots with AI');
+    setExportStatus('Generating titles');
+    setExportDetail('Reading your screenshots');
 
     try {
       // Collect screenshot images as base64 data URLs
@@ -578,7 +571,7 @@ Generate exactly ${images.length} items, one per screenshot.`;
       );
 
       setExportProgress(80);
-      setExportStatus('Applying titles...');
+      setExportStatus('Applying titles');
 
       // Parse response
       const cleaned = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -616,7 +609,7 @@ Generate exactly ${images.length} items, one per screenshot.`;
       dispatch({ type: SET_CURRENT_LANGUAGE, payload: { language: targetLang } });
 
       setExportProgress(100);
-      setExportStatus('Titles generated successfully!');
+      setExportStatus('Titles generated');
     } catch (err) {
       console.error('Title generation failed:', err);
       setExportStatus('Generation failed: ' + err.message);
@@ -689,15 +682,15 @@ Generate exactly ${images.length} items, one per screenshot.`;
           {/* Fixed bottom tab bar */}
           <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: '3.5rem', zIndex: 50, borderTop: '1px solid var(--border)', background: 'var(--background)' }}>
             <TabsList style={{ display: 'flex', width: '100%', height: '100%', borderRadius: 0, padding: 0, background: 'transparent' }}>
-              <TabsTrigger value="list" style={{ flex: 1, height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px' }}>
+              <TabsTrigger value="list" style={{ flex: 1, height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '12px' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                 Screenshots
               </TabsTrigger>
-              <TabsTrigger value="preview" style={{ flex: 1, height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px' }}>
+              <TabsTrigger value="preview" style={{ flex: 1, height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '12px' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
                 Preview
               </TabsTrigger>
-              <TabsTrigger value="settings" style={{ flex: 1, height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px' }}>
+              <TabsTrigger value="settings" style={{ flex: 1, height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '12px' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                 Settings
               </TabsTrigger>
@@ -717,7 +710,7 @@ Generate exactly ${images.length} items, one per screenshot.`;
         className="app-container"
         style={{
           gridTemplateColumns: rightSidebarOpen ? '320px 1fr 340px' : '320px 1fr',
-          transition: 'grid-template-columns 0.2s ease',
+          transition: 'grid-template-columns 180ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       >
         <LeftSidebar {...leftSidebarProps} />
@@ -725,25 +718,9 @@ Generate exactly ${images.length} items, one per screenshot.`;
         <div style={{ position: 'relative' }}>
           <CanvasArea {...canvasAreaProps} />
           <button
+            className="panel-toggle-btn"
             onClick={() => setRightSidebarOpen((v) => !v)}
             title={rightSidebarOpen ? 'Hide settings panel' : 'Show settings panel'}
-            style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              zIndex: 10,
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-            }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               {rightSidebarOpen ? (

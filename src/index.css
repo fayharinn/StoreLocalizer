@@ -1,13 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -20,8 +25,13 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-faint: var(--faint);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-highlight-ink: var(--highlight-ink);
+  --color-positive: var(--positive);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -41,73 +51,88 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/*
+ * Graphite ramp, one accent. The chrome stays neutral; the highlighter amber is
+ * the proofreader's mark and only lands on the primary translate action, the
+ * active selection and the one figure that matters.
+ */
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.002 280);
-  --foreground: oklch(0.13 0.02 280);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0.02 280);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.02 280);
-  --primary: oklch(0.55 0.25 270);
-  --primary-foreground: oklch(0.98 0.01 280);
-  --secondary: oklch(0.96 0.01 280);
-  --secondary-foreground: oklch(0.25 0.02 280);
-  --muted: oklch(0.96 0.005 280);
-  --muted-foreground: oklch(0.5 0.02 280);
-  --accent: oklch(0.94 0.03 280);
-  --accent-foreground: oklch(0.25 0.02 280);
-  --destructive: oklch(0.55 0.22 25);
-  --border: oklch(0.91 0.01 280);
-  --input: oklch(0.91 0.01 280);
-  --ring: oklch(0.55 0.25 270);
-  --chart-1: oklch(0.55 0.25 270);
-  --chart-2: oklch(0.65 0.20 180);
-  --chart-3: oklch(0.60 0.18 330);
-  --chart-4: oklch(0.70 0.15 80);
-  --chart-5: oklch(0.58 0.22 25);
-  --sidebar: oklch(0.99 0.002 280);
-  --sidebar-foreground: oklch(0.13 0.02 280);
-  --sidebar-primary: oklch(0.55 0.25 270);
-  --sidebar-primary-foreground: oklch(0.98 0.01 280);
-  --sidebar-accent: oklch(0.96 0.02 270);
-  --sidebar-accent-foreground: oklch(0.25 0.02 280);
-  --sidebar-border: oklch(0.92 0.01 280);
-  --sidebar-ring: oklch(0.55 0.25 270);
+  --radius: 0.625rem;
+  --background: #fafafa;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #171717;
+  --muted: #f4f4f5;
+  --muted-foreground: #525252;
+  --faint: #737373;
+  --accent: #f4f4f5;
+  --accent-foreground: #171717;
+  --highlight: #f2b928;
+  --highlight-foreground: #1f1600;
+  --highlight-ink: #8a5a00;
+  --positive: #16a34a;
+  --destructive: #dc2626;
+  --border: rgb(23 23 23 / 0.1);
+  --input: rgb(23 23 23 / 0.12);
+  --ring: rgb(23 23 23 / 0.35);
+  --chart-1: #f2b928;
+  --chart-2: #525252;
+  --chart-3: #a3a3a3;
+  --chart-4: #4c7a9a;
+  --chart-5: #d4d4d4;
+  --sidebar: #f4f4f5;
+  --sidebar-foreground: #171717;
+  --sidebar-primary: #171717;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #e9e9eb;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: rgb(23 23 23 / 0.08);
+  --sidebar-ring: rgb(23 23 23 / 0.35);
 }
 
 .dark {
-  --background: oklch(0.11 0.02 270);
-  --foreground: oklch(0.96 0.01 270);
-  --card: oklch(0.15 0.025 270);
-  --card-foreground: oklch(0.96 0.01 270);
-  --popover: oklch(0.14 0.02 270);
-  --popover-foreground: oklch(0.96 0.01 270);
-  --primary: oklch(0.65 0.28 270);
-  --primary-foreground: oklch(0.98 0.01 270);
-  --secondary: oklch(0.22 0.03 270);
-  --secondary-foreground: oklch(0.96 0.01 270);
-  --muted: oklch(0.20 0.025 270);
-  --muted-foreground: oklch(0.65 0.02 270);
-  --accent: oklch(0.25 0.04 270);
-  --accent-foreground: oklch(0.96 0.01 270);
-  --destructive: oklch(0.60 0.22 25);
-  --border: oklch(0.25 0.03 270);
-  --input: oklch(0.22 0.025 270);
-  --ring: oklch(0.65 0.28 270);
-  --chart-1: oklch(0.65 0.28 270);
-  --chart-2: oklch(0.70 0.18 180);
-  --chart-3: oklch(0.68 0.22 330);
-  --chart-4: oklch(0.75 0.18 80);
-  --chart-5: oklch(0.65 0.22 25);
-  --sidebar: oklch(0.13 0.025 270);
-  --sidebar-foreground: oklch(0.96 0.01 270);
-  --sidebar-primary: oklch(0.65 0.28 270);
-  --sidebar-primary-foreground: oklch(0.98 0.01 270);
-  --sidebar-accent: oklch(0.20 0.035 270);
-  --sidebar-accent-foreground: oklch(0.96 0.01 270);
-  --sidebar-border: oklch(0.25 0.03 270);
-  --sidebar-ring: oklch(0.65 0.28 270);
+  --background: #141415;
+  --foreground: #ededed;
+  --card: #19191b;
+  --card-foreground: #ededed;
+  --popover: #1c1c1e;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #141415;
+  --secondary: #232325;
+  --secondary-foreground: #ededed;
+  --muted: #232325;
+  --muted-foreground: #a1a1a6;
+  --faint: #85858b;
+  --accent: #232325;
+  --accent-foreground: #ededed;
+  --highlight: #f5c542;
+  --highlight-foreground: #1a1406;
+  --highlight-ink: #f5c542;
+  --positive: #4cc38a;
+  --destructive: #e5484d;
+  --border: rgb(237 237 237 / 0.08);
+  --input: rgb(237 237 237 / 0.1);
+  --ring: rgb(237 237 237 / 0.4);
+  --chart-1: #f5c542;
+  --chart-2: #a1a1a6;
+  --chart-3: #5c5c62;
+  --chart-4: #7aa2c0;
+  --chart-5: #3a3a3e;
+  --sidebar: #0f0f10;
+  --sidebar-foreground: #ededed;
+  --sidebar-primary: #ededed;
+  --sidebar-primary-foreground: #141415;
+  --sidebar-accent: #1f1f21;
+  --sidebar-accent-foreground: #ededed;
+  --sidebar-border: rgb(237 237 237 / 0.07);
+  --sidebar-ring: rgb(237 237 237 / 0.4);
 }
 
 @layer base {
@@ -115,11 +140,18 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  code, kbd, samp, pre {
+    @apply font-mono;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--highlight) 45%, transparent);
+    color: var(--foreground);
   }
 }
 
-/* Custom scrollbar for premium feel */
 @layer base {
   ::-webkit-scrollbar {
     width: 8px;
@@ -129,87 +161,55 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.5 0.02 270 / 0.3);
+    background: rgb(23 23 23 / 0.16);
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.5 0.02 270 / 0.5);
+    background: rgb(23 23 23 / 0.28);
   }
   .dark ::-webkit-scrollbar-thumb {
-    background: oklch(0.6 0.02 270 / 0.3);
+    background: rgb(237 237 237 / 0.12);
   }
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.6 0.02 270 / 0.5);
+    background: rgb(237 237 237 / 0.22);
   }
 }
 
-/* Gradient utilities */
-@layer utilities {
-  .gradient-primary {
-    background: linear-gradient(135deg, oklch(0.55 0.25 270), oklch(0.60 0.22 300));
-  }
-  .dark .gradient-primary {
-    background: linear-gradient(135deg, oklch(0.60 0.28 270), oklch(0.65 0.25 300));
-  }
-  .gradient-subtle {
-    background: linear-gradient(135deg, oklch(0.97 0.01 270), oklch(0.95 0.02 300));
-  }
-  .dark .gradient-subtle {
-    background: linear-gradient(135deg, oklch(0.16 0.03 270), oklch(0.18 0.04 300));
-  }
-  .gradient-card {
-    background: linear-gradient(145deg, oklch(1 0 0), oklch(0.98 0.01 270));
-    color: oklch(0.13 0.02 280);
-  }
-  .dark .gradient-card {
-    background: linear-gradient(145deg, oklch(0.16 0.025 270), oklch(0.14 0.03 280));
-    color: oklch(0.96 0.01 270);
-  }
-  .gradient-glow {
-    box-shadow: 0 0 40px -10px oklch(0.55 0.25 270 / 0.3);
-  }
-  .dark .gradient-glow {
-    box-shadow: 0 0 50px -10px oklch(0.65 0.28 270 / 0.25);
-  }
-  .glass {
-    background: oklch(1 0 0 / 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  .dark .glass {
-    background: oklch(0.15 0.02 270 / 0.7);
-  }
-  .text-gradient {
-    background: linear-gradient(135deg, oklch(0.55 0.25 270), oklch(0.60 0.22 300));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .dark .text-gradient {
-    background: linear-gradient(135deg, oklch(0.70 0.28 270), oklch(0.75 0.25 300));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-}
-
-/* Smooth transitions */
+/* Feedback transitions: color and surface only, one curve */
 @layer base {
   button, a, input, select, textarea {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-property: color, background-color, border-color, opacity, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
   }
 }
 
-/* Card hover effects */
+@layer base {
+  /* One icon weight across the app */
+  svg.lucide {
+    stroke-width: 1.5;
+  }
+}
+
 @layer utilities {
-  .card-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Locale code as a small mono keycap, the product's signature detail */
+  .keycap {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--secondary);
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px -12px oklch(0.3 0.02 270 / 0.15);
-  }
-  .dark .card-hover:hover {
-    box-shadow: 0 12px 40px -12px oklch(0 0 0 / 0.4);
+  .dark .keycap {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
   }
 }

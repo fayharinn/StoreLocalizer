@@ -20,7 +20,6 @@ import {
   KeyRound,
   Unlock,
   X,
-  Sparkles,
   AlertTriangle,
   Terminal,
 } from 'lucide-react'
@@ -95,23 +94,23 @@ const markdownComponents = {
   strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
   ul: ({ children }) => <ul className="list-disc pl-5 mb-2 space-y-1 last:mb-0">{children}</ul>,
   ol: ({ children }) => <ol className="list-decimal pl-5 mb-2 space-y-1 last:mb-0">{children}</ol>,
-  li: ({ children }) => <li className="marker:text-muted-foreground">{children}</li>,
-  h1: ({ children }) => <p className="font-semibold mt-3 mb-1 first:mt-0">{children}</p>,
-  h2: ({ children }) => <p className="font-semibold mt-3 mb-1 first:mt-0">{children}</p>,
-  h3: ({ children }) => <p className="font-semibold mt-3 mb-1 first:mt-0">{children}</p>,
-  h4: ({ children }) => <p className="font-semibold mt-3 mb-1 first:mt-0">{children}</p>,
-  h5: ({ children }) => <p className="font-semibold mt-3 mb-1 first:mt-0">{children}</p>,
-  h6: ({ children }) => <p className="font-semibold mt-3 mb-1 first:mt-0">{children}</p>,
+  li: ({ children }) => <li className="marker:text-faint">{children}</li>,
+  h1: ({ children }) => <p className="font-medium mt-3 mb-1 first:mt-0">{children}</p>,
+  h2: ({ children }) => <p className="font-medium mt-3 mb-1 first:mt-0">{children}</p>,
+  h3: ({ children }) => <p className="font-medium mt-3 mb-1 first:mt-0">{children}</p>,
+  h4: ({ children }) => <p className="font-medium mt-3 mb-1 first:mt-0">{children}</p>,
+  h5: ({ children }) => <p className="font-medium mt-3 mb-1 first:mt-0">{children}</p>,
+  h6: ({ children }) => <p className="font-medium mt-3 mb-1 first:mt-0">{children}</p>,
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2">
       {children}
     </a>
   ),
   code: ({ children }) => (
-    <code className="rounded border border-border/50 bg-background/70 px-1 py-0.5 font-mono text-[0.85em]">{children}</code>
+    <code className="rounded-sm border border-border bg-secondary px-1 py-0.5 font-mono text-[0.85em]">{children}</code>
   ),
   pre: ({ children }) => (
-    <pre className="mb-2 last:mb-0 overflow-x-auto rounded-md border border-border/50 bg-background/70 p-3 text-xs [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0">
+    <pre className="mb-2 last:mb-0 overflow-x-auto rounded-md border border-border bg-secondary p-3 font-mono text-xs [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0">
       {children}
     </pre>
   ),
@@ -123,9 +122,9 @@ const markdownComponents = {
       <table className="w-full border-collapse text-xs">{children}</table>
     </div>
   ),
-  th: ({ children }) => <th className="border border-border/50 bg-muted/60 px-2 py-1 text-left font-semibold">{children}</th>,
-  td: ({ children }) => <td className="border border-border/50 px-2 py-1 align-top">{children}</td>,
-  hr: () => <hr className="my-3 border-border/60" />,
+  th: ({ children }) => <th className="border border-border bg-secondary px-2 py-1 text-left font-medium">{children}</th>,
+  td: ({ children }) => <td className="border border-border px-2 py-1 align-top">{children}</td>,
+  hr: () => <hr className="my-3 border-border" />,
 }
 
 function Markdown({ children }) {
@@ -193,20 +192,20 @@ function ScreenshotGallery({ call, result, ascCredentials }) {
   }
 
   return (
-    <div className="border-t border-border/60 px-3 py-2 space-y-2">
+    <div className="border-t border-border px-3 py-2 space-y-2">
       <div className="flex items-center gap-2">
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-xs text-faint tabular-nums">
           {images.length ? `${images.length} screenshot${images.length > 1 ? 's' : ''}` : 'No screenshots'}
         </span>
-        {isSwitching && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+        {isSwitching && <Loader2 className="h-3 w-3 animate-spin text-faint" />}
         {locales?.length > 0 && (
           <Select value={locale} onValueChange={handleSwitch} disabled={isSwitching}>
-            <SelectTrigger className="ml-auto h-7 w-[130px] text-xs" aria-label="Screenshot locale">
+            <SelectTrigger className="ml-auto h-7 w-[130px] font-mono text-xs" aria-label="Screenshot locale">
               <SelectValue placeholder="Locale" />
             </SelectTrigger>
             <SelectContent>
               {locales.map((l) => (
-                <SelectItem key={l} value={l} className="text-xs">{l}</SelectItem>
+                <SelectItem key={l} value={l} className="font-mono text-xs">{l}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -227,7 +226,7 @@ function ScreenshotGallery({ call, result, ascCredentials }) {
                 alt={img.name}
                 loading="lazy"
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
-                className="h-36 w-auto rounded-md border border-border/50 hover:border-primary/60 transition-colors"
+                className="h-36 w-auto rounded-md border border-border hover:border-foreground/30 transition-colors"
               />
             </button>
           ))}
@@ -253,7 +252,7 @@ function ScreenshotGallery({ call, result, ascCredentials }) {
                     type="button"
                     onClick={() => setPreviewIndex((i) => (i > 0 ? i - 1 : images.length - 1))}
                     aria-label="Previous screenshot"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/80"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-lg bg-black/50 p-2 text-white transition-colors hover:bg-black/80"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -261,15 +260,15 @@ function ScreenshotGallery({ call, result, ascCredentials }) {
                     type="button"
                     onClick={() => setPreviewIndex((i) => (i < images.length - 1 ? i + 1 : 0))}
                     aria-label="Next screenshot"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/80"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-black/50 p-2 text-white transition-colors hover:bg-black/80"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>
                 </>
               )}
-              <div className="absolute bottom-0 left-0 right-0 rounded-b-lg bg-gradient-to-t from-black/70 to-transparent p-3 text-center">
+              <div className="absolute bottom-0 left-0 right-0 rounded-b-lg bg-black/60 p-3 text-center">
                 <p className="truncate text-xs text-white/85">{images[previewIndex].name}</p>
-                <p className="text-[11px] text-white/50">{previewIndex + 1} / {images.length}</p>
+                <p className="text-xs tabular-nums text-white/60">{previewIndex + 1} / {images.length}</p>
               </div>
             </div>
           )}
@@ -341,8 +340,8 @@ function ConfigNeededCard({ service, ready, unlockable, onUnlockKey, onRetry }) 
   // — offer to re-run the failed request right away.
   if (unlocked || ready) {
     return (
-      <div className="relative rounded-lg border border-emerald-500/40 bg-emerald-500/5 px-3 py-2.5 pr-9">
-        <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+      <div className="relative rounded-lg border border-positive/30 bg-positive/10 px-3 py-2.5 pr-9">
+        <div className="flex items-center gap-2 text-xs font-medium text-positive">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
           {unlocked ? `${info.name} key unlocked` : `${info.name} is ready`}
         </div>
@@ -357,7 +356,7 @@ function ConfigNeededCard({ service, ready, unlockable, onUnlockKey, onRetry }) 
           type="button"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss"
-          className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+          className="absolute right-2 top-2 rounded-md p-1 text-faint transition-colors hover:bg-secondary hover:text-foreground"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -366,8 +365,8 @@ function ConfigNeededCard({ service, ready, unlockable, onUnlockKey, onRetry }) 
   }
 
   return (
-    <div className="relative rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2.5 pr-9">
-      <div className="flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400">
+    <div className="relative rounded-lg border border-highlight/30 bg-highlight/10 px-3 py-2.5 pr-9">
+      <div className="flex items-center gap-2 text-xs font-medium text-highlight-ink">
         <KeyRound className="h-3.5 w-3.5 shrink-0" />
         {unlockable ? `${info.name} key is locked` : `${info.name} isn't configured`}
       </div>
@@ -390,20 +389,20 @@ function ConfigNeededCard({ service, ready, unlockable, onUnlockKey, onRetry }) 
               Unlock
             </Button>
           </div>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {unlockError
               ? <span className="text-destructive">{unlockError}</span>
               : 'Enter the password you used to save your .p8 key.'}
           </p>
         </div>
       ) : (
-        <p className="mt-1 text-[11px] text-muted-foreground">{info.hint}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{info.hint}</p>
       )}
       <button
         type="button"
         onClick={() => setDismissed(true)}
         aria-label="Dismiss"
-        className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+        className="absolute right-2 top-2 rounded-md p-1 text-faint transition-colors hover:bg-secondary hover:text-foreground"
       >
         <X className="h-3.5 w-3.5" />
       </button>
@@ -421,11 +420,11 @@ const APPROVAL_LABELS = {
 
 function ToolCallCard({ call, result, isAwaitingApproval, isRunning, writeTool, ascCredentials, ascUnlockable, onUnlockKey, serviceReady, onRetry }) {
   let StatusIcon = Minus
-  let statusClass = 'text-muted-foreground/50'
+  let statusClass = 'text-faint'
   let statusLabel = 'cancelled'
   if (isAwaitingApproval) {
     StatusIcon = ShieldAlert
-    statusClass = 'text-amber-500'
+    statusClass = 'text-highlight-ink'
     statusLabel = 'awaiting approval'
   } else if (result?.approval === 'rejected') {
     StatusIcon = XCircle
@@ -433,46 +432,46 @@ function ToolCallCard({ call, result, isAwaitingApproval, isRunning, writeTool, 
     statusLabel = 'rejected'
   } else if (result) {
     StatusIcon = result.isError ? XCircle : CheckCircle2
-    statusClass = result.isError ? 'text-destructive' : 'text-emerald-500'
+    statusClass = result.isError ? 'text-destructive' : 'text-positive'
     statusLabel = result.isError ? 'error' : 'done'
   } else if (isRunning) {
     StatusIcon = Loader2
-    statusClass = 'text-muted-foreground animate-spin'
+    statusClass = 'text-faint animate-spin'
     statusLabel = 'running'
   }
 
   return (
     <div className="space-y-2">
-      <Collapsible className="rounded-lg border border-border/60 bg-muted/30">
-      <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-muted/50 rounded-lg transition-colors">
-        <Wrench className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      <Collapsible className="rounded-lg border border-border bg-secondary/40">
+      <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-secondary rounded-lg transition-colors">
+        <Wrench className="h-3.5 w-3.5 text-faint shrink-0" />
         <span className="font-mono font-medium truncate">{call.name}</span>
         {writeTool && (
-          <Badge variant="outline" className="h-4 px-1.5 text-[10px] border-amber-500/50 text-amber-600 dark:text-amber-400">
+          <Badge variant="outline" className="h-5 px-1.5 text-xs text-muted-foreground">
             write
           </Badge>
         )}
         {writeTool && APPROVAL_LABELS[result?.approval] && (
-          <Badge variant="outline" className="h-4 px-1.5 text-[10px] text-muted-foreground font-normal">
+          <Badge variant="outline" className="h-5 px-1.5 text-xs text-faint font-normal">
             {APPROVAL_LABELS[result.approval]}
           </Badge>
         )}
-        <span className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground shrink-0">
+        <span className="ml-auto flex items-center gap-1.5 text-xs text-faint shrink-0">
           {statusLabel}
           <StatusIcon className={`h-3.5 w-3.5 ${statusClass}`} />
-          <ChevronDown className="h-3 w-3" />
+          <ChevronDown className="h-3 w-3 text-faint" />
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="border-t border-border/60 px-3 py-2 space-y-2">
+        <div className="border-t border-border px-3 py-2 space-y-2">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Arguments</div>
-            <pre className="text-[11px] font-mono bg-background/60 rounded-md p-2 overflow-x-auto max-h-40 overflow-y-auto whitespace-pre-wrap break-all">{prettyJson(call.args || {})}</pre>
+            <div className="text-xs text-faint mb-1">Arguments</div>
+            <pre className="text-xs font-mono bg-card border border-border rounded-md p-2 overflow-x-auto max-h-40 overflow-y-auto whitespace-pre-wrap break-all">{prettyJson(call.args || {})}</pre>
           </div>
           {result && (
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Result</div>
-              <pre className={`text-[11px] font-mono rounded-md p-2 overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap break-all ${result.isError ? 'bg-destructive/10 text-destructive' : 'bg-background/60'}`}>{prettyJson(result.content)}</pre>
+              <div className="text-xs text-faint mb-1">Result</div>
+              <pre className={`text-xs font-mono rounded-md border p-2 overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap break-all ${result.isError ? 'border-destructive/30 bg-destructive/10 text-destructive' : 'border-border bg-card'}`}>{prettyJson(result.content)}</pre>
             </div>
           )}
         </div>
@@ -857,21 +856,18 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
   const noProviderConfigured = !capableProviders.some((id) => aiConfig.apiKeys[id])
 
   const approvalMode = autoApprove
-    ? { label: 'Auto-approve', icon: <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> }
+    ? { label: 'Auto-approve', icon: <ShieldCheck className="h-3.5 w-3.5 text-highlight-ink" /> }
     : alwaysAllow.size > 0
-      ? { label: `${alwaysAllow.size} always allowed`, icon: <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> }
-      : { label: 'Ask every write', icon: <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" /> }
+      ? { label: `${alwaysAllow.size} always allowed`, icon: <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" /> }
+      : { label: 'Ask every write', icon: <ShieldAlert className="h-3.5 w-3.5 text-faint" /> }
 
   return (
     <div className="flex h-full min-h-[480px] flex-col gap-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 shrink-0">
-            <Bot className="h-5 w-5 text-primary" />
-          </div>
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold leading-tight tracking-tight">Agent</h1>
-            <p className="text-[11px] leading-tight text-muted-foreground">{AGENT_TOOL_COUNT} tools available to the model</p>
+            <h1 className="text-[28px] leading-9 font-medium tracking-[-0.01em]">Agent</h1>
+            <p className="text-sm text-muted-foreground"><span className="tabular-nums">{AGENT_TOOL_COUNT}</span> tools available to the model</p>
           </div>
         </div>
 
@@ -882,8 +878,8 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
             ['AppCompete', appCompeteReady],
             [xcstringsData && fileName ? fileName : '.xcstrings', !!xcstringsData],
           ].map(([label, ready]) => (
-            <Badge key={label} variant="outline" className={`h-6 gap-1.5 font-normal ${ready ? 'text-foreground' : 'text-muted-foreground'}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${ready ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
+            <Badge key={label} variant="outline" className={`h-6 gap-1.5 font-normal ${ready ? 'text-foreground' : 'text-faint'}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${ready ? 'bg-positive' : 'bg-faint/40'}`} />
               <span className="max-w-[160px] truncate">{label}</span>
             </Badge>
           ))}
@@ -898,7 +894,7 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
               {capableProviders.map((id) => (
                 <SelectItem key={id} value={id}>
                   {PROVIDERS[id].name}
-                  {!aiConfig.apiKeys[id] && <span className="text-muted-foreground"> — no API key</span>}
+                  {!aiConfig.apiKeys[id] && <span className="text-faint"> (no API key)</span>}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -920,14 +916,14 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
             <Button variant="outline" size="sm" className="h-8 gap-1.5 font-normal" aria-label="Write approvals">
               {approvalMode.icon}
               <span className="text-xs">{approvalMode.label}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              <ChevronDown className="h-3.5 w-3.5 text-faint" />
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-[330px] p-0">
             <div className="px-3 py-2.5">
               <p className="text-sm font-medium">Write approvals</p>
-              <p className="text-[11px] text-muted-foreground">
-                Which actions on App Store Connect / Google Play can run without asking.
+              <p className="text-xs text-muted-foreground">
+                Which actions on App Store Connect and Google Play can run without asking.
               </p>
             </div>
             <Separator />
@@ -935,11 +931,11 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
               <Switch id="agent-auto-approve" className="mt-0.5" checked={autoApprove} onCheckedChange={setAutoApprove} />
               <div className="min-w-0 space-y-0.5">
                 <Label htmlFor="agent-auto-approve" className="cursor-pointer text-xs font-medium">
-                  {autoApprove ? <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> : <ShieldAlert className="h-3.5 w-3.5" />}
+                  {autoApprove ? <ShieldCheck className="h-3.5 w-3.5 text-highlight-ink" /> : <ShieldAlert className="h-3.5 w-3.5 text-faint" />}
                   Auto-approve every write
                 </Label>
-                <p className="text-[11px] text-muted-foreground">
-                  Skips the prompt for all {WRITE_TOOL_NAMES.size} write tools, including ones you never allowed.
+                <p className="text-xs text-muted-foreground">
+                  Skips the prompt for all <span className="tabular-nums">{WRITE_TOOL_NAMES.size}</span> write tools, including ones you never allowed.
                 </p>
               </div>
             </div>
@@ -951,7 +947,7 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 px-1.5 text-[11px] text-muted-foreground"
+                    className="h-6 px-1.5 text-xs text-muted-foreground"
                     onClick={() => askTools(null)}
                   >
                     Revoke all
@@ -959,21 +955,21 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
                 )}
               </div>
               {alwaysAllow.size === 0 ? (
-                <p className="text-[11px] text-muted-foreground">
-                  Nothing yet. Hit <span className="font-medium">Always allow</span> on an approval, or type{' '}
-                  <code className="rounded bg-muted px-1 py-0.5 font-mono">/allow &lt;tool&gt;</code>.
+                <p className="text-xs text-muted-foreground">
+                  Nothing yet. Choose <span className="font-medium">Always allow</span> on an approval, or type{' '}
+                  <code className="rounded-sm bg-secondary px-1 py-0.5 font-mono">/allow &lt;tool&gt;</code>.
                 </p>
               ) : (
                 <div className="max-h-44 space-y-1 overflow-y-auto">
                   {[...alwaysAllow].sort().map((name) => (
-                    <div key={name} className="flex items-center gap-2 rounded-md bg-muted/50 px-2 py-1">
-                      <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                      <span className="truncate font-mono text-[11px]">{name}</span>
+                    <div key={name} className="flex items-center gap-2 rounded-md bg-secondary px-2 py-1">
+                      <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-faint" />
+                      <span className="truncate font-mono text-xs">{name}</span>
                       <button
                         type="button"
                         onClick={() => askTools([name])}
                         aria-label={`Ask again for ${name}`}
-                        className="ml-auto rounded p-0.5 text-muted-foreground/70 transition-colors hover:bg-background hover:text-foreground"
+                        className="ml-auto rounded-sm p-0.5 text-faint transition-colors hover:bg-background hover:text-foreground"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -999,7 +995,7 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
       </div>
 
       {!agentConfig.apiKey && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+        <div className="flex items-start gap-2 rounded-lg bg-highlight/10 px-3 py-2 text-xs text-highlight-ink">
           <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
           <span>
             {noProviderConfigured
@@ -1009,31 +1005,28 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
         </div>
       )}
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="mx-auto w-full max-w-3xl space-y-4 p-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
-                  <Bot className="h-6 w-6 text-primary" />
-                </div>
                 <p className="text-sm font-medium mb-1">Ask the agent to do something</p>
-                <p className="text-xs text-muted-foreground mb-5 max-w-sm">
-                  It can list your apps, read and update store metadata, translate content, and more — with your approval on every write.
+                <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+                  It can list your apps, read and update store metadata and translate content. Every write waits for your approval.
                 </p>
-                <div className="flex flex-col gap-2 w-full max-w-md">
+                <div className="flex flex-col w-full max-w-md divide-y divide-border border-y border-border">
                   {SUGGESTIONS.map((s) => (
                     <button
                       key={s}
                       onClick={() => setInput(s)}
-                      className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                      className="px-2 py-2.5 text-sm text-left text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                     >
                       {s}
                     </button>
                   ))}
                 </div>
-                <p className="mt-4 text-[11px] text-muted-foreground">
-                  Type <code className="rounded bg-muted px-1 py-0.5 font-mono">/help</code> for commands
+                <p className="mt-4 text-xs text-faint">
+                  Type <code className="rounded-sm bg-secondary px-1 py-0.5 font-mono">/help</code> for commands
                   ({AGENT_COMMANDS.map((c) => c.name).join(', ')}).
                 </p>
               </div>
@@ -1046,13 +1039,13 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
                     <div
                       className={`w-full max-w-[92%] rounded-lg border px-3 py-2 text-xs ${
                         m.tone === 'error'
-                          ? 'border-destructive/40 bg-destructive/5 text-destructive'
-                          : 'border-border/60 bg-muted/30 text-muted-foreground'
+                          ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                          : 'border-border bg-secondary/40 text-muted-foreground'
                       }`}
                     >
                       {m.command && (
-                        <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] text-foreground/70">
-                          <Terminal className="h-3 w-3" />
+                        <div className="mb-1 flex items-center gap-1.5 font-mono text-xs text-foreground/70">
+                          <Terminal className="h-3 w-3 text-faint" />
                           {m.command}
                         </div>
                       )}
@@ -1064,7 +1057,7 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
               if (m.role === 'user') {
                 return (
                   <div key={i} className="flex justify-end">
-                    <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground whitespace-pre-wrap break-words">
+                    <div className="max-w-[80%] rounded-xl rounded-br-sm bg-secondary px-4 py-2.5 text-sm text-foreground whitespace-pre-wrap break-words">
                       {m.content}
                     </div>
                   </div>
@@ -1074,12 +1067,12 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
                 const unconfigured = m.configNeeded || detectUnconfiguredService(m.content, { ascReady, gpReady, appCompeteReady })
                 return (
                   <div key={i} className="flex gap-3">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-0.5">
-                      <Bot className="h-4 w-4 text-primary" />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-secondary shrink-0 mt-0.5">
+                      <Bot className="h-4 w-4 text-faint" />
                     </div>
                     <div className="min-w-0 flex-1 space-y-2">
                       {m.content && (
-                        <div className="rounded-2xl rounded-tl-sm bg-muted/50 px-4 py-2.5 text-sm break-words max-w-[90%]">
+                        <div className="rounded-xl rounded-tl-sm border border-border bg-card px-4 py-2.5 text-sm break-words max-w-[90%]">
                           <Markdown>{m.content}</Markdown>
                         </div>
                       )}
@@ -1116,15 +1109,15 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
 
             {isRunning && !pendingApproval && (
               <div className="flex items-center gap-2 pl-10 text-xs text-muted-foreground">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Thinking…
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-faint" />
+                Thinking
               </div>
             )}
             <div ref={bottomRef} />
           </div>
         </div>
 
-        <div className="shrink-0 space-y-2 border-t border-border/60 bg-card/80 p-3">
+        <div className="shrink-0 space-y-2 border-t border-border bg-card p-3">
           <div className="mx-auto w-full max-w-3xl space-y-2">
             {pendingApproval && (
               <div className="max-h-[45vh] overflow-y-auto">
@@ -1137,20 +1130,20 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
               </div>
             )}
 
-            <div className="rounded-xl border border-border/60 bg-muted/30 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+            <div className="rounded-lg border border-border bg-secondary/40 transition-colors focus-within:border-foreground/30">
               {commandMatches.length > 0 && (
-                <div className="border-b border-border/60 p-1">
+                <div className="border-b border-border p-1">
                   {commandMatches.map((c, idx) => (
                     <button
                       key={c.name}
                       type="button"
                       onClick={() => completeCommand(c)}
-                      className={`flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted ${idx === 0 ? 'bg-muted/60' : ''}`}
+                      className={`flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-secondary ${idx === 0 ? 'bg-secondary' : ''}`}
                     >
                       <span className="font-mono text-xs">{c.usage}</span>
-                      <span className="truncate text-[11px] text-muted-foreground">{c.description}</span>
+                      <span className="truncate text-xs text-muted-foreground">{c.description}</span>
                       {idx === 0 && (
-                        <kbd className="ml-auto shrink-0 rounded border border-border px-1 text-[9px] leading-[14px] text-muted-foreground">Tab</kbd>
+                        <kbd className="ml-auto shrink-0 rounded-sm border border-border px-1 font-mono text-xs leading-4 text-faint">Tab</kbd>
                       )}
                     </button>
                   ))}
@@ -1161,22 +1154,23 @@ export default function AgentPage({ aiConfig, ascCredentials, onAscCredentialsCh
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder='e.g. "Translate the description of my latest version to Spanish and update it" — or / for commands'
+                placeholder='e.g. "Translate the description of my latest version to Spanish and update it", or / for commands'
                 rows={1}
                 className="max-h-40 min-h-[44px] resize-none border-0 bg-transparent shadow-none text-sm focus-visible:ring-0"
                 disabled={isRunning}
               />
               <div className="flex items-center justify-between gap-2 px-3 pb-2.5">
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-xs text-faint">
                   Enter to send · Shift+Enter for a new line · <span className="font-mono">/</span> for commands
                 </span>
                 {isRunning ? (
-                  <Button variant="destructive" size="sm" className="h-8" onClick={handleStop}>
+                  <Button variant="outline" size="sm" className="h-8" onClick={handleStop}>
                     <Square className="h-3.5 w-3.5 mr-1.5" />
                     Stop
                   </Button>
                 ) : (
                   <Button
+                    variant="highlight"
                     size="sm"
                     className="h-8"
                     onClick={handleSend}

@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Sparkles, CheckCircle2, AlertCircle, Loader2, ChevronDown, Search, TrendingUp, Edit3, Plus, X, ArrowUpDown, Users, ClipboardCheck } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Loader2, ChevronDown, Search, TrendingUp, Edit3, Plus, X, ArrowUpDown, Users, ClipboardCheck } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 
 export default function ASOKeywordsCard({
@@ -39,34 +39,29 @@ export default function ASOKeywordsCard({
 }) {
   return (
   <>
-    <Card id="asc-aso-keywords" className="border-border/50 shadow-sm scroll-mt-44">
+    <Card id="asc-aso-keywords" className="scroll-mt-44">
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg">
-            <TrendingUp className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">ASO Keywords</CardTitle>
-            <CardDescription className="flex items-center gap-2">
-              Optimize keywords for each locale
-              {appCompeteEnabled && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-sky-500/10 text-sky-500 border-0">AppCompete</Badge>
-              )}
-              {astroEnabled && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-orange-500/10 text-orange-500 border-0">Astro</Badge>
-              )}
-              {!appCompeteEnabled && !astroEnabled && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-0">AI</Badge>
-              )}
-            </CardDescription>
-          </div>
+        <div>
+          <CardTitle className="text-base font-medium">ASO keywords</CardTitle>
+          <CardDescription className="flex items-center gap-2 text-sm text-muted-foreground">
+            Optimize the keywords of each locale
+            {appCompeteEnabled && (
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 font-normal">AppCompete</Badge>
+            )}
+            {astroEnabled && (
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 font-normal">Astro</Badge>
+            )}
+            {!appCompeteEnabled && !astroEnabled && (
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 font-normal">AI</Badge>
+            )}
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20">
-          <Search className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/40 border border-border">
+          <Search className="h-4 w-4 text-faint mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-medium text-foreground">Smart Keyword Generation</p>
+            <p className="text-sm font-medium text-foreground">Keyword generation</p>
             <p className="text-xs text-muted-foreground mt-1">
               Generate optimized, country-specific keywords based on your app description.
               Keywords are tailored for each market, not just translated.
@@ -85,7 +80,7 @@ export default function ASOKeywordsCard({
             return (
               <div
                 key={loc.id}
-                className="rounded-xl border border-border/50 overflow-hidden transition-all duration-200 hover:border-border"
+                className="rounded-lg border border-border overflow-hidden"
               >
                 <div
                   className="flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/30 transition-colors"
@@ -95,8 +90,9 @@ export default function ASOKeywordsCard({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">{localeInfo?.name || loc.locale}</span>
+                      <span className="keycap">{loc.locale}</span>
                       {loc.keywords ? (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs tabular-nums">
                           {keywordCount} keywords
                         </Badge>
                       ) : (
@@ -113,23 +109,23 @@ export default function ASOKeywordsCard({
                   </div>
                   <div className="flex items-center gap-2">
                     {loc.keywords && (
-                      <span className={`text-xs font-mono ${charCount > 90 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                      <span className={`text-xs font-mono tabular-nums ${charCount > 90 ? 'text-highlight-ink' : 'text-faint'}`}>
                         {charCount}/100
                       </span>
                     )}
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-faint transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4 pt-2 border-t border-border/50 bg-muted/20">
+                  <div className="px-4 pb-4 pt-2 border-t border-border bg-muted/20">
                     <div className="space-y-3">
                       {editingKeywordsFor === loc.locale ? (
                         <div className="space-y-3">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <Label className="text-xs font-medium text-muted-foreground">Edit Keywords</Label>
-                              <span className={`text-xs font-mono ${editedKeywords.length > 90 ? 'text-amber-500' : editedKeywords.length > 100 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                              <Label className="text-xs font-medium text-muted-foreground">Edit keywords</Label>
+                              <span className={`text-xs font-mono tabular-nums ${editedKeywords.length > 90 ? 'text-highlight-ink' : editedKeywords.length > 100 ? 'text-destructive' : 'text-faint'}`}>
                                 {editedKeywords.length}/100
                               </span>
                             </div>
@@ -141,7 +137,7 @@ export default function ASOKeywordsCard({
                               maxLength={100}
                               onClick={(e) => e.stopPropagation()}
                             />
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-faint">
                               Separate keywords with commas. No spaces after commas.
                             </p>
                           </div>
@@ -158,12 +154,12 @@ export default function ASOKeywordsCard({
                               {isSavingKeywords ? (
                                 <>
                                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Saving...
+                                  Saving
                                 </>
                               ) : (
                                 <>
                                   <CheckCircle2 className="h-4 w-4 mr-2" />
-                                  Save Keywords
+                                  Save keywords
                                 </>
                               )}
                             </Button>
@@ -184,7 +180,7 @@ export default function ASOKeywordsCard({
                       ) : (
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <Label className="text-xs font-medium text-muted-foreground">Current Keywords</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">Current keywords</Label>
                             <Button
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -200,7 +196,7 @@ export default function ASOKeywordsCard({
                           </div>
                           {loc.keywords ? (
                             <div
-                              className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-background/50 border border-border/30 cursor-pointer hover:border-primary/30 transition-colors"
+                              className="flex flex-wrap gap-1.5 p-3 rounded-lg bg-background/50 border border-border cursor-pointer hover:border-foreground/30 transition-colors"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 startEditingKeywords(loc.locale, loc.keywords)
@@ -209,7 +205,7 @@ export default function ASOKeywordsCard({
                               {loc.keywords.split(',').map((keyword, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-2.5 py-1 rounded-lg bg-background border border-border/50 text-xs font-medium hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                                  className="px-2 py-1 rounded-md bg-background border border-border text-xs font-medium hover:border-foreground/30 transition-colors"
                                 >
                                   {keyword.trim()}
                                 </span>
@@ -217,14 +213,14 @@ export default function ASOKeywordsCard({
                             </div>
                           ) : (
                             <div
-                              className="p-4 rounded-lg bg-background/50 border border-dashed border-border/50 cursor-pointer hover:border-primary/30 transition-colors text-center"
+                              className="p-4 rounded-lg bg-background/50 border border-dashed border-border cursor-pointer hover:border-foreground/30 transition-colors text-center"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 startEditingKeywords(loc.locale, '')
                               }}
                             >
                               <p className="text-sm text-muted-foreground">No keywords set</p>
-                              <p className="text-xs text-muted-foreground/70 mt-1">Click to add keywords</p>
+                              <p className="text-xs text-faint mt-1">Click to add keywords</p>
                             </div>
                           )}
                         </div>
@@ -240,7 +236,7 @@ export default function ASOKeywordsCard({
                                   disabled={isGenerating}
                                   variant="outline"
                                   size="sm"
-                                  className="flex-1 h-9 min-w-[110px] border-sky-500/30 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10"
+                                  className="flex-1 h-9 min-w-[110px]"
                                 >
                                   {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <TrendingUp className="h-3.5 w-3.5 mr-1.5" />}
                                   Suggest
@@ -250,7 +246,7 @@ export default function ASOKeywordsCard({
                                   disabled={appCompeteLoadingFor === `${loc.locale}:competitors`}
                                   variant="outline"
                                   size="sm"
-                                  className="flex-1 h-9 min-w-[110px] border-sky-500/30 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10"
+                                  className="flex-1 h-9 min-w-[110px]"
                                 >
                                   {appCompeteLoadingFor === `${loc.locale}:competitors` ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Users className="h-3.5 w-3.5 mr-1.5" />}
                                   Competitors
@@ -260,7 +256,7 @@ export default function ASOKeywordsCard({
                                   disabled={appCompeteLoadingFor === `${loc.locale}:review` || !loc.keywords}
                                   variant="outline"
                                   size="sm"
-                                  className="flex-1 h-9 min-w-[110px] border-sky-500/30 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10"
+                                  className="flex-1 h-9 min-w-[110px]"
                                 >
                                   {appCompeteLoadingFor === `${loc.locale}:review` ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <ClipboardCheck className="h-3.5 w-3.5 mr-1.5" />}
                                   Review
@@ -286,15 +282,15 @@ export default function ASOKeywordsCard({
                               size="sm"
                               className={(astroEnabled || appCompeteEnabled) ? 'flex-1 h-9 min-w-[110px]' : 'w-full h-9'}
                             >
-                              {isGenerating && !astroEnabled && !appCompeteEnabled ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Sparkles className="h-3.5 w-3.5 mr-1.5" />}
-                              AI Generate
+                              {isGenerating && !astroEnabled && !appCompeteEnabled && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+                              Generate with AI
                             </Button>
                           </div>
 
                           {!currentAiApiKey && !astroEnabled && !appCompeteEnabled && (
-                            <p className="text-xs text-amber-500 flex items-center gap-1">
+                            <p className="text-xs text-highlight-ink flex items-center gap-1">
                               <AlertCircle className="h-3 w-3" />
-                              Configure AI API key or AppCompete in the sidebar
+                              Set an AI API key or AppCompete in the sidebar
                             </p>
                           )}
                         </>
@@ -338,10 +334,7 @@ export function CompetitorPickerDialog({ picker, onClose, onPick }) {
     <Dialog open={!!picker} onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <Users className="h-4 w-4 text-sky-500" />
-            Pick a competitor
-          </DialogTitle>
+          <DialogTitle className="text-base">Pick a competitor</DialogTitle>
           <DialogDescription className="text-xs">
             Apps tracked on your AppCompete dashboard
           </DialogDescription>
@@ -356,13 +349,13 @@ export function CompetitorPickerDialog({ picker, onClose, onPick }) {
               {app.icon ? (
                 <img src={app.icon} alt="" className="h-8 w-8 rounded-lg" />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-xs font-semibold">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-xs font-medium text-muted-foreground">
                   {app.name.charAt(0)}
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium truncate">{app.name}</p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs tabular-nums text-faint">
                   {app.keywordCount != null ? `${app.keywordCount} tracked keywords` : `Apple ID ${app.appleId}`}
                 </p>
               </div>
@@ -375,10 +368,10 @@ export function CompetitorPickerDialog({ picker, onClose, onPick }) {
 }
 
 const VERDICT_STYLES = {
-  great: { label: 'Great', className: 'bg-emerald-500/10 text-emerald-500' },
-  ok: { label: 'OK', className: 'bg-sky-500/10 text-sky-500' },
-  weak: { label: 'Weak', className: 'bg-amber-500/10 text-amber-500' },
-  hard: { label: 'Hard', className: 'bg-red-500/10 text-red-500' },
+  great: { label: 'Great', className: 'bg-positive/10 text-positive' },
+  ok: { label: 'OK', className: 'bg-secondary text-foreground' },
+  weak: { label: 'Weak', className: 'bg-highlight/10 text-highlight-ink' },
+  hard: { label: 'Hard', className: 'bg-destructive/10 text-destructive' },
   unknown: { label: 'Untracked', className: 'bg-muted text-muted-foreground' },
 }
 
@@ -393,20 +386,17 @@ export function KeywordReviewDialog({ review, onClose, onTrack }) {
     <Dialog open={!!review} onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-[640px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <ClipboardCheck className="h-4 w-4 text-sky-500" />
-            Keyword Review — {review.localeName}
-          </DialogTitle>
+          <DialogTitle className="text-base">Keyword review — {review.localeName}</DialogTitle>
           <DialogDescription className="text-xs">
-            {review.items.length} keywords analyzed with AppCompete
-            {needAttention > 0 && <span className="text-amber-500"> — {needAttention} need attention</span>}
+            <span className="tabular-nums">{review.items.length}</span> keywords analyzed with AppCompete
+            {needAttention > 0 && <span className="text-highlight-ink tabular-nums"> — {needAttention} need attention</span>}
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[55vh] overflow-y-auto -mx-1 px-1">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-background z-10">
-              <tr className="border-b border-border/50 text-xs text-muted-foreground">
+              <tr className="border-b border-border text-xs text-faint">
                 <th className="py-2 text-left font-medium">Keyword</th>
                 <th className="py-2 text-right font-medium w-12">Pos</th>
                 <th className="py-2 text-right font-medium w-12">Pop</th>
@@ -418,16 +408,16 @@ export function KeywordReviewDialog({ review, onClose, onTrack }) {
               {review.items.map((item) => {
                 const v = VERDICT_STYLES[item.verdict] || VERDICT_STYLES.unknown
                 return (
-                  <tr key={item.keyword} className="border-b border-border/30 align-top">
+                  <tr key={item.keyword} className="border-b border-border align-top">
                     <td className="py-2">
                       <span className="font-medium">{item.keyword}</span>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{item.advice}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{item.advice}</p>
                     </td>
                     <td className="py-2 text-right tabular-nums">{item.position ?? '—'}</td>
                     <td className="py-2 text-right tabular-nums">{item.popularity ?? '—'}</td>
                     <td className="py-2 text-right tabular-nums">{item.difficulty ?? '—'}</td>
                     <td className="py-2 pl-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-medium ${v.className}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${v.className}`}>
                         {v.label}
                       </span>
                     </td>
@@ -439,7 +429,7 @@ export function KeywordReviewDialog({ review, onClose, onTrack }) {
         </div>
 
         <DialogFooter className="flex items-center justify-between sm:justify-between">
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-xs tabular-nums text-faint">
             {untracked.length > 0 ? `${untracked.length} keyword(s) not tracked yet` : 'All keywords tracked'}
           </span>
           <div className="flex gap-2">
@@ -453,7 +443,6 @@ export function KeywordReviewDialog({ review, onClose, onTrack }) {
                   await onTrack(untracked)
                   setIsTracking(false)
                 }}
-                className="border-sky-500/30 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10"
               >
                 {isTracking ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Plus className="h-3.5 w-3.5 mr-1.5" />}
                 Track on AppCompete
@@ -524,12 +513,13 @@ export function AstroSuggestionsDialog({ astroSuggestions, onClose, onApply, isS
   }
 
   const sortArrow = (col) => {
-    if (sortBy !== col) return <ArrowUpDown className="h-3 w-3 opacity-30" />
+    if (sortBy !== col) return <ArrowUpDown className="h-3 w-3 text-faint" />
     return <ChevronDown className={`h-3 w-3 ${sortDir === 'asc' ? 'rotate-180' : ''}`} />
   }
 
-  const popColor = (v) => v >= 50 ? 'text-emerald-500' : v >= 20 ? 'text-amber-500' : 'text-muted-foreground'
-  const diffColor = (v) => v <= 20 ? 'text-emerald-500' : v <= 50 ? 'text-amber-500' : 'text-red-500'
+  // Neutral steps: the strong value reads in foreground, weak ones fade; only hard difficulty is flagged
+  const popColor = (v) => v >= 50 ? 'text-foreground' : v >= 20 ? 'text-muted-foreground' : 'text-faint'
+  const diffColor = (v) => v <= 20 ? 'text-foreground' : v <= 50 ? 'text-muted-foreground' : 'text-highlight-ink'
 
   if (!astroSuggestions) return null
 
@@ -538,43 +528,38 @@ export function AstroSuggestionsDialog({ astroSuggestions, onClose, onApply, isS
   return (
     <Dialog open={!!astroSuggestions} onOpenChange={(open) => { if (!open) { setSelected(new Set()); setSearch(''); onClose() } }}>
       <DialogContent className="sm:max-w-[700px] gap-0 p-0 overflow-hidden">
-        <DialogHeader className="p-5 pb-4 border-b border-border/50 bg-gradient-to-r from-orange-500/5 to-amber-500/5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-500">
-              <TrendingUp className="h-4 w-4 text-white" />
-            </div>
-            <div>
-              <DialogTitle className="text-base">{astroSuggestions.title || 'Astro Suggestions'}</DialogTitle>
-              <DialogDescription className="text-xs">{astroSuggestions.localeName} — {suggestions.length} keywords</DialogDescription>
-            </div>
+        <DialogHeader className="p-5 pb-4 border-b border-border">
+          <div>
+            <DialogTitle className="text-base">{astroSuggestions.title || 'Astro suggestions'}</DialogTitle>
+            <DialogDescription className="text-xs tabular-nums">{astroSuggestions.localeName} — {suggestions.length} keywords</DialogDescription>
           </div>
         </DialogHeader>
 
         <div className="px-5 pt-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">Capacity</span>
-            <div className="w-32 h-2 rounded-full bg-muted overflow-hidden">
+            <span className="text-xs text-faint">Capacity</span>
+            <div className="w-32 h-1.5 rounded-full bg-secondary overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${charsLeft < 0 ? 'bg-red-500' : charsLeft < 15 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                className={`h-full rounded-full transition-[width] ${charsLeft < 0 ? 'bg-destructive' : charsLeft < 15 ? 'bg-highlight' : 'bg-muted-foreground'}`}
                 style={{ width: `${Math.min(100, (charsUsed / 100) * 100)}%` }}
               />
             </div>
           </div>
-          <div className={`flex items-baseline gap-1 ${charsLeft < 0 ? 'text-red-500' : charsLeft < 15 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-            <span className="text-xl font-bold tabular-nums">{charsLeft}</span>
+          <div className={`flex items-baseline gap-1 ${charsLeft < 0 ? 'text-destructive' : charsLeft < 15 ? 'text-highlight-ink' : 'text-muted-foreground'}`}>
+            <span className="text-xl font-medium tabular-nums">{charsLeft}</span>
             <span className="text-xs">chars left</span>
           </div>
         </div>
 
         <div className="px-5 pt-3 pb-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-faint" />
             <input
               type="text"
-              placeholder="Filter keywords..."
+              placeholder="Filter keywords"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-8 pl-9 pr-3 text-sm rounded-lg border border-border/50 bg-background focus:outline-none focus:ring-1 focus:ring-orange-500/50"
+              className="w-full h-8 pl-9 pr-3 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
         </div>
@@ -582,12 +567,12 @@ export function AstroSuggestionsDialog({ astroSuggestions, onClose, onApply, isS
         <div className="overflow-y-auto max-h-[50vh] px-5">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-background z-10">
-              <tr className="border-b border-border/50">
+              <tr className="border-b border-border">
                 <th className="w-8 py-2 text-left" />
-                <th className="py-2 text-left font-medium text-muted-foreground text-xs">Keyword</th>
+                <th className="py-2 text-left font-medium text-faint text-xs">Keyword</th>
                 {[['popularity', 'Pop'], ['difficulty', 'Diff'], ['appsCount', 'Apps']].map(([col, label]) => (
                   <th key={col} className="py-2 text-right w-14">
-                    <button onClick={() => handleSort(col)} className="inline-flex items-center gap-0.5 font-medium text-muted-foreground text-xs hover:text-foreground ml-auto">
+                    <button onClick={() => handleSort(col)} className="inline-flex items-center gap-0.5 font-medium text-faint text-xs hover:text-foreground ml-auto">
                       {label} {sortArrow(col)}
                     </button>
                   </th>
@@ -603,18 +588,18 @@ export function AstroSuggestionsDialog({ astroSuggestions, onClose, onApply, isS
                   <tr
                     key={s.keyword}
                     onClick={() => !disabled && toggleKeyword(s.keyword)}
-                    className={`border-b border-border/30 ${
-                      disabled ? 'opacity-35 cursor-default' :
-                      isSelected ? 'bg-orange-500/5 cursor-pointer' : 'hover:bg-muted/30 cursor-pointer'
+                    className={`border-b border-border ${
+                      disabled ? 'opacity-40 cursor-default' :
+                      isSelected ? 'bg-muted/50 cursor-pointer' : 'hover:bg-muted/30 cursor-pointer'
                     }`}
                   >
                     <td className="py-1.5">
-                      <div className={`flex h-4 w-4 items-center justify-center rounded border-2 ${
-                        s.existing ? 'bg-muted border-muted-foreground/20' :
-                        isSelected ? 'bg-orange-500 border-orange-500' : 'border-muted-foreground/30'
+                      <div className={`flex h-4 w-4 items-center justify-center rounded border ${
+                        s.existing ? 'bg-muted border-muted-foreground/20 text-muted-foreground' :
+                        isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/40'
                       }`}>
                         {(isSelected || s.existing) && (
-                          <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         )}
@@ -622,13 +607,13 @@ export function AstroSuggestionsDialog({ astroSuggestions, onClose, onApply, isS
                     </td>
                     <td className="py-1.5">
                       <span className="font-medium">{s.keyword}</span>
-                      {s.existing && <span className="ml-1.5 text-[10px] text-muted-foreground">(added)</span>}
-                      {!s.existing && !fits && !isSelected && <span className="ml-1.5 text-[10px] text-red-400">won't fit</span>}
+                      {s.existing && <span className="ml-1.5 text-xs text-faint">(added)</span>}
+                      {!s.existing && !fits && !isSelected && <span className="ml-1.5 text-xs text-destructive">won't fit</span>}
                     </td>
-                    <td className={`py-1.5 text-right tabular-nums font-medium ${s.popularity != null ? popColor(s.popularity) : 'text-muted-foreground'}`}>
+                    <td className={`py-1.5 text-right tabular-nums font-medium ${s.popularity != null ? popColor(s.popularity) : 'text-faint'}`}>
                       {s.popularity ?? '—'}
                     </td>
-                    <td className={`py-1.5 text-right tabular-nums font-medium ${s.difficulty != null ? diffColor(s.difficulty) : 'text-muted-foreground'}`}>
+                    <td className={`py-1.5 text-right tabular-nums font-medium ${s.difficulty != null ? diffColor(s.difficulty) : 'text-faint'}`}>
                       {s.difficulty ?? '—'}
                     </td>
                     <td className="py-1.5 text-right tabular-nums text-muted-foreground">
@@ -644,14 +629,14 @@ export function AstroSuggestionsDialog({ astroSuggestions, onClose, onApply, isS
           </table>
         </div>
 
-        <div className="px-5 py-3 border-t border-border/50 space-y-2">
+        <div className="px-5 py-3 border-t border-border space-y-2">
           <div className={`text-xs rounded-lg px-3 py-2 break-all border font-mono ${
-            charsLeft < 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-muted/30 border-border/50'
+            charsLeft < 0 ? 'bg-destructive/10 border-destructive/30' : 'bg-muted/30 border-border'
           }`}>
-            {previewKeywords || <span className="text-muted-foreground italic">No keywords yet</span>}
+            {previewKeywords || <span className="text-faint">No keywords yet</span>}
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{selected.size} selected — {charsUsed}/100 chars</span>
+            <span className="text-xs tabular-nums text-faint">{selected.size} selected — {charsUsed}/100 chars</span>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" onClick={() => { setSelected(new Set()); setSearch(''); onClose() }}>
                 Cancel
@@ -660,12 +645,12 @@ export function AstroSuggestionsDialog({ astroSuggestions, onClose, onApply, isS
                 size="sm"
                 onClick={() => { onApply(selectedKeywords); setSelected(new Set()); setSearch('') }}
                 disabled={selected.size === 0 || isSaving}
-                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 border-0"
+                variant="highlight"
               >
                 {isSaving ? (
-                  <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />Saving...</>
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />Saving</>
                 ) : (
-                  <>Apply Keywords</>
+                  <>Apply keywords</>
                 )}
               </Button>
             </div>

@@ -38,18 +38,18 @@ export default function PromotionalTextDialog({ open, locale, localization, exis
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {availableLocales.map(loc => (
-                    <SelectItem key={loc.code} value={loc.code}>{loc.flag} {loc.name}</SelectItem>
+                    <SelectItem key={loc.code} value={loc.code}>{loc.flag} {loc.name} <span className="keycap">{loc.code}</span></SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {isDuplicate && <p className="text-xs text-amber-500">This locale already exists — choose another.</p>}
+              {isDuplicate && <p className="text-xs text-highlight-ink">This locale already exists — choose another.</p>}
             </div>
           )}
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <Label htmlFor="cpp-loc-promo">Promotional text</Label>
-              <span className={`text-xs ${over ? 'font-medium text-destructive' : 'text-muted-foreground'}`}>
+              <span className={`text-xs tabular-nums ${over ? 'font-medium text-destructive' : 'text-faint'}`}>
                 {text.length}/{CPP_PROMOTIONAL_TEXT_LIMIT}
               </span>
             </div>

@@ -85,7 +85,7 @@ export default function EventDialog({ mode = 'create', open, event, isSubmitting
                 <SelectContent>
                   {ASC_LOCALES.map(loc => (
                     <SelectItem key={loc.code} value={loc.code}>
-                      {loc.flag} {loc.name}
+                      {loc.flag} {loc.name} <span className="keycap">{loc.code}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>

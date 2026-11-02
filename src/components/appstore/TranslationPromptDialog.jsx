@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { MessageSquareText, RotateCcw, AlertTriangle, Check } from 'lucide-react'
+import { RotateCcw, AlertTriangle, Check } from 'lucide-react'
 
 // Per-field prompt editor. The user picks a field via the top tab bar,
 // edits its prompt, then Save persists that field's override. Reset reverts
@@ -73,16 +73,13 @@ export default function TranslationPromptDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[720px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquareText className="h-5 w-5 text-muted-foreground" />
-            {title}
-          </DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           {/* Field tab bar */}
-          <div className="flex flex-wrap gap-1.5 p-1 rounded-lg bg-muted/40 border border-border/50">
+          <div className="flex flex-wrap gap-1.5 p-1 rounded-lg bg-muted/40 border border-border">
             {fields.map(f => {
               const active = f.key === activeField
               const customized = isCustom(f.key)
@@ -104,14 +101,14 @@ export default function TranslationPromptDialog({
           </div>
 
           {/* Placeholder doc */}
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs">
-            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-highlight/10 text-xs">
+            <AlertTriangle className="h-4 w-4 text-highlight-ink shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="text-amber-500 font-medium">Available placeholders</p>
-              <p className="text-amber-500/80">
-                <code className="bg-amber-500/20 px-1 rounded">{'{localeName}'}</code> — target language,
-                {' '}<code className="bg-amber-500/20 px-1 rounded">{'{limit}'}</code> — char limit for this field,
-                {' '}<code className="bg-amber-500/20 px-1 rounded">{'{fieldType}'}</code> — the current field key.
+              <p className="text-highlight-ink font-medium">Available placeholders</p>
+              <p className="text-muted-foreground">
+                <code className="bg-secondary px-1 rounded text-foreground">{'{localeName}'}</code> — target language,
+                {' '}<code className="bg-secondary px-1 rounded text-foreground">{'{limit}'}</code> — char limit for this field,
+                {' '}<code className="bg-secondary px-1 rounded text-foreground">{'{fieldType}'}</code> — the current field key.
                 Always keep the char-limit rule, or Apple will reject the translation.
               </p>
             </div>
@@ -120,11 +117,11 @@ export default function TranslationPromptDialog({
           {/* Active prompt editor */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="asc-prompt" className="text-sm font-semibold">
+              <Label htmlFor="asc-prompt" className="text-sm font-medium">
                 System prompt — {fields.find(f => f.key === activeField)?.label}
               </Label>
               <div className="flex items-center gap-2">
-                {fieldIsCustom && <Badge variant="secondary" className="text-[10px] h-4">customized</Badge>}
+                {fieldIsCustom && <Badge variant="secondary" className="text-xs h-5 font-normal">Customized</Badge>}
                 <Button
                   type="button"
                   size="sm"
@@ -145,9 +142,9 @@ export default function TranslationPromptDialog({
               onChange={(e) => updateDraft(e.target.value)}
               rows={14}
               className="font-mono text-xs leading-relaxed"
-              placeholder="System prompt for this field..."
+              placeholder="System prompt for this field"
             />
-            <p className="text-xs text-muted-foreground">{currentDraft.length} characters</p>
+            <p className="text-xs tabular-nums text-faint">{currentDraft.length} characters</p>
           </div>
         </div>
 

@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  ChevronRight, Copy, ExternalLink, Eye, EyeOff, Globe, Images, Loader2, MessageSquareText, PanelsTopLeft,
-  Pencil, Plus, RefreshCw, Sparkles, Trash2, Link,
+  ChevronRight, Copy, ExternalLink, Eye, EyeOff, Languages, Loader2, MessageSquareText, PanelsTopLeft,
+  Pencil, Plus, RefreshCw, Trash2, Link,
 } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 import {
@@ -62,27 +62,22 @@ export default function CustomProductPagesCard({
 
   return (
     <>
-      <Card id="asc-cpp" className="scroll-mt-44 border-border/50 shadow-sm">
+      <Card id="asc-cpp" className="scroll-mt-44">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10">
-                <PanelsTopLeft className="h-5 w-5 text-sky-500" />
-              </div>
-              <div>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  Custom Product Pages
-                  {pages.length > 0 && (
-                    <Badge variant="outline" className="text-[10px]">{pages.length}/{MAX_CUSTOM_PRODUCT_PAGES}</Badge>
-                  )}
-                </CardTitle>
-                <CardDescription>
-                  Product page variants for {selectedApp.name} with their own screenshots, previews and promotional text
-                </CardDescription>
-              </div>
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base font-medium">
+                Custom Product Pages
+                {pages.length > 0 && (
+                  <Badge variant="outline" className="text-xs tabular-nums">{pages.length}/{MAX_CUSTOM_PRODUCT_PAGES}</Badge>
+                )}
+              </CardTitle>
+              <CardDescription className="text-sm text-muted-foreground">
+                Product page variants for {selectedApp.name} with their own screenshots, previews and promotional text
+              </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-9" onClick={onEditPrompt} title="Customize the AI translation prompt">
+              <Button variant="outline" size="sm" className="h-9" onClick={onEditPrompt} title="Customize the translation prompt">
                 <MessageSquareText className="mr-2 h-4 w-4" />
                 Prompt
                 {promptIsCustom && <span className="ml-2 h-1.5 w-1.5 rounded-full bg-foreground" />}
@@ -106,12 +101,12 @@ export default function CustomProductPagesCard({
         <CardContent className="space-y-6">
           {isLoadingPages ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-              Loading custom product pages...
+              <Loader2 className="mr-3 h-5 w-5 animate-spin text-faint" />
+              Loading custom product pages
             </div>
           ) : pages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <PanelsTopLeft className="mb-3 h-10 w-10 opacity-30" />
+              <PanelsTopLeft className="mb-3 h-6 w-6 text-faint" />
               <p className="font-medium">No custom product pages yet</p>
               <p className="text-sm">Create one per audience or campaign, then send ads and links to its URL</p>
             </div>
@@ -126,31 +121,26 @@ export default function CustomProductPagesCard({
                     tabIndex={0}
                     onClick={() => handleSelectPage(page)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSelectPage(page)}
-                    className={`group w-full cursor-pointer rounded-xl border p-4 text-left transition-all
+                    className={`group w-full cursor-pointer rounded-lg border px-4 py-3 text-left transition-colors
                       ${isSelected
-                        ? 'border-sky-500/50 bg-sky-500/[0.04] shadow-sm'
-                        : 'border-border/50 bg-background hover:border-sky-500/30 hover:bg-muted/40'}`}
+                        ? 'border-highlight/60 bg-muted/30'
+                        : 'border-border bg-background hover:bg-muted/40'}`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
-                        ${isSelected ? 'bg-sky-500/15' : 'bg-muted/60 group-hover:bg-sky-500/10'}`}>
-                        <PanelsTopLeft className={`h-5 w-5 ${isSelected ? 'text-sky-500' : 'text-muted-foreground'}`} />
-                      </div>
-
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
-                          <span className="truncate font-semibold">{page.name}</span>
-                          <Badge variant={page.visible ? 'default' : 'secondary'} className="h-4 px-1.5 text-[10px]">
+                          <span className="truncate font-medium">{page.name}</span>
+                          <Badge variant={page.visible ? 'success' : 'secondary'} className="h-5 px-1.5 text-xs">
                             {page.visible ? 'Visible' : 'Hidden'}
                           </Badge>
                           {isSelected && latestVersion && (
-                            <Badge variant="outline" className="h-4 px-1.5 text-[10px]">
+                            <Badge variant="outline" className="h-5 px-1.5 text-xs">
                               v{latestVersion.version} · {CPP_VERSION_STATES[latestVersion.state] || latestVersion.state}
                             </Badge>
                           )}
                         </div>
                         {page.url && (
-                          <p className="truncate font-mono text-xs text-muted-foreground">{page.url}</p>
+                          <p className="truncate font-mono text-xs text-faint">{page.url}</p>
                         )}
                       </div>
 
@@ -181,8 +171,8 @@ export default function CustomProductPagesCard({
                           onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ open: true, page, isDeleting: false }) }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                        <ChevronRight className={`ml-1 h-5 w-5 transition-transform
-                          ${isSelected ? 'rotate-90 text-sky-500' : 'text-muted-foreground/50 group-hover:translate-x-0.5 group-hover:text-sky-500'}`} />
+                        <ChevronRight className={`ml-1 h-4 w-4 transition-transform
+                          ${isSelected ? 'rotate-90 text-foreground' : 'text-faint group-hover:text-foreground'}`} />
                       </div>
                     </div>
                   </div>
@@ -192,11 +182,11 @@ export default function CustomProductPagesCard({
           )}
 
           {selectedPage && (
-            <div className="space-y-6 rounded-xl border border-border/50 bg-muted/20 p-5">
+            <div className="space-y-6 rounded-xl border border-border bg-muted/20 p-5">
               {isLoadingDetail ? (
                 <div className="flex items-center justify-center py-6 text-muted-foreground">
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  <span className="text-sm">Loading page…</span>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin text-faint" />
+                  <span className="text-sm">Loading page</span>
                 </div>
               ) : !latestVersion ? (
                 <p className="text-sm text-muted-foreground">This page has no version yet.</p>
@@ -205,12 +195,12 @@ export default function CustomProductPagesCard({
                   {/* Version status */}
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-1">
-                      <h4 className="text-sm font-semibold">
+                      <h4 className="text-sm font-medium">
                         Version {latestVersion.version} — {CPP_VERSION_STATES[latestVersion.state] || latestVersion.state}
                       </h4>
                       {latestVersion.deepLink && (
                         <p className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                          <Link className="h-3 w-3" /> {latestVersion.deepLink}
+                          <Link className="h-3 w-3 text-faint" /> {latestVersion.deepLink}
                         </p>
                       )}
                       {!editable && (
@@ -237,10 +227,9 @@ export default function CustomProductPagesCard({
                   {/* Promotional text per locale */}
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <h4 className="flex items-center gap-2 text-sm font-semibold">
-                        <Globe className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="flex items-center gap-2 text-sm font-medium">
                         Promotional text
-                        <span className="font-normal text-muted-foreground">({localizations.length} locale{localizations.length === 1 ? '' : 's'})</span>
+                        <span className="font-normal tabular-nums text-faint">({localizations.length} locale{localizations.length === 1 ? '' : 's'})</span>
                       </h4>
                       {editable && (
                         <div className="flex flex-wrap items-center gap-2">
@@ -260,10 +249,10 @@ export default function CustomProductPagesCard({
                             disabled={!sourceLocalization || !currentAiApiKey || isTranslatingAll}
                             title={!sourceLocalization
                               ? 'Write the promotional text for one locale first'
-                              : !currentAiApiKey ? 'Configure an AI provider API key in the sidebar' : 'AI-translate the promotional text'}
-                            className="gradient-primary border-0 text-white hover:opacity-90"
+                              : !currentAiApiKey ? 'Set an AI provider API key in the sidebar' : 'Translate the promotional text'}
+                            variant="highlight"
                           >
-                            <Sparkles className="mr-2 h-4 w-4" />
+                            <Languages className="mr-2 h-4 w-4" />
                             Translate with AI
                           </Button>
                         </div>
@@ -271,33 +260,33 @@ export default function CustomProductPagesCard({
                     </div>
 
                     {isTranslatingAll && (
-                      <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/60 p-3">
-                        <Loader2 className="h-4 w-4 animate-spin text-foreground/70" />
-                        <p className="text-xs text-foreground/80">
+                      <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/60 p-3">
+                        <Loader2 className="h-4 w-4 animate-spin text-faint" />
+                        <p className="text-xs tabular-nums text-muted-foreground">
                           Translating {translationProgress.current}/{translationProgress.total} — {translationProgress.locale}
                         </p>
                       </div>
                     )}
 
                     {localizations.length === 0 ? (
-                      <p className="text-sm italic text-muted-foreground">No locales yet.</p>
+                      <p className="text-sm text-muted-foreground">No locales yet</p>
                     ) : (
                       <div className="space-y-2">
                         {localizations.map(loc => {
                           const isSource = sourceLocalization?.id === loc.id
                           return (
-                            <div key={loc.id} className="flex items-start justify-between gap-3 rounded-lg border border-border/50 bg-background p-3">
+                            <div key={loc.id} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-background p-3">
                               <div className="min-w-0 flex-1">
                                 <div className="mb-1 flex items-center gap-2">
                                   <span className="text-base">{localeFlag(loc.locale)}</span>
-                                  <span className="text-sm font-medium">{loc.locale}</span>
-                                  {isSource && <Badge variant="secondary" className="text-xs">AI source</Badge>}
-                                  <span className="ml-auto text-[11px] text-muted-foreground">
+                                  <span className="keycap">{loc.locale}</span>
+                                  {isSource && <Badge variant="secondary" className="text-xs font-normal">Source</Badge>}
+                                  <span className="ml-auto text-xs tabular-nums text-faint">
                                     {loc.promotionalText.length}/{CPP_PROMOTIONAL_TEXT_LIMIT}
                                   </span>
                                 </div>
                                 <p className="line-clamp-2 text-xs text-muted-foreground">
-                                  {loc.promotionalText || <em>No promotional text</em>}
+                                  {loc.promotionalText || <span className="text-faint">No promotional text</span>}
                                 </p>
                               </div>
                               {editable && (
@@ -310,7 +299,7 @@ export default function CustomProductPagesCard({
                                     <Button
                                       size="icon"
                                       variant="ghost"
-                                      className="h-8 w-8 text-destructive hover:text-destructive"
+                                      className={`h-8 w-8 text-destructive hover:text-destructive ${confirmDeleteLocId === loc.id ? 'bg-destructive/10' : ''}`}
                                       onClick={() => {
                                         if (confirmDeleteLocId === loc.id) {
                                           handleDeleteLocalization(loc)
@@ -322,7 +311,7 @@ export default function CustomProductPagesCard({
                                       }}
                                       title={confirmDeleteLocId === loc.id ? 'Click again to confirm' : 'Delete locale'}
                                     >
-                                      <Trash2 className={`h-4 w-4 ${confirmDeleteLocId === loc.id ? 'animate-pulse' : ''}`} />
+                                      <Trash2 className="h-4 w-4" />
                                     </Button>
                                   )}
                                 </div>
@@ -335,11 +324,8 @@ export default function CustomProductPagesCard({
                   </div>
 
                   {/* Media */}
-                  <div className="space-y-3 border-t border-border/50 pt-5">
-                    <h4 className="flex items-center gap-2 text-sm font-semibold">
-                      <Images className="h-4 w-4 text-muted-foreground" />
-                      Screenshots &amp; previews
-                    </h4>
+                  <div className="space-y-3 border-t border-border pt-5">
+                    <h4 className="text-sm font-medium">Screenshots &amp; previews</h4>
                     <LocalizedMediaPanel
                       media={media}
                       library={assetLibrary}
@@ -394,7 +380,7 @@ export default function CustomProductPagesCard({
         <TranslateAllLocalesDialog
           key={`${selectedPage?.id}-${sourceLocalization.locale}`}
           open
-          title="AI-translate promotional text"
+          title="Translate promotional text"
           description={`Translates the ${sourceLocalization.locale} promotional text into every selected language and saves it to this custom product page (max ${CPP_PROMOTIONAL_TEXT_LIMIT} characters). New languages are added to the page.`}
           primaryLocale={sourceLocalization.locale}
           existingLocales={localizations.map(l => l.locale)}

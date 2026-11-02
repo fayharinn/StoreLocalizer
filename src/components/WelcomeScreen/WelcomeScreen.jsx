@@ -1,156 +1,120 @@
-import { Suspense, useState, useEffect, useRef, useCallback } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Preload } from '@react-three/drei'
-import { Languages, DollarSign, Smartphone, Camera, ShieldCheck, Zap } from 'lucide-react'
-import SpaceBackground from './SpaceBackground'
-import Globe from './Globe'
+import { useState, useEffect, useCallback } from 'react'
+import { Languages, Search, DollarSign, Image, Bot, ShieldCheck, Copy, Check, ArrowRight } from 'lucide-react'
+import { LogoMark } from '@/components/LogoMark'
+import { AppStoreIcon, GooglePlayIcon } from '@/components/StoreIcons'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
+// One App Store subtitle, written for each storefront within Apple's 30 characters
+const SUBTITLE_LIMIT = 30
+const SPECIMEN = [
+  { code: 'en-US', text: 'Strength, runs and streaks', source: true },
+  { code: 'fr-FR', text: 'Muscu, course et séries' },
+  { code: 'ja', text: '筋トレ、ラン、連続記録', marked: true },
+  { code: 'ar-SA', text: 'القوة والجري والاستمرار', rtl: true },
+  { code: 'hi', text: 'स्ट्रेंथ, रन और स्ट्रीक' },
+  { code: 'ko', text: '근력, 러닝, 연속 기록' },
+  { code: 'pt-BR', text: 'Força, corridas e sequências' },
+]
+
+const PREVIEW_ROWS = [
+  { flag: '🇺🇸', name: 'English (US)', code: 'en-US', subtitle: 'Strength, runs and streaks', whatsNew: 'Weekly plans are here. Pick your training days and FitTrack reminds you before each session.' },
+  { flag: '🇫🇷', name: 'French', code: 'fr-FR', subtitle: 'Muscu, course et séries', whatsNew: 'Les plans hebdomadaires arrivent. Choisissez vos jours et FitTrack vous prévient avant chaque séance.' },
+  { flag: '🇯🇵', name: 'Japanese', code: 'ja', subtitle: '筋トレ、ラン、連続記録', whatsNew: null },
+  { flag: '🇧🇷', name: 'Portuguese (BR)', code: 'pt-BR', subtitle: 'Força, corridas e sequências', whatsNew: null },
+]
 
 const FEATURES = [
-  { icon: Languages,    title: 'AI-Powered Translation',      desc: 'Translate app name, subtitle, description, keywords to 40+ languages with OpenAI or AWS Bedrock.' },
-  { icon: DollarSign,   title: 'Smart Subscription Pricing',  desc: 'GDP-adjusted pricing recommendations for 40+ countries. One-click price updates to App Store Connect.' },
-  { icon: Smartphone,   title: 'Direct Store Sync',           desc: 'Connect to App Store Connect & Google Play Console. Push translations without copy-paste.' },
-  { icon: Camera,       title: 'Screenshot Generator',        desc: '2D and 3D device frames, multi-language headlines, custom backgrounds. Batch export as ZIP.' },
-  { icon: ShieldCheck,  title: 'Privacy First',               desc: 'Credentials never leave your browser. JWT tokens generated client-side. Fully open source.' },
-  { icon: Zap,          title: 'Blazing Fast',                desc: 'Parallel AI requests with batching. Translate thousands of strings in minutes, not hours.' },
+  { icon: AppStoreIcon, title: 'App Store Connect and Google Play', desc: 'Name, subtitle, description, keywords and What’s New for every locale, translated with the AI provider you choose and pushed through the official APIs.' },
+  { icon: Image, title: 'Localized screenshots', desc: '2D and 3D device frames with a headline in every language, placed per locale from the Asset Library or exported as one ZIP per store size.' },
+  { icon: Bot, title: 'An agent for the busywork', desc: 'Ask in plain words to list your apps, audit localizations, translate What’s New or review your screenshots. It asks before every write.' },
+  { icon: Search, title: 'ASO keywords', desc: 'Keyword ideas per locale that fit Apple’s 100 characters, with popularity and difficulty scores once you connect AppCompete.' },
+  { icon: DollarSign, title: 'Subscription pricing', desc: 'A price for each of 175 storefronts from your US base price, adjusted to local purchasing power, then sent to App Store Connect.' },
+  { icon: Languages, title: 'String catalogs too', desc: 'Drop a Localizable.xcstrings file and get it back with every missing string filled, format specifiers and brand words untouched.' },
+  { icon: ShieldCheck, title: 'Keys stay in your browser', desc: 'API keys and your .p8 key never leave the page. Saved keys are encrypted with your password and tokens are signed client side.' },
 ]
 
-const QUICK_START_STEPS = [
-  { cmd: '# Clone the repo', color: '#6b7280' },
-  { cmd: '$ git clone https://github.com/fayharinn/StoreLocalizer.git', color: '#a78bfa' },
-  { cmd: '$ cd StoreLocalizer && npm install', color: '#a78bfa' },
-  { cmd: '$ npm run dev', color: '#34d399' },
-]
+const QUICK_START = 'git clone https://github.com/fayharinn/StoreLocalizer.git\ncd StoreLocalizer && npm install\nnpm run dev'
 
-// ─── Scroll-reveal hook ──────────────────────────────────────────────────────
+const GITHUB_URL = 'https://github.com/fayharinn/StoreLocalizer'
 
-function useReveal(threshold = 0.12) {
-  const ref = useRef()
-  const [visible, setVisible] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [threshold])
-  return [ref, visible]
-}
-
-// ─── Scroll-driven particle canvas ──────────────────────────────────────────
-
-function ScrollParticles({ scrollContainerRef }) {
-  const canvasRef = useRef()
-  const particlesRef = useRef([])
-  const scrollRef = useRef(0)
-  const rafRef = useRef()
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    let w = window.innerWidth
-    let h = window.innerHeight
-
-    const resize = () => {
-      w = window.innerWidth
-      h = window.innerHeight
-      canvas.width = w
-      canvas.height = h
-    }
-    resize()
-    window.addEventListener('resize', resize)
-
-    const spawnParticles = (delta) => {
-      const count = Math.min(Math.floor(delta / 4) + 2, 10)
-      for (let i = 0; i < count; i++) {
-        particlesRef.current.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: -Math.random() * 1.8 - 0.5,
-          size: Math.random() * 3 + 0.8,
-          life: 1,
-          decay: 0.004 + Math.random() * 0.007,
-          color: ['#a78bfa', '#60a5fa', '#f472b6', '#34d399', '#fbbf24'][Math.floor(Math.random() * 5)],
-        })
-      }
-    }
-
-    const onScroll = () => {
-      const el = scrollContainerRef.current
-      if (!el) return
-      const newScroll = el.scrollTop
-      const delta = Math.abs(newScroll - scrollRef.current)
-      scrollRef.current = newScroll
-      if (delta > 1) spawnParticles(delta)
-    }
-
-    const el = scrollContainerRef.current
-    if (el) el.addEventListener('scroll', onScroll, { passive: true })
-
-    const animate = () => {
-      ctx.clearRect(0, 0, w, h)
-      const ps = particlesRef.current
-      for (let i = ps.length - 1; i >= 0; i--) {
-        const p = ps[i]
-        p.x += p.vx
-        p.y += p.vy
-        p.life -= p.decay
-        if (p.life <= 0) { ps.splice(i, 1); continue }
-
-        // Core dot
-        ctx.globalAlpha = p.life * 0.7
-        ctx.fillStyle = p.color
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fill()
-
-        // Soft glow halo
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5)
-        grad.addColorStop(0, p.color + '55')
-        grad.addColorStop(1, p.color + '00')
-        ctx.globalAlpha = p.life * 0.4
-        ctx.fillStyle = grad
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2)
-        ctx.fill()
-      }
-      ctx.globalAlpha = 1
-      rafRef.current = requestAnimationFrame(animate)
-    }
-    rafRef.current = requestAnimationFrame(animate)
-
-    return () => {
-      window.removeEventListener('resize', resize)
-      if (el) el.removeEventListener('scroll', onScroll)
-      cancelAnimationFrame(rafRef.current)
-    }
-  }, [scrollContainerRef])
-
+function GitHubIcon({ className }) {
   return (
-    <canvas
-      ref={canvasRef}
-      style={{ position: 'fixed', inset: 0, zIndex: 3, pointerEvents: 'none' }}
-    />
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>
   )
 }
 
-// ─── Section heading ─────────────────────────────────────────────────────────
+// ─── Specimen: one App Store subtitle in seven storefronts ────────────────────
 
-function SectionHeading({ children }) {
+function Specimen() {
   return (
-    <h2 style={{
-      display: 'flex', alignItems: 'center', gap: 10,
-      fontSize: 'clamp(1.3rem, 3vw, 1.7rem)',
-      fontWeight: 800, color: '#f1f0ff',
-      letterSpacing: '-0.02em', marginBottom: 24,
-    }}>
-      <span style={{ color: '#a78bfa', fontSize: '1.2em' }}>›</span>
-      {children}
-    </h2>
+    <figure className="w-full">
+      <ul className="divide-y divide-border border-y border-border">
+        {SPECIMEN.map(({ code, text, source, marked, rtl }) => (
+          <li key={code} className="grid h-16 grid-cols-[64px_1fr_auto] items-center gap-4 md:h-[72px]">
+            <span className="keycap w-fit">{code}</span>
+            <span
+              dir={rtl ? 'rtl' : undefined}
+              lang={code}
+              className={`truncate text-[22px] leading-none md:text-[28px] ${rtl ? 'text-left' : ''} ${source ? 'text-faint' : 'text-foreground'}`}
+            >
+              {marked ? (
+                <mark className="rounded-[3px] bg-highlight px-1.5 py-0.5 text-highlight-foreground [box-decoration-break:clone]">{text}</mark>
+              ) : text}
+            </span>
+            <span className="font-mono text-xs tabular-nums text-faint">{[...text].length}/{SUBTITLE_LIMIT}</span>
+          </li>
+        ))}
+      </ul>
+      <figcaption className="mt-3 flex items-center justify-between font-mono text-xs text-faint">
+        <span>App Store subtitle</span>
+        <span>7 storefronts</span>
+      </figcaption>
+    </figure>
+  )
+}
+
+// ─── Product view: an App Store listing across locales ───────────────────────
+
+function ListingPreview() {
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-[0_24px_64px_rgba(0,0,0,0.35)]">
+      <div className="flex h-11 items-center gap-3 border-b border-border px-4">
+        <span className="flex gap-1.5" aria-hidden="true">
+          <span className="h-2.5 w-2.5 rounded-full bg-foreground/15" />
+          <span className="h-2.5 w-2.5 rounded-full bg-foreground/15" />
+          <span className="h-2.5 w-2.5 rounded-full bg-foreground/15" />
+        </span>
+        <span className="text-xs text-muted-foreground">FitTrack: Workout Log <span className="text-faint">· version 2.4</span></span>
+        <span className="ml-auto hidden items-center gap-4 text-xs text-faint sm:flex">
+          <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-positive" /><AppStoreIcon className="h-3.5 w-3.5" />App Store Connect</span>
+          <span><span className="tabular-nums text-foreground">12</span> locales</span>
+          <span><span className="tabular-nums text-highlight-ink">2</span> to translate</span>
+        </span>
+      </div>
+      <div className="grid grid-cols-[220px_260px_1fr] border-b border-border px-4 py-2.5 text-xs text-faint max-md:grid-cols-[1fr]">
+        <span>Locale</span>
+        <span className="max-md:hidden">Subtitle</span>
+        <span className="max-md:hidden">What’s New</span>
+      </div>
+      {PREVIEW_ROWS.map((row) => (
+        <div key={row.code} className="grid grid-cols-[220px_260px_1fr] items-center gap-y-1 border-b border-border px-4 py-3 last:border-b-0 max-md:grid-cols-[1fr]">
+          <span className="flex items-center gap-2 text-sm">
+            <span className="text-base leading-none">{row.flag}</span>
+            {row.name}
+            <span className="keycap">{row.code}</span>
+          </span>
+          <span className="truncate pr-6 text-sm text-muted-foreground">{row.subtitle}</span>
+          {row.whatsNew ? (
+            <span className="truncate text-sm text-muted-foreground max-md:hidden">{row.whatsNew}</span>
+          ) : (
+            <span className="flex h-8 w-fit items-center rounded-md border border-dashed border-foreground/15 px-2.5 text-[13px] text-faint max-md:hidden">
+              Empty, translate from en-US
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -162,7 +126,7 @@ export default function WelcomeScreen({ onComplete }) {
 
   const handleStart = useCallback(() => {
     setExiting(true)
-    setTimeout(onComplete, 600)
+    setTimeout(onComplete, 300)
   }, [onComplete])
 
   useEffect(() => {
@@ -172,339 +136,165 @@ export default function WelcomeScreen({ onComplete }) {
   }, [handleStart])
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(
-      'git clone https://github.com/fayharinn/StoreLocalizer.git && cd StoreLocalizer && npm install && npm run dev'
-    )
+    navigator.clipboard.writeText(QUICK_START.replace(/\n/g, ' && '))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const [quickstartRef, quickstartVisible] = useReveal()
-  const [featuresRef, featuresVisible] = useReveal()
-  const [ctaRef, ctaVisible] = useReveal()
-  const scrollContainerRef = useRef()
-  const scrollProgressRef = useRef(0)
-
-  useEffect(() => {
-    const el = scrollContainerRef.current
-    if (!el) return
-    const onScroll = () => {
-      const max = el.scrollHeight - el.clientHeight
-      scrollProgressRef.current = max > 0 ? el.scrollTop / max : 0
-    }
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [])
-
   return (
     <div
-      ref={scrollContainerRef}
-      data-scroll-root
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: '#050510',
-        opacity: exiting ? 0 : 1,
-        transition: 'opacity 0.6s ease',
-        overflowY: 'auto', overflowX: 'hidden',
-      }}
+      className={`fixed inset-0 z-[9999] overflow-x-hidden overflow-y-auto bg-background text-foreground transition-opacity duration-300 ease-out ${exiting ? 'opacity-0' : 'opacity-100'}`}
     >
-      {/* Three.js background — fixed */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
-        <Canvas
-          camera={{ position: [0, 0, 12], fov: 60 }}
-          gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-          dpr={[1, 1.5]}
-        >
-          <Suspense fallback={null}>
-            <ambientLight intensity={0.1} />
-            <pointLight position={[10, 10, 10]} intensity={0.5} color="#9b6dff" />
-            <SpaceBackground />
-            <Globe radius={3} scrollProgressRef={scrollProgressRef} />
-            <Preload all />
-          </Suspense>
-        </Canvas>
-      </div>
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-10">
 
-      {/* Blue glow + vignette overlay */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none',
-        background: `
-          radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30,60,200,0.4) 0%, rgba(10,20,80,0.15) 45%, transparent 100%),
-          radial-gradient(ellipse 100% 80% at 50% 50%, transparent 20%, rgba(5,5,16,0.4) 65%, rgba(5,5,16,0.85) 100%),
-          linear-gradient(to bottom, transparent 30%, rgba(5,5,16,0.5) 60%, rgba(5,5,16,0.95) 100%)
-        `,
-      }} />
-
-      {/* Scroll-driven particles */}
-      <ScrollParticles scrollContainerRef={scrollContainerRef} />
-
-      {/* Scrollable content */}
-      <div style={{ position: 'relative', zIndex: 4 }}>
-
-        {/* ═══ HERO — compact, ~70vh so next section peeks ═══ */}
-        <section style={{
-          minHeight: '70vh',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'flex-start',
-          textAlign: 'center', padding: '40px 24px 40px',
-        }}>
-          {/* Pill */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '5px 14px', borderRadius: 999,
-            border: '1px solid rgba(139,92,246,0.4)',
-            background: 'rgba(139,92,246,0.1)',
-            marginBottom: 24,
-            animation: 'fade-up 0.6s ease 0.1s both',
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#a78bfa', display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
-            <span style={{ fontSize: 12, color: '#c4b5fd', fontWeight: 500 }}>
-              The all-in-one toolkit to grow your app globally
+        {/* ═══ HERO ═══ */}
+        <section className="welcome-enter flex min-h-[calc(100svh-160px)] flex-col">
+          <div className="flex h-16 items-center justify-between">
+            <span className="flex items-center gap-3">
+              <LogoMark className="h-7 w-7" />
+              <span className="text-[15px] font-medium">StoreLocalizer</span>
             </span>
-          </div>
-
-          {/* Title */}
-          <h1 style={{
-            fontSize: 'clamp(2.8rem, 8vw, 5.5rem)',
-            fontWeight: 800, lineHeight: 1.05,
-            letterSpacing: '-0.04em', marginBottom: 20,
-            animation: 'fade-up 0.6s ease 0.2s both',
-          }}>
-            <span style={{
-              background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #60a5fa 100%)',
-              backgroundSize: '200% 200%',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              animation: 'gradient-shift 4s ease infinite',
-            }}>
-              StoreLocalizer
-            </span>
-          </h1>
-
-          {/* Sub */}
-          <p style={{
-            fontSize: 'clamp(0.95rem, 2.2vw, 1.15rem)',
-            color: 'rgba(220,215,245,0.85)',
-            maxWidth: 500, lineHeight: 1.7, marginBottom: 32,
-            animation: 'fade-up 0.6s ease 0.3s both',
-            textShadow: '0 1px 12px rgba(5,5,16,0.8)',
-          }}>
-            Translate App Store & Play Store listings to 40+ languages with AI.
-            Optimize pricing, generate screenshots — all connected to your stores.
-          </p>
-
-          {/* CTAs */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', animation: 'fade-up 0.6s ease 0.4s both', marginBottom: 24 }}>
-            <button onClick={handleStart} className="welcome-cta-primary">
-              Get Started Free
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </button>
-            <a href="https://github.com/fayharinn/StoreLocalizer" target="_blank" rel="noopener noreferrer" className="welcome-cta-secondary">
-              <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>
-              Star on GitHub
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              <GitHubIcon className="h-4 w-4" />
+              <span className="max-sm:hidden">Source on GitHub</span>
             </a>
           </div>
 
-          {/* Badges */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', animation: 'fade-up 0.6s ease 0.5s both' }}>
-            {['Open Source', 'AI-Powered', '40+ Languages', 'iOS & Android', 'Free'].map(b => (
-              <span key={b} style={{
-                padding: '4px 12px', borderRadius: 999, fontSize: 11, fontWeight: 500,
-                color: 'rgba(220,215,245,0.75)',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}>{b}</span>
-            ))}
+          <div className="grid flex-1 items-center gap-12 py-12 md:py-16 lg:grid-cols-[1fr_minmax(0,560px)] lg:gap-16">
+            <div className="max-w-xl">
+              <h1 className="text-balance text-[40px] leading-[1.06] font-medium tracking-[-0.02em] md:text-[60px] md:tracking-[-0.03em]">
+                Your App Store and Google Play pages, in every language
+              </h1>
+              <p className="mt-6 max-w-[36rem] text-lg leading-8 text-muted-foreground">
+                StoreLocalizer connects to App Store Connect and the Google Play Console with your own keys, translates your listings with the AI provider you choose, builds screenshots for each locale, and lets an agent handle the repetitive parts.
+              </p>
+              <div className="mt-10 flex flex-wrap items-center gap-3">
+                <button
+                  onClick={handleStart}
+                  className="inline-flex h-12 items-center gap-2 rounded-lg bg-primary px-5 text-[15px] font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+                >
+                  Open StoreLocalizer
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+                <a
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-12 items-center gap-2 rounded-lg border border-border px-5 text-[15px] text-foreground hover:bg-secondary"
+                >
+                  <GitHubIcon className="h-4 w-4" />
+                  Star on GitHub
+                </a>
+              </div>
+              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                <span className="text-faint">Works with</span>
+                <span className="flex items-center gap-2">
+                  <AppStoreIcon className="h-4 w-4" />
+                  App Store Connect
+                </span>
+                <span className="flex items-center gap-2">
+                  <GooglePlayIcon className="h-4 w-4" />
+                  Google Play Console
+                </span>
+                <span className="text-faint max-md:hidden">Free and open source · press <kbd className="keycap">Enter</kbd> to start</span>
+              </div>
+            </div>
+
+            <Specimen />
           </div>
         </section>
 
-        {/* ═══ QUICK START ═══ */}
-        <section ref={quickstartRef} style={{
-          padding: '16px 24px 48px',
-          maxWidth: 680, margin: '0 auto',
-          opacity: quickstartVisible ? 1 : 0,
-          transform: quickstartVisible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.7s ease, transform 0.7s ease',
-        }}>
-          <SectionHeading>Quick Start</SectionHeading>
+        {/* Product view rising into the first screen */}
+        <div className="welcome-enter [animation-delay:80ms]">
+          <ListingPreview />
+        </div>
 
-          {/* Terminal chrome */}
-          <div style={{
-            borderRadius: '14px 14px 0 0',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderBottom: 'none',
-            padding: '10px 18px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ff5f57' }} />
-                <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#febc2e' }} />
-                <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#28c840' }} />
-              </div>
-              <span style={{ fontSize: 11, color: 'rgba(180,175,210,0.4)' }}>terminal</span>
-            </div>
-            <button onClick={handleCopy} style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 6, padding: '3px 8px', cursor: 'pointer',
-              color: copied ? '#34d399' : 'rgba(180,175,210,0.5)',
-              fontSize: 11, transition: 'color 0.2s',
-            }}>
-              {copied ? '✓ Copied' : '⎘ Copy'}
-            </button>
-          </div>
-          <div style={{
-            borderRadius: '0 0 14px 14px',
-            background: 'rgba(10,10,25,0.8)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderTop: '1px solid rgba(255,255,255,0.04)',
-            padding: '16px 20px',
-            fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
-            fontSize: 12, lineHeight: 1.9, overflow: 'auto',
-          }}>
-            {QUICK_START_STEPS.map((s, i) => (
-              <div key={i} style={{ color: s.color }}>{s.cmd}</div>
-            ))}
-          </div>
-          <p style={{ textAlign: 'center', marginTop: 14, fontSize: 12, color: 'rgba(180,175,210,0.45)' }}>
-            Or visit <a href="https://localizer.fayhe.com" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa', textDecoration: 'underline' }}>localizer.fayhe.com</a> — no install needed.
+        {/* ═══ QUICK START ═══ */}
+        <section className="mx-auto max-w-[720px] pt-32">
+          <h2 className="text-2xl font-medium tracking-[-0.01em]">Run it locally</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Or use it at <a href="https://localizer.fayhe.com" target="_blank" rel="noopener noreferrer" className="text-foreground underline decoration-foreground/30 underline-offset-4 hover:decoration-foreground">localizer.fayhe.com</a> with nothing to install.
           </p>
+          <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
+            <div className="flex h-10 items-center justify-between border-b border-border pl-4 pr-2">
+              <span className="font-mono text-xs text-faint">Terminal</span>
+              <button
+                onClick={handleCopy}
+                className="flex h-7 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                {copied ? <Check className="h-3.5 w-3.5 text-positive" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre className="overflow-x-auto px-4 py-4 font-mono text-[13px] leading-6">
+              {QUICK_START.split('\n').map((line) => (
+                <div key={line}><span className="select-none text-faint">$ </span>{line}</div>
+              ))}
+            </pre>
+          </div>
         </section>
 
         {/* ═══ WHAT IT DOES ═══ */}
-        <section ref={featuresRef} style={{
-          padding: '48px 24px 64px',
-          maxWidth: 960, margin: '0 auto',
-          opacity: featuresVisible ? 1 : 0,
-          transform: featuresVisible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.7s ease, transform 0.7s ease',
-        }}>
-          <SectionHeading>What It Does</SectionHeading>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-            gap: 14,
-          }}>
-            {FEATURES.map((f, i) => (
-              <div key={i} className="welcome-feature-card">
-                <div style={{
-                  marginBottom: 10,
-                  width: 42, height: 42, borderRadius: 10,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(167,139,250,0.1)',
-                }}>
-                  <f.icon size={20} color="#a78bfa" strokeWidth={1.6} />
-                </div>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: '#f1f0ff', marginBottom: 4 }}>{f.title}</h3>
-                <p style={{ fontSize: 12, color: 'rgba(200,195,230,0.8)', lineHeight: 1.6 }}>{f.desc}</p>
-              </div>
-            ))}
+        <section className="pt-32">
+          <div className="grid gap-12 lg:grid-cols-[280px_1fr] lg:gap-16">
+            <div>
+              <h2 className="text-2xl font-medium tracking-[-0.01em]">What it does</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Everything a store release needs before it reaches another country.
+              </p>
+            </div>
+            <ul className="grid gap-x-12 sm:grid-cols-2">
+              {FEATURES.map((f) => (
+                <li key={f.title} className="border-t border-border py-6">
+                  <h3 className="flex items-center gap-2.5 text-[15px] font-medium">
+                    <f.icon className="h-4 w-4 text-faint" />
+                    {f.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{f.desc}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
         {/* ═══ BOTTOM CTA ═══ */}
-        <section ref={ctaRef} style={{
-          padding: '48px 24px 60px', textAlign: 'center',
-          opacity: ctaVisible ? 1 : 0,
-          transform: ctaVisible ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'opacity 0.7s ease, transform 0.7s ease',
-        }}>
-          <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 2rem)', fontWeight: 800, color: '#f1f0ff', marginBottom: 12 }}>
-            Ready to go global?
-          </h2>
-          <p style={{ fontSize: 14, color: 'rgba(210,205,235,0.75)', marginBottom: 28, maxWidth: 380, margin: '0 auto 28px' }}>
-            Start localizing your app in minutes. No account needed.
-          </p>
-          <button onClick={handleStart} className="welcome-cta-primary">
-            Launch Localizer
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-          </button>
+        <section className="pt-24 pb-16">
+          <div className="flex flex-col items-start justify-between gap-8 border-t border-border pt-12 md:flex-row md:items-center">
+            <div>
+              <h2 className="text-2xl font-medium tracking-[-0.01em]">Connect your first store</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Bring an App Store Connect key or a Google Play service account, and an API key from the AI provider you already use.
+              </p>
+            </div>
+            <button
+              onClick={handleStart}
+              className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+            >
+              Open StoreLocalizer
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
 
-          {/* Footer */}
-          <div style={{ marginTop: 40, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-            <a href="https://github.com/fayharinn/StoreLocalizer" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(200,195,230,0.65)', fontSize: 12, textDecoration: 'none' }}>
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>
-              Open Source
+          <div className="mt-16 flex flex-wrap items-center gap-6 text-sm text-faint">
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-foreground">
+              <GitHubIcon className="h-4 w-4" />
+              Source on GitHub
             </a>
-            <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
-            <a href="https://x.com/fayhecode" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(180,175,210,0.45)', fontSize: 12, textDecoration: 'none' }}>
-              <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+            <a href="https://x.com/fayhecode" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
               @fayhecode
             </a>
           </div>
         </section>
       </div>
 
-      <WelcomeStyles />
+      <style>{`
+        @keyframes welcome-rise {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: none; }
+        }
+        .welcome-enter { animation: welcome-rise 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+        @media (prefers-reduced-motion: reduce) { .welcome-enter { animation: none; } }
+      `}</style>
     </div>
-  )
-}
-
-
-function WelcomeStyles() {
-  return (
-    <style>{`
-      @keyframes gradient-shift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      @keyframes fade-up {
-        from { opacity: 0; transform: translateY(16px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes pulse-dot {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
-      }
-      .welcome-cta-primary {
-        display: inline-flex; align-items: center; gap: 8px;
-        padding: 12px 28px; border-radius: 999px;
-        font-size: 15px; font-weight: 600; color: #fff;
-        background: linear-gradient(135deg, #7c3aed, #a855f7);
-        border: none; cursor: pointer;
-        box-shadow: 0 0 30px rgba(139,92,246,0.4), 0 4px 20px rgba(0,0,0,0.3);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        text-decoration: none;
-      }
-      .welcome-cta-primary:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 50px rgba(139,92,246,0.6), 0 4px 30px rgba(0,0,0,0.4);
-      }
-      .welcome-cta-secondary {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 12px 24px; border-radius: 999px;
-        font-size: 14px; font-weight: 500;
-        color: rgba(200,195,230,0.8);
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        cursor: pointer; transition: all 0.2s ease;
-        text-decoration: none;
-      }
-      .welcome-cta-secondary:hover {
-        background: rgba(255,255,255,0.1);
-        color: #f1f0ff;
-        border-color: rgba(255,255,255,0.2);
-      }
-      .welcome-feature-card {
-        padding: 20px; border-radius: 14px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.09);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        transition: all 0.3s ease; cursor: default;
-      }
-      .welcome-feature-card:hover {
-        background: rgba(255,255,255,0.08);
-        border-color: rgba(167,139,250,0.3);
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      }
-      [data-scroll-root]::-webkit-scrollbar { width: 0; display: none; }
-      [data-scroll-root] { scrollbar-width: none; }
-    `}</style>
   )
 }

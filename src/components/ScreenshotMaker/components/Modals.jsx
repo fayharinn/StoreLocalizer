@@ -56,7 +56,7 @@ export function TranslateModal({ visible, onClose, target, state, dispatch, aiCo
 
   const handleAiTranslate = useCallback(async () => {
     if (!sourceText.trim()) {
-      setStatusMessage('Please enter text in the source language first');
+      setStatusMessage('Enter text in the source language first');
       setStatusType('error');
       return;
     }
@@ -78,7 +78,7 @@ export function TranslateModal({ visible, onClose, target, state, dispatch, aiCo
 
     setTranslating(true);
     const providerName = providerConfig?.name || provider;
-    setStatusMessage(`Translating to ${targetLangs.length} language(s) with ${providerName}...`);
+    setStatusMessage(`Translating to ${targetLangs.length} language(s) with ${providerName}`);
     setStatusType('');
 
     try {
@@ -154,16 +154,16 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
   return (
     <div className={`modal-overlay ${visible ? 'visible' : ''}`}>
       <div className="modal translate-modal">
-        <div className="modal-icon" style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#764ba2' }}>
+        <div className="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2v3M22 22l-5-10-5 10M14 18h6" />
           </svg>
         </div>
-        <h3 className="modal-title">Translate {isHeadline ? 'Headline' : 'Subheadline'}</h3>
+        <h3 className="modal-title">Translate {isHeadline ? 'headline' : 'subheadline'}</h3>
         <p className="modal-message">Select a source language and enter translations for each active language.</p>
 
         <div className="translate-source">
-          <label className="control-label">Source Language</label>
+          <label className="control-label">Source language</label>
           <select
             value={sourceLang}
             onChange={e => setSourceLang(e.target.value)}
@@ -187,14 +187,14 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2v4m0 12v4m-8-10h4m12 0h4m-5.66-5.66l-2.83 2.83m-5.66 5.66l-2.83 2.83m14.14 0l-2.83-2.83M6.34 6.34L3.51 3.51" />
                 </svg>
-                <span>Translating...</span>
+                <span>Translating</span>
               </>
             ) : (
               <>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
-                <span>Auto-translate with AI</span>
+                <span>Translate with AI</span>
               </>
             )}
           </button>
@@ -215,7 +215,7 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
                 <span>{languageNames[lang] || lang}</span>
               </div>
               <textarea
-                placeholder={`Enter ${languageNames[lang] || lang} translation...`}
+                placeholder={`${languageNames[lang] || lang} translation`}
                 value={translations[lang] || ''}
                 onChange={e => handleTranslationChange(lang, e.target.value)}
               />
@@ -226,11 +226,10 @@ Translate to these language codes: ${targetLangs.join(', ')}`;
         <div className="modal-buttons">
           <button className="modal-btn modal-btn-cancel" onClick={onClose}>Cancel</button>
           <button
-            className="modal-btn modal-btn-confirm"
-            style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+            className="modal-btn modal-btn-primary"
             onClick={handleApply}
           >
-            Apply Translations
+            Apply translations
           </button>
         </div>
       </div>
@@ -278,7 +277,7 @@ export function LanguagesModal({ visible, onClose, state, dispatch }) {
     <Dialog open={visible} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col gap-0 p-0">
         <DialogHeader className="px-5 pt-5 pb-3">
-          <DialogTitle>Project Languages</DialogTitle>
+          <DialogTitle>Project languages</DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">
             Select the languages for your screenshots. Click to toggle.
           </p>
@@ -300,7 +299,7 @@ export function LanguagesModal({ visible, onClose, state, dispatch }) {
                   }}
                 >
                   {languageFlags[lang]} {languageNames[lang] || lang}
-                  {isDefault(lang) && <span className="text-[10px] opacity-70">default</span>}
+                  {isDefault(lang) && <span className="text-xs opacity-70">default</span>}
                   {!isDefault(lang) && <span className="opacity-50 hover:opacity-100">&times;</span>}
                 </Badge>
               ))
@@ -315,7 +314,7 @@ export function LanguagesModal({ visible, onClose, state, dispatch }) {
         {/* Search */}
         <div className="px-5 pb-2">
           <Input
-            placeholder="Search languages..."
+            placeholder="Search languages"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-9"
@@ -331,7 +330,7 @@ export function LanguagesModal({ visible, onClose, state, dispatch }) {
               <div
                 key={code}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                  selected ? 'bg-primary/10' : 'hover:bg-accent/50'
+                  selected ? 'bg-secondary' : 'hover:bg-secondary/60'
                 }`}
                 onClick={() => toggleLanguage(code)}
               >
@@ -350,14 +349,14 @@ export function LanguagesModal({ visible, onClose, state, dispatch }) {
                 <span className="flex-1 text-sm">{languageNames[code] || code}</span>
 
                 {def && (
-                  <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                    DEFAULT
+                  <span className="text-xs text-muted-foreground border border-border px-1.5 py-0.5 rounded">
+                    Default
                   </span>
                 )}
 
                 {selected && !def && (
                   <button
-                    className="text-[10px] font-medium text-muted-foreground hover:text-primary bg-muted hover:bg-primary/10 px-1.5 py-0.5 rounded transition-colors"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-accent px-1.5 py-0.5 rounded transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSetDefault(code);
@@ -396,7 +395,7 @@ export function LanguagesModal({ visible, onClose, state, dispatch }) {
                 }
               }}
             >
-              {state.projectLanguages.length === allLanguageCodes.length ? 'Deselect All' : 'Select All'}
+              {state.projectLanguages.length === allLanguageCodes.length ? 'Deselect all' : 'Select all'}
             </Button>
             <Button size="sm" onClick={onClose}>Done</Button>
           </div>
@@ -417,23 +416,23 @@ export function ExportLanguageModal({ visible, onClose, onExportCurrent, onExpor
   return (
     <div className={`modal-overlay ${visible ? 'visible' : ''}`}>
       <div className="modal">
-        <div className="modal-icon" style={{ background: 'rgba(10, 132, 255, 0.2)' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--accent)' }}>
+        <div className="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </div>
-        <h3 className="modal-title">Export Screenshots</h3>
+        <h3 className="modal-title">Export screenshots</h3>
         <p className="modal-message">Choose which language versions to export.</p>
 
         <div className="export-options">
           <button className="export-option" onClick={onExportCurrent}>
-            <span className="export-option-title">Current Language Only</span>
+            <span className="export-option-title">Current language only</span>
             <span className="export-option-desc">{flag} {displayName}</span>
           </button>
           <button className="export-option" onClick={onExportAll}>
-            <span className="export-option-title">All Languages</span>
+            <span className="export-option-title">All languages</span>
             <span className="export-option-desc">Separate folder per language</span>
           </button>
         </div>
@@ -501,7 +500,7 @@ export function ScreenshotTranslationsModal({ visible, onClose, screenshotIndex,
     <div className={`modal-overlay ${visible ? 'visible' : ''}`}>
       <div className="modal translations-modal">
         <div className="modal-header">
-          <h3 className="modal-title">Screenshot Translations</h3>
+          <h3 className="modal-title">Screenshot translations</h3>
           <button className="modal-close" onClick={onClose}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -554,8 +553,7 @@ export function ScreenshotTranslationsModal({ visible, onClose, screenshotIndex,
 
         <div className="modal-buttons">
           <button
-            className="modal-btn modal-btn-confirm"
-            style={{ background: 'var(--accent)' }}
+            className="modal-btn modal-btn-primary"
             onClick={onClose}
           >
             Done
@@ -589,18 +587,20 @@ export function MagicalTitlesModal({ visible, onClose, onConfirm, state, aiConfi
   return (
     <div className={`modal-overlay ${visible ? 'visible' : ''}`}>
       <div className="modal">
-        <div className="modal-icon" style={{ background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%)' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#ffa500' }}>
-            <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z" />
+        <div className="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 7V4h16v3" />
+            <path d="M9 20h6" />
+            <path d="M12 4v16" />
           </svg>
         </div>
-        <h3 className="modal-title">Generate Magical Titles</h3>
-        <p className="modal-message">This will use AI to analyze your screenshots and generate marketing headlines and subheadlines for each screen.</p>
-        <p className="modal-message" style={{ marginTop: 8, fontSize: 12, color: 'var(--text-tertiary)' }}>
+        <h3 className="modal-title">Generate titles</h3>
+        <p className="modal-message">AI reads each screenshot and writes a headline and a subheadline for it.</p>
+        <p className="modal-message" style={{ fontSize: 12, lineHeight: '16px', color: 'var(--text-tertiary)' }}>
           Screenshots: {screenshotCount} &middot; Provider: {providerName}
         </p>
 
-        <div className="translate-source" style={{ marginTop: 16 }}>
+        <div className="translate-source">
           <label className="control-label">Generate titles in</label>
           <select
             value={selectedLang}
@@ -618,11 +618,10 @@ export function MagicalTitlesModal({ visible, onClose, onConfirm, state, aiConfi
         <div className="modal-buttons">
           <button className="modal-btn modal-btn-cancel" onClick={onClose}>Cancel</button>
           <button
-            className="modal-btn modal-btn-confirm"
-            style={{ background: 'linear-gradient(135deg, #ffa500 0%, #ff8c00 100%)' }}
+            className="modal-btn modal-btn-primary"
             onClick={() => onConfirm(selectedLang)}
           >
-            Generate Titles
+            Generate titles
           </button>
         </div>
       </div>
@@ -638,15 +637,15 @@ export function ExportProgressModal({ visible, status, detail, progress }) {
   return (
     <div className={`modal-overlay ${visible ? 'visible' : ''}`}>
       <div className="modal export-progress-modal">
-        <div className="modal-icon" style={{ background: 'rgba(10, 132, 255, 0.2)' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--accent)' }}>
+        <div className="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </div>
-        <h2>Exporting Screenshots</h2>
-        <p>{status || 'Preparing export...'}</p>
+        <h2>Exporting screenshots</h2>
+        <p>{status || 'Preparing export'}</p>
         <div className="export-progress-bar">
           <div
             className="export-progress-fill"
@@ -677,12 +676,12 @@ export function DuplicateScreenshotModal({
   return (
     <div className={`modal-overlay ${visible ? 'visible' : ''}`}>
       <div className="modal duplicate-screenshot-modal">
-        <div className="modal-icon" style={{ background: 'rgba(255, 159, 10, 0.2)' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#ff9f0a' }}>
+        <div className="modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h3 className="modal-title">Screenshot Already Exists</h3>
+        <h3 className="modal-title">Screenshot already exists</h3>
         <p className="modal-message">A screenshot with this filename already exists. What would you like to do?</p>
 
         <div className="duplicate-comparison">
@@ -726,7 +725,7 @@ export function DuplicateScreenshotModal({
               <path d="M12 5v14M5 12h14" />
             </svg>
             <div className="duplicate-option-text">
-              <span className="duplicate-option-title">Create New</span>
+              <span className="duplicate-option-title">Create new</span>
               <span className="duplicate-option-desc">Add as a separate screenshot</span>
             </div>
           </button>

@@ -110,7 +110,7 @@ function RangeControl({ label, value, min, max, unit, onChange, resetValue }) {
         min={min}
         max={max}
         value={value}
-        style={{ background: `linear-gradient(to right, var(--accent) ${pct}%, var(--bg-tertiary) ${pct}%)` }}
+        style={{ background: `linear-gradient(to right, var(--highlight) ${pct}%, var(--bg-tertiary) ${pct}%)` }}
         title={resetValue !== undefined ? `Double-click to reset to ${resetValue}${unitSymbol}` : undefined}
         onDoubleClick={resetValue !== undefined ? () => onChange(resetValue) : undefined}
         onChange={(e) => onChange(Number(e.target.value))}
@@ -206,7 +206,7 @@ function FontPicker({ currentFont, onSelect, idPrefix = 'font' }) {
         </svg>
       </button>
       {open && (
-        <div className="font-picker-dropdown">
+        <div className="font-picker-dropdown open">
           <div className="font-picker-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" />
@@ -214,7 +214,7 @@ function FontPicker({ currentFont, onSelect, idPrefix = 'font' }) {
             </svg>
             <input
               type="text"
-              placeholder="Search fonts..."
+              placeholder="Search fonts"
               autoComplete="off"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -329,7 +329,7 @@ function TextSection({
 
       {/* Font picker */}
       <div className="control-group">
-        <label className="control-label">{isHeadline ? 'Headline' : 'Subheadline'} Font</label>
+        <label className="control-label">{isHeadline ? 'Headline' : 'Subheadline'} font</label>
         <FontPicker
           currentFont={font}
           onSelect={(v) => set(fontKey, v)}
@@ -343,18 +343,18 @@ function TextSection({
             min="12"
             max={isHeadline ? 300 : 200}
             value={size}
-            title="Font Size"
+            title="Font size"
             onChange={(e) => set(sizeKey, Number(e.target.value))}
           />
           <input
             type="color"
             value={color}
-            title="Text Color"
+            title="Text color"
             onChange={(e) => set(colorKey, e.target.value)}
           />
           <select
             value={weight}
-            title="Font Weight"
+            title="Font weight"
             onChange={(e) => set(weightKey, e.target.value)}
           >
             <option value="300">Light</option>
@@ -404,7 +404,7 @@ function TextSection({
       {isHeadline && (
         <>
           <div className="control-group">
-            <label className="control-label">Text Position</label>
+            <label className="control-label">Text position</label>
             <BtnGroup
               options={[
                 { value: 'top', label: 'Top' },
@@ -416,7 +416,7 @@ function TextSection({
           </div>
 
           <div className="control-group">
-            <label className="control-label">Text Align</label>
+            <label className="control-label">Text alignment</label>
             <BtnGroup
               options={[
                 { value: 'left', label: 'Left' },
@@ -429,7 +429,7 @@ function TextSection({
           </div>
 
           <RangeControl
-            label="Text Vertical Offset"
+            label="Vertical offset"
             value={text.offsetY}
             min={0}
             max={100}
@@ -438,7 +438,7 @@ function TextSection({
             onChange={(v) => set('offsetY', v)}
           />
           <RangeControl
-            label="Text Horizontal Offset"
+            label="Horizontal offset"
             value={text.offsetX}
             min={-50}
             max={50}
@@ -447,7 +447,7 @@ function TextSection({
             onChange={(v) => set('offsetX', v)}
           />
           <RangeControl
-            label="Line Height"
+            label="Line height"
             value={text.lineHeight}
             min={80}
             max={250}
@@ -459,7 +459,7 @@ function TextSection({
           {/* Highlight */}
           <div className="control-group">
             <div className="toggle-row">
-              <span className="toggle-label">Highlight Words</span>
+              <span className="toggle-label">Highlight words</span>
               <div
                 className={`toggle${text.highlightEnabled ? ' active' : ''}`}
                 onClick={() => set('highlightEnabled', !text.highlightEnabled)}
@@ -479,7 +479,7 @@ function TextSection({
                 <input
                   type="color"
                   value={text.highlightColor}
-                  title="Highlight Color"
+                  title="Highlight color"
                   onChange={(e) => set('highlightColor', e.target.value)}
                 />
               </div>
@@ -491,7 +491,7 @@ function TextSection({
       {/* Subheadline opacity */}
       {!isHeadline && (
         <RangeControl
-          label="Subheadline Opacity"
+          label="Subheadline opacity"
           value={text.subheadlineOpacity}
           min={0}
           max={100}
@@ -633,13 +633,13 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
 
   const positionPresetLabels = {
     centered: 'Centered',
-    'bleed-bottom': 'Bleed Bottom',
-    'bleed-top': 'Bleed Top',
-    'float-center': 'Float Center',
-    'tilt-left': 'Tilt Left',
-    'tilt-right': 'Tilt Right',
+    'bleed-bottom': 'Bleed bottom',
+    'bleed-top': 'Bleed top',
+    'float-center': 'Float center',
+    'tilt-left': 'Tilt left',
+    'tilt-right': 'Tilt right',
     perspective: 'Perspective',
-    'float-bottom': 'Float Bottom',
+    'float-bottom': 'Float bottom',
   };
 
   return (
@@ -690,7 +690,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
           <div className="tab-content active" id="tab-background">
             {/* Background type selector */}
             <div className="control-group">
-              <label className="control-label">Background Type</label>
+              <label className="control-label">Background type</label>
               <BtnGroup
                 options={[
                   { value: 'gradient', label: 'Gradient' },
@@ -723,7 +723,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
 
                 {/* Gradient direction */}
                 <RangeControl
-                  label="Gradient Direction"
+                  label="Gradient direction"
                   value={bg.gradient.angle}
                   min={0}
                   max={360}
@@ -786,7 +786,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                       setBg('gradient.stops', newStops);
                     }}
                   >
-                    + Add Color Stop
+                    + Add color stop
                   </button>
                 </div>
               </>
@@ -795,7 +795,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
             {/* --- Solid options --- */}
             {bg.type === 'solid' && (
               <ColorHexInput
-                label="Background Color"
+                label="Background color"
                 value={bg.solid}
                 onChange={(v) => setBg('solid', v)}
               />
@@ -805,7 +805,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
             {bg.type === 'image' && (
               <>
                 <div className="control-group">
-                  <label className="control-label">Background Image</label>
+                  <label className="control-label">Background image</label>
                   <div
                     className="bg-image-upload"
                     onClick={() => bgImageInputRef.current?.click()}
@@ -824,7 +824,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   )}
                 </div>
                 <div className="control-group">
-                  <label className="control-label">Image Fit</label>
+                  <label className="control-label">Image fit</label>
                   <select value={bg.imageFit} onChange={(e) => setBg('imageFit', e.target.value)}>
                     <option value="cover">Cover</option>
                     <option value="contain">Contain</option>
@@ -840,12 +840,12 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   onChange={(v) => setBg('imageBlur', v)}
                 />
                 <ColorHexInput
-                  label="Overlay Color"
+                  label="Overlay color"
                   value={bg.overlayColor}
                   onChange={(v) => setBg('overlayColor', v)}
                 />
                 <RangeControl
-                  label="Overlay Opacity"
+                  label="Overlay opacity"
                   value={bg.overlayOpacity}
                   min={0}
                   max={100}
@@ -865,7 +865,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
               defaultOpen={false}
             >
               <RangeControl
-                label="Noise Intensity"
+                label="Noise intensity"
                 value={bg.noiseIntensity}
                 min={0}
                 max={100}
@@ -883,7 +883,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
           <div className="tab-content active" id="tab-screenshot">
             {/* Device type selector */}
             <div className="control-group">
-              <label className="control-label">Device Type</label>
+              <label className="control-label">Device type</label>
               <BtnGroup
                 options={[
                   { value: false, label: '2D' },
@@ -898,7 +898,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
             {ss.use3D && (
               <>
                 <div className="control-group">
-                  <label className="control-label">Device Model</label>
+                  <label className="control-label">Device model</label>
                   <BtnGroup
                     options={[
                       { value: 'iphone', label: 'iPhone' },
@@ -909,7 +909,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   />
                 </div>
                 <RangeControl
-                  label="Rotation X (Tilt)"
+                  label="Rotation X (tilt)"
                   value={ss.rotation3D.x}
                   min={-45}
                   max={45}
@@ -918,7 +918,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   onChange={(v) => setSS('rotation3D.x', v)}
                 />
                 <RangeControl
-                  label="Rotation Y (Turn)"
+                  label="Rotation Y (turn)"
                   value={ss.rotation3D.y}
                   min={-45}
                   max={45}
@@ -927,7 +927,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   onChange={(v) => setSS('rotation3D.y', v)}
                 />
                 <RangeControl
-                  label="Rotation Z (Roll)"
+                  label="Rotation Z (roll)"
                   value={ss.rotation3D.z}
                   min={-45}
                   max={45}
@@ -940,7 +940,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
 
             {/* Position presets — always-visible gallery with active state */}
             <div className="control-group">
-              <label className="control-label">Layout Presets</label>
+              <label className="control-label">Layout presets</label>
               <div className="preset-positions">
                 {Object.keys(positionPresets).map((presetName) => (
                   <button
@@ -961,7 +961,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
             <div className="divider" />
 
             <RangeControl
-              label="Screenshot Scale"
+              label="Screenshot scale"
               value={ss.scale}
               min={30}
               max={100}
@@ -970,7 +970,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
               onChange={(v) => setSS('scale', v)}
             />
             <RangeControl
-              label="Vertical Position"
+              label="Vertical position"
               value={ss.y}
               min={-30}
               max={130}
@@ -979,7 +979,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
               onChange={(v) => setSS('y', v)}
             />
             <RangeControl
-              label="Horizontal Position"
+              label="Horizontal position"
               value={ss.x}
               min={-30}
               max={130}
@@ -994,7 +994,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                 <div className="divider" />
 
                 <RangeControl
-                  label="Corner Radius"
+                  label="Corner radius"
                   value={ss.cornerRadius}
                   min={0}
                   max={100}
@@ -1003,7 +1003,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   onChange={(v) => setSS('cornerRadius', v)}
                 />
                 <RangeControl
-                  label="Tilt / Rotation"
+                  label="Tilt / rotation"
                   value={ss.rotation}
                   min={-45}
                   max={45}
@@ -1022,7 +1022,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   defaultOpen={true}
                 >
                   <ColorHexInput
-                    label="Shadow Color"
+                    label="Shadow color"
                     value={ss.shadow.color}
                     onChange={(v) => setSS('shadow.color', v)}
                   />
@@ -1073,12 +1073,12 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                   defaultOpen={false}
                 >
                   <ColorHexInput
-                    label="Border Color"
+                    label="Border color"
                     value={ss.frame.color}
                     onChange={(v) => setSS('frame.color', v)}
                   />
                   <RangeControl
-                    label="Border Width"
+                    label="Border width"
                     value={ss.frame.width}
                     min={1}
                     max={50}
@@ -1086,7 +1086,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                     onChange={(v) => setSS('frame.width', v)}
                   />
                   <RangeControl
-                    label="Border Opacity"
+                    label="Border opacity"
                     value={ss.frame.opacity}
                     min={0}
                     max={100}
@@ -1100,10 +1100,13 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
             {/* 3D tip */}
             {ss.use3D && (
               <div className="tip-box">
-                <img src="/appscreen/img/info.svg" width="16" height="16" alt="Info" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4M12 8h.01" />
+                </svg>
                 <div className="tip-content">
-                  <strong>Interactive Controls</strong>
-                  <span>Drag on preview to rotate - Alt+drag to move</span>
+                  <strong>Interactive controls</strong>
+                  <span>Drag the preview to rotate, Alt-drag to move</span>
                 </div>
               </div>
             )}
@@ -1112,14 +1115,14 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
 
             {/* Logo Overlay section */}
             <CollapsibleSection
-              label="Logo Overlay"
+              label="Logo overlay"
               enabled={overlay.enabled}
               onToggle={(v) => setOverlay('enabled', v)}
               defaultOpen={false}
             >
               {/* Upload zone */}
               <div className="control-group">
-                <label className="control-label">Logo Image</label>
+                <label className="control-label">Logo image</label>
                 <div
                   className="bg-image-upload"
                   onClick={() => overlayImageInputRef.current?.click()}
@@ -1153,7 +1156,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                 onChange={(v) => setOverlay('scale', v)}
               />
               <RangeControl
-                label="Horizontal Position"
+                label="Horizontal position"
                 value={overlay.x}
                 min={0}
                 max={100}
@@ -1161,7 +1164,7 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
                 onChange={(v) => setOverlay('x', v)}
               />
               <RangeControl
-                label="Vertical Position"
+                label="Vertical position"
                 value={overlay.y}
                 min={0}
                 max={100}
@@ -1190,11 +1193,10 @@ export default function RightSidebar({ state, dispatch, onTranslateHeadline, onT
               {overlay.imageSrc && (
                 <div className="control-group">
                   <button
-                    className="add-stop-btn"
-                    style={{ background: '#e74c3c', color: '#fff', border: 'none' }}
+                    className="add-stop-btn danger"
                     onClick={handleRemoveOverlayImage}
                   >
-                    Remove Logo
+                    Remove logo
                   </button>
                 </div>
               )}

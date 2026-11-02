@@ -17,7 +17,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCallback, useEffect, useState } from 'react'
-import { Image, ExternalLink, FileText, Images, Megaphone, Terminal } from 'lucide-react'
+import { Image, ExternalLink, FileText, Images, Megaphone, Package, Terminal } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 import useAppStoreConnect from '@/hooks/useAppStoreConnect'
 import useAppEvents from '@/hooks/useAppEvents'
@@ -26,6 +26,7 @@ import useAssetLibrary from '@/hooks/useAssetLibrary'
 import useLocalizedMedia from '@/hooks/useLocalizedMedia'
 import useCustomProductPages from '@/hooks/useCustomProductPages'
 import useProductPageExperiments from '@/hooks/useProductPageExperiments'
+import useBuildUpload from '@/hooks/useBuildUpload'
 import { selectScreenshotTargetGroups } from '@/services/appAssetLibraryService'
 import {
   EVENT_TRANSLATION_PROMPTS_KEY,
@@ -56,7 +57,7 @@ const CPP_PROMPT_FIELDS = [
 const COPY_FIELD_LABELS = {
   description: 'Description',
   keywords: 'Keywords',
-  promotionalText: 'Promotional Text',
+  promotionalText: 'Promotional text',
   whatsNew: "What's New",
   supportUrl: 'Support URL',
   marketingUrl: 'Marketing URL',
@@ -75,6 +76,7 @@ import ProductPageMediaCard from './ProductPageMediaCard'
 import CustomProductPagesCard from './CustomProductPagesCard'
 import ProductPageOptimizationCard from './ProductPageOptimizationCard'
 import ActivityLogCard from './ActivityLogCard'
+import BuildUploadCard from './BuildUploadCard'
 
 const ASC_TAB_KEY = 'asc-localizer-active-tab'
 
@@ -82,6 +84,7 @@ const ASC_TABS = [
   { value: 'listing', label: 'Listing', icon: FileText },
   { value: 'media', label: 'Media', icon: Images },
   { value: 'growth', label: 'Growth', icon: Megaphone },
+  { value: 'builds', label: 'Builds', icon: Package },
   { value: 'activity', label: 'Activity', icon: Terminal },
 ]
 
@@ -96,6 +99,7 @@ const SECTION_TABS = {
   'asc-events': 'growth',
   'asc-cpp': 'growth',
   'asc-ppo': 'growth',
+  'asc-builds': 'builds',
   'asc-logs': 'activity',
 }
 
@@ -143,7 +147,7 @@ function useAscSectionNavigation(setTab) {
 
 function TabEmpty({ text }) {
   return (
-    <div className="rounded-xl border border-dashed border-border/60 bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
+    <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
       {text}
     </div>
   )
@@ -174,6 +178,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
     translationPrompts: cppPrompt.prompts,
     defaultLocale: hook.sourceLocale,
   })
+  const buildHook = useBuildUpload({ credentials, selectedApp: hook.selectedApp })
   const ppoHook = useProductPageExperiments({
     credentials,
     selectedApp: hook.selectedApp,
@@ -267,7 +272,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
 
       {hook.apps.length > 0 && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
-          <div className="sticky top-16 z-20 -mx-1 space-y-2 rounded-2xl border border-border/60 bg-background/90 p-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/75">
+          <div className="sticky top-16 z-20 -mx-1 space-y-2 rounded-xl border border-border bg-background p-2">
             <AppVersionSelector
               apps={hook.apps}
               selectedApp={hook.selectedApp}
@@ -281,13 +286,13 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
               handleVersionSelect={hook.handleVersionSelect}
               setCreateVersionDialog={hook.setCreateVersionDialog}
             />
-            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-muted/60 p-1 sm:grid-cols-4">
+            <TabsList className="grid h-auto w-full grid-cols-3 gap-1 bg-muted/60 p-1 sm:grid-cols-5">
               {ASC_TABS.map(({ value, label, icon: Icon }) => (
                 <TabsTrigger key={value} value={value} className="h-8 gap-1.5 text-xs sm:text-sm">
                   <Icon className="h-4 w-4" />
                   {label}
                   {value === 'activity' && hook.logs.length > 0 && (
-                    <span className="rounded-full bg-muted px-1.5 text-[10px] font-semibold leading-4 text-muted-foreground">{hook.logs.length}</span>
+                    <span className="rounded-md bg-muted px-1.5 text-xs font-medium leading-4 tabular-nums text-muted-foreground">{hook.logs.length}</span>
                   )}
                 </TabsTrigger>
               ))}
@@ -472,6 +477,15 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
             )}
           </TabsContent>
 
+          <TabsContent value="builds" forceMount className="space-y-5 data-[state=inactive]:hidden">
+            {visitedTabs.has('builds') && (
+              <>
+                {hook.selectedApp && <BuildUploadCard selectedApp={hook.selectedApp} buildHook={buildHook} />}
+                {!hook.selectedApp && <TabEmpty text="Select an app to upload a build." />}
+              </>
+            )}
+          </TabsContent>
+
           <TabsContent value="activity" forceMount className="data-[state=inactive]:hidden">
             {visitedTabs.has('activity') && <ActivityLogCard logs={hook.logs} />}
           </TabsContent>
@@ -504,10 +518,11 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
       <Dialog open={hook.editDialog.open} onOpenChange={(open) => !open && hook.setEditDialog({ ...hook.editDialog, open: false })}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Localization</DialogTitle>
-            <DialogDescription>
+            <DialogTitle>Edit localization</DialogTitle>
+            <DialogDescription className="flex items-center gap-1.5">
               {ASC_LOCALES.find(l => l.code === hook.editDialog.locale)?.flag}{' '}
               {ASC_LOCALES.find(l => l.code === hook.editDialog.locale)?.name || hook.editDialog.locale}
+              {hook.editDialog.locale && <span className="keycap">{hook.editDialog.locale}</span>}
             </DialogDescription>
           </DialogHeader>
           {hook.editDialog.localization && hook.editDialog.type === 'version' && (
@@ -523,7 +538,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                   rows={6}
                   maxLength={4000}
                 />
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs tabular-nums text-faint">
                   {hook.editDialog.localization.description?.length || 0}/4000
                 </span>
               </div>
@@ -538,12 +553,12 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                   rows={4}
                   maxLength={4000}
                 />
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs tabular-nums text-faint">
                   {hook.editDialog.localization.whatsNew?.length || 0}/4000
                 </span>
               </div>
               <div className="space-y-2">
-                <Label>Promotional Text (max 170 chars)</Label>
+                <Label>Promotional text (max 170 chars)</Label>
                 <Textarea
                   value={hook.editDialog.localization.promotionalText}
                   onChange={(e) => hook.setEditDialog(prev => ({
@@ -553,7 +568,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                   rows={2}
                   maxLength={170}
                 />
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs tabular-nums text-faint">
                   {hook.editDialog.localization.promotionalText?.length || 0}/170
                 </span>
               </div>
@@ -567,7 +582,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                   }))}
                   maxLength={100}
                 />
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs tabular-nums text-faint">
                   {hook.editDialog.localization.keywords?.length || 0}/100
                 </span>
               </div>
@@ -602,7 +617,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
           {hook.editDialog.localization && hook.editDialog.type === 'appInfo' && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>App Name (max 30 chars)</Label>
+                <Label>App name (max 30 chars)</Label>
                 <Input
                   value={hook.editDialog.localization.name}
                   onChange={(e) => hook.setEditDialog(prev => ({
@@ -624,7 +639,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                 />
               </div>
               <div className="space-y-2">
-                <Label>Privacy Policy URL</Label>
+                <Label>Privacy policy URL</Label>
                 <Input
                   type="url"
                   placeholder="https://example.com/privacy"
@@ -651,14 +666,14 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
       <Dialog open={hook.createVersionDialog.open} onOpenChange={(open) => !open && hook.setCreateVersionDialog(prev => ({ ...prev, open: false }))}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Create New Version</DialogTitle>
+            <DialogTitle>Create new version</DialogTitle>
             <DialogDescription>
               Create a new App Store version for {hook.selectedApp?.name}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Version Number</Label>
+              <Label>Version number</Label>
               <Input
                 placeholder="1.0.0"
                 value={hook.createVersionDialog.versionString}
@@ -692,7 +707,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
               onClick={hook.handleCreateVersion}
               disabled={hook.createVersionDialog.isCreating || !hook.createVersionDialog.versionString.trim()}
             >
-              {hook.createVersionDialog.isCreating ? 'Creating...' : 'Create Version'}
+              {hook.createVersionDialog.isCreating ? 'Creating' : 'Create version'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -701,7 +716,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
       <Dialog open={hook.screenshotPreview.open} onOpenChange={(open) => !open && hook.setScreenshotPreview({ open: false, screenshot: null, locale: '', deviceType: '' })}>
         <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[900px] max-h-[90vh] p-0 overflow-hidden">
           <div className="relative">
-            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-black/60 to-transparent">
+            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-black/40">
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className="bg-black/40 border-white/20 text-white">
                   {hook.screenshotPreview.locale}
@@ -712,7 +727,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
               </div>
               <button
                 onClick={() => hook.setScreenshotPreview({ open: false, screenshot: null, locale: '', deviceType: '' })}
-                className="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors"
+                className="p-2 rounded-md bg-black/40 hover:bg-black/60 text-white transition-colors"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -732,14 +747,14 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center text-white/50 py-20">
-                  <Image className="h-16 w-16 mb-4" />
+                  <Image className="h-8 w-8 mb-4" />
                   <p>Image not available</p>
                 </div>
               )}
             </div>
 
             {hook.screenshotPreview.screenshot?.fileName && (
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/40">
                 <p className="text-white/80 text-sm text-center truncate">
                   {hook.screenshotPreview.screenshot.fileName}
                 </p>
@@ -780,7 +795,7 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
         <TranslationPromptDialog
           open
           title="Custom product page prompt"
-          description="Prompt used to AI-translate the promotional text of custom product pages (170 chars)."
+          description="Prompt used to translate the promotional text of custom product pages (170 chars)."
           fields={CPP_PROMPT_FIELDS}
           initialField={cppPrompt.promptDialog.field}
           getPrompt={cppPrompt.getPromptFor}

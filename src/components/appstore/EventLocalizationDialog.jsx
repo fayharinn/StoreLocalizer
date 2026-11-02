@@ -71,13 +71,13 @@ export default function EventLocalizationDialog({
                 <SelectContent>
                   {availableLocales.map(loc => (
                     <SelectItem key={loc.code} value={loc.code}>
-                      {loc.flag} {loc.name} {loc.code === primaryLocale ? '(primary)' : ''}
+                      {loc.flag} {loc.name} <span className="keycap">{loc.code}</span> {loc.code === primaryLocale ? '(primary)' : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {isExistingLocale && (
-                <p className="text-xs text-amber-500">This locale already exists — choose another.</p>
+                <p className="text-xs text-highlight-ink">This locale already exists — choose another.</p>
               )}
             </div>
           )}
@@ -136,7 +136,7 @@ function FieldWithCount({ id, label, value, onChange, limit, count, multiline, r
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <Label htmlFor={id}>{label}</Label>
-        <span className={`text-xs ${over ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+        <span className={`text-xs tabular-nums ${over ? 'text-destructive font-medium' : 'text-faint'}`}>
           {count}/{limit}
         </span>
       </div>

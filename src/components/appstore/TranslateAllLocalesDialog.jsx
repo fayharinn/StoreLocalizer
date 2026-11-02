@@ -5,10 +5,10 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { Sparkles, Loader2, MessageSquareText } from 'lucide-react'
+import { Languages, Loader2, MessageSquareText } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 
-// AI-translate a source locale into a picked set of ASC locales.
+// Translate a source locale into a picked set of ASC locales.
 // Shared by In-App Events and Custom Product Pages.
 export default function TranslateAllLocalesDialog({
   open,
@@ -54,12 +54,7 @@ export default function TranslateAllLocalesDialog({
     <Dialog open={open} onOpenChange={(o) => !o && !isTranslating && onClose()}>
       <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md gradient-primary">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            {title}
-          </DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
@@ -68,31 +63,31 @@ export default function TranslateAllLocalesDialog({
           <button
             type="button"
             onClick={onEditPrompt}
-            className="flex w-full items-center justify-between gap-3 rounded-lg border border-border/50 px-3 py-2.5 text-sm hover:bg-muted/50 transition-colors text-left"
+            className="flex w-full items-center justify-between gap-3 rounded-lg border border-border px-3 py-2.5 text-sm hover:bg-muted/50 transition-colors text-left"
           >
             <div className="flex items-center gap-2.5">
-              <MessageSquareText className="h-4 w-4 text-muted-foreground" />
+              <MessageSquareText className="h-4 w-4 text-faint" />
               <span className="font-medium">Translation prompt</span>
-              {promptIsCustom && <Badge variant="secondary" className="text-[10px] h-4">customized</Badge>}
+              {promptIsCustom && <Badge variant="secondary" className="text-xs h-5 font-normal">Customized</Badge>}
             </div>
-            <span className="text-xs text-muted-foreground">Edit →</span>
+            <span className="text-xs text-faint">Edit</span>
           </button>
 
           {/* Locale picker */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">Target languages</Label>
+              <Label className="text-sm font-medium">Target languages</Label>
               <div className="flex items-center gap-2">
                 <Button size="sm" variant="ghost" onClick={() => setSelected(targets.map(l => l.code))}>
-                  All ({targets.length})
+                  All (<span className="tabular-nums">{targets.length}</span>)
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setSelected(initialSelection)} disabled={missingCount === 0}>
-                  Missing only ({missingCount})
+                  Missing only (<span className="tabular-nums">{missingCount}</span>)
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setSelected([])}>None</Button>
               </div>
             </div>
-            <ScrollArea className="h-56 rounded-lg border border-border/50 bg-background p-2">
+            <ScrollArea className="h-56 rounded-lg border border-border bg-background p-2">
               <div className="grid grid-cols-2 gap-1.5">
                 {targets.map(loc => {
                   const alreadyPresent = existingLocales.includes(loc.code)
@@ -107,9 +102,10 @@ export default function TranslateAllLocalesDialog({
                       />
                       <span>{loc.flag}</span>
                       <span className="truncate flex-1">{loc.name}</span>
+                      <span className="keycap shrink-0">{loc.code}</span>
                       {alreadyPresent && (
-                        <Badge variant="outline" className="text-[10px] h-4 px-1.5 shrink-0">
-                          overwrite
+                        <Badge variant="warning" className="text-xs h-5 px-1.5 shrink-0">
+                          Overwrite
                         </Badge>
                       )}
                     </label>
@@ -117,22 +113,22 @@ export default function TranslateAllLocalesDialog({
                 })}
               </div>
             </ScrollArea>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs tabular-nums text-faint">
               {selected.length} selected{overwriteCount > 0 ? ` · ${overwriteCount} will overwrite existing` : ''}
             </p>
           </div>
 
           {/* Progress */}
           {isTranslating && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/60 border border-border/50">
-              <Loader2 className="h-4 w-4 animate-spin text-foreground/70 shrink-0" />
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/60 border border-border">
+              <Loader2 className="h-4 w-4 animate-spin text-faint shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-foreground font-medium">
+                <p className="text-sm text-foreground font-medium tabular-nums">
                   {translationProgress.current}/{translationProgress.total} — {translationProgress.locale}
                 </p>
                 <div className="mt-1.5 h-1 rounded-full bg-border overflow-hidden">
                   <div
-                    className="h-full gradient-primary transition-all"
+                    className="h-full bg-highlight transition-[width]"
                     style={{ width: `${(translationProgress.current / Math.max(1, translationProgress.total)) * 100}%` }}
                   />
                 </div>
@@ -143,15 +139,14 @@ export default function TranslateAllLocalesDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isTranslating}>
-            {isTranslating ? 'Translating...' : 'Cancel'}
+            {isTranslating ? 'Translating' : 'Cancel'}
           </Button>
           <Button
             onClick={handleTranslate}
             disabled={selected.length === 0 || isTranslating}
-            className="gradient-primary text-white border-0 hover:opacity-90"
+            variant="highlight"
           >
-            {isTranslating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            <Sparkles className="h-4 w-4 mr-2" />
+            {isTranslating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Languages className="h-4 w-4 mr-2" />}
             Translate {selected.length} language{selected.length === 1 ? '' : 's'}
           </Button>
         </DialogFooter>

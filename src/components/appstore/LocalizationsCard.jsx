@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Layers, Sparkles, CheckCircle2, Globe, Loader2, Copy, Edit3, AppWindow } from 'lucide-react'
+import { Languages, CheckCircle2, Globe, Loader2, Copy, Edit3 } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 
 export default function LocalizationsCard({
@@ -37,19 +37,14 @@ export default function LocalizationsCard({
   editedAppInfo,
 }) {
   return (
-    <Card id="asc-localizations" className="border-border/50 shadow-sm scroll-mt-44">
+    <Card id="asc-localizations" className="scroll-mt-44">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-              <Layers className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Current Localizations</CardTitle>
-              <CardDescription>
-                View and edit existing localizations for v{selectedVersion.versionString}
-              </CardDescription>
-            </div>
+          <div>
+            <CardTitle className="text-base font-medium">Current localizations</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              View and edit the localizations of v{selectedVersion.versionString}
+            </CardDescription>
           </div>
           {hasPreviousVersion && (
             <Button
@@ -63,12 +58,12 @@ export default function LocalizationsCard({
               {isCopyingFromPrevious ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Copying...
+                  Copying
                 </>
               ) : (
                 <>
                   <Copy className="h-4 w-4 mr-2" />
-                  Copy All from Previous{localesNeedingCopy.length > 0 ? ` (${localesNeedingCopy.length})` : ''}
+                  Copy all from previous{localesNeedingCopy.length > 0 ? ` (${localesNeedingCopy.length})` : ''}
                 </>
               )}
             </Button>
@@ -78,26 +73,26 @@ export default function LocalizationsCard({
       <CardContent>
         {isLoadingLocalizations ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin mr-3" />
-            <span>Loading localizations...</span>
+            <Loader2 className="h-5 w-5 animate-spin mr-3 text-faint" />
+            <span>Loading localizations</span>
           </div>
         ) : versionLocalizations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-            <Globe className="h-10 w-10 mb-3 opacity-30" />
+            <Globe className="h-6 w-6 mb-3 text-faint" />
             <p className="font-medium">No localizations found</p>
             <p className="text-sm">Add translations using the section below</p>
           </div>
         ) : (
           <div className="space-y-6">
             {localesNeedingCopy.length > 0 && (
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <Copy className="h-5 w-5 text-amber-500 shrink-0" />
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-highlight/10">
+                <Copy className="h-4 w-4 text-highlight-ink shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-amber-500">
-                    {localesNeedingCopy.length} locale(s) have empty fields (description, keywords, What's New…)
+                  <p className="text-sm font-medium text-highlight-ink">
+                    <span className="tabular-nums">{localesNeedingCopy.length}</span> locale(s) have empty fields (description, keywords, What's New…)
                   </p>
-                  <p className="text-xs text-amber-500/70 mt-0.5">
-                    Content from the previous version can fill them — use "Copy All from Previous"
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Content from the previous version can fill them — use "Copy all from previous"
                   </p>
                 </div>
               </div>
@@ -105,10 +100,7 @@ export default function LocalizationsCard({
 
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-muted-foreground" />
-                  Version Content
-                </h4>
+                <h4 className="text-sm font-medium">Version content</h4>
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
@@ -116,17 +108,17 @@ export default function LocalizationsCard({
                     onClick={handleCopySupportUrl}
                     disabled={isCopyingSupportUrl || !versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl}
                     className="gap-2"
-                    title={!versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl ? `Fill Support URL in source locale (${sourceLocale}) first` : ""}
+                    title={!versionLocalizations.find(l => l.locale === sourceLocale)?.supportUrl ? `Fill the support URL in the source locale (${sourceLocale}) first` : ""}
                   >
                     {isCopyingSupportUrl ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Copying...
+                        Copying
                       </>
                     ) : (
                       <>
                         <Copy className="h-4 w-4" />
-                        Copy Support URL to all
+                        Copy support URL to all
                       </>
                     )}
                   </Button>
@@ -136,30 +128,30 @@ export default function LocalizationsCard({
                     onClick={handleCopyMarketingUrl}
                     disabled={isCopyingMarketingUrl || !versionLocalizations.find(l => l.locale === sourceLocale)?.marketingUrl}
                     className="gap-2"
-                    title={!versionLocalizations.find(l => l.locale === sourceLocale)?.marketingUrl ? `Fill Marketing URL in source locale (${sourceLocale}) first` : ""}
+                    title={!versionLocalizations.find(l => l.locale === sourceLocale)?.marketingUrl ? `Fill the marketing URL in the source locale (${sourceLocale}) first` : ""}
                   >
                     {isCopyingMarketingUrl ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Copying...
+                        Copying
                       </>
                     ) : (
                       <>
                         <Copy className="h-4 w-4" />
-                        Copy Marketing URL to all
+                        Copy marketing URL to all
                       </>
                     )}
                   </Button>
                 </div>
               </div>
-              <div className="rounded-xl border border-border/50 overflow-hidden">
+              <div className="rounded-lg border border-border overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/30 hover:bg-muted/30">
-                      <TableHead className="w-[150px] font-semibold">Locale</TableHead>
-                      <TableHead className="font-semibold">Description</TableHead>
-                      <TableHead className="w-[120px] font-semibold">What's New</TableHead>
-                      <TableHead className="w-[100px] font-semibold">Actions</TableHead>
+                      <TableHead className="w-[150px] font-medium">Locale</TableHead>
+                      <TableHead className="font-medium">Description</TableHead>
+                      <TableHead className="w-[120px] font-medium">What's New</TableHead>
+                      <TableHead className="w-[100px] font-medium">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -171,21 +163,22 @@ export default function LocalizationsCard({
                             <div className="flex items-center gap-2">
                               <span className="text-lg">{localeInfo?.flag || '🌐'}</span>
                               <span className="font-medium text-sm">{localeInfo?.name || loc.locale}</span>
+                              <span className="keycap">{loc.locale}</span>
                             </div>
                           </TableCell>
                           <TableCell className="max-w-[300px]">
                             <span className="text-sm text-muted-foreground truncate block">
-                              {loc.description ? loc.description.substring(0, 80) + '...' : <span className="italic text-muted-foreground/50">No description</span>}
+                              {loc.description ? loc.description.substring(0, 80) + '…' : <span className="text-faint">No description</span>}
                             </span>
                           </TableCell>
                           <TableCell>
                             {loc.whatsNew ? (
-                              <div className="flex items-center gap-1.5 text-emerald-500">
+                              <div className="flex items-center gap-1.5 text-positive">
                                 <CheckCircle2 className="h-4 w-4" />
                                 <span className="text-xs font-medium">Added</span>
                               </div>
                             ) : (
-                              <span className="text-xs text-muted-foreground/50 italic">Empty</span>
+                              <span className="text-xs text-faint">Empty</span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -210,27 +203,24 @@ export default function LocalizationsCard({
             {appInfoLocalizations.localizations.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold flex items-center gap-2">
-                    <AppWindow className="h-4 w-4 text-muted-foreground" />
-                    App Info (Name, Subtitle, Privacy Policy URL)
-                  </h4>
+                  <h4 className="text-sm font-medium">App info (name, subtitle, privacy policy URL)</h4>
                   <div className="flex items-center gap-2">
                     {hasAppInfoChanges && (
                       <Button
                         size="sm"
                         onClick={handleSaveAllAppInfo}
                         disabled={isSavingAppInfo}
-                        className="gradient-primary border-0"
+                        variant="highlight"
                       >
                         {isSavingAppInfo ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Saving...
+                            Saving
                           </>
                         ) : (
                           <>
                             <CheckCircle2 className="h-4 w-4 mr-2" />
-                            Save All Changes ({editedFieldsCount})
+                            Save all changes (<span className="tabular-nums">{editedFieldsCount}</span>)
                           </>
                         )}
                       </Button>
@@ -238,16 +228,16 @@ export default function LocalizationsCard({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-3 mb-3 p-3 rounded-lg bg-muted/30 border border-border">
                   <div className="flex items-center gap-2 flex-1">
-                    <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">Protected words:</Label>
+                    <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">Protected words</Label>
                     <Input
-                      placeholder="Chill, Pro, Plus..."
+                      placeholder="Chill, Pro, Plus"
                       value={appInfoProtectedWords}
                       onChange={(e) => setAppInfoProtectedWords(e.target.value)}
                       className="h-8 text-sm flex-1 max-w-[200px]"
                     />
-                    <span className="text-xs text-muted-foreground">Won't be translated</span>
+                    <span className="text-xs text-faint">Won't be translated</span>
                   </div>
                   <Button
                     size="sm"
@@ -259,25 +249,25 @@ export default function LocalizationsCard({
                     {isTranslatingAppInfo === 'all' ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Translating...
+                        Translating
                       </>
                     ) : (
                       <>
-                        <Sparkles className="h-4 w-4" />
-                        Translate All
+                        <Languages className="h-4 w-4" />
+                        Translate all
                       </>
                     )}
                   </Button>
                 </div>
 
-                <div className="rounded-xl border border-border/50 overflow-hidden">
+                <div className="rounded-lg border border-border overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/30 hover:bg-muted/30">
-                        <TableHead className="w-[140px] font-semibold">Locale</TableHead>
-                        <TableHead className="w-[180px] font-semibold">Name (30)</TableHead>
-                        <TableHead className="w-[200px] font-semibold">Subtitle (30)</TableHead>
-                        <TableHead className="w-[180px] font-semibold">Privacy URL</TableHead>
+                        <TableHead className="w-[140px] font-medium">Locale</TableHead>
+                        <TableHead className="w-[180px] font-medium">Name (30)</TableHead>
+                        <TableHead className="w-[200px] font-medium">Subtitle (30)</TableHead>
+                        <TableHead className="w-[180px] font-medium">Privacy URL</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -288,21 +278,22 @@ export default function LocalizationsCard({
                         const isSource = loc.locale === sourceLocale
                         const isTranslatingThis = isTranslatingAppInfo === loc.locale
                         return (
-                          <TableRow key={loc.id} className={hasAnyEdit ? 'bg-amber-500/5' : 'hover:bg-muted/20'}>
+                          <TableRow key={loc.id} className={hasAnyEdit ? 'bg-highlight/5' : 'hover:bg-muted/20'}>
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <span className="text-lg">{localeInfo?.flag || '🌐'}</span>
                                 <span className="font-medium text-sm">{localeInfo?.name || loc.locale}</span>
-                                {isSource && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Source</Badge>}
+                                <span className="keycap">{loc.locale}</span>
+                                {isSource && <Badge variant="secondary" className="text-xs px-1.5 py-0 font-normal">Source</Badge>}
                               </div>
                             </TableCell>
                             <TableCell>
                               <Input
-                                placeholder="App Name"
+                                placeholder="App name"
                                 value={getAppInfoValue(loc, 'name')}
                                 onChange={(e) => handleAppInfoChange(loc.id, 'name', e.target.value)}
                                 maxLength={30}
-                                className={`text-sm h-9 ${isFieldEdited(loc.id, 'name') ? 'border-amber-500 bg-amber-500/5' : ''}`}
+                                className={`text-sm h-9 ${isFieldEdited(loc.id, 'name') ? 'border-highlight/60 bg-highlight/5' : ''}`}
                               />
                             </TableCell>
                             <TableCell>
@@ -311,16 +302,16 @@ export default function LocalizationsCard({
                                 value={getAppInfoValue(loc, 'subtitle')}
                                 onChange={(e) => handleAppInfoChange(loc.id, 'subtitle', e.target.value)}
                                 maxLength={30}
-                                className={`text-sm h-9 ${isFieldEdited(loc.id, 'subtitle') ? 'border-amber-500 bg-amber-500/5' : ''}`}
+                                className={`text-sm h-9 ${isFieldEdited(loc.id, 'subtitle') ? 'border-highlight/60 bg-highlight/5' : ''}`}
                               />
                             </TableCell>
                             <TableCell>
                               <Input
                                 type="url"
-                                placeholder="https://..."
+                                placeholder="https://"
                                 value={getAppInfoValue(loc, 'privacyPolicyUrl')}
                                 onChange={(e) => handleAppInfoChange(loc.id, 'privacyPolicyUrl', e.target.value)}
-                                className={`text-sm h-9 ${isFieldEdited(loc.id, 'privacyPolicyUrl') ? 'border-amber-500 bg-amber-500/5' : ''}`}
+                                className={`text-sm h-9 ${isFieldEdited(loc.id, 'privacyPolicyUrl') ? 'border-highlight/60 bg-highlight/5' : ''}`}
                               />
                             </TableCell>
                             <TableCell>
@@ -336,7 +327,7 @@ export default function LocalizationsCard({
                                   {isTranslatingThis ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <Sparkles className="h-4 w-4" />
+                                    <Languages className="h-4 w-4" />
                                   )}
                                 </Button>
                               )}

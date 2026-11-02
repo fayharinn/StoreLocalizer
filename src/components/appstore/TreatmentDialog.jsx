@@ -33,7 +33,7 @@ export default function TreatmentDialog({ mode = 'create', open, treatment, isSu
               placeholder="AppIcon-Dark"
               className="font-mono"
             />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-faint">
               The name of an alternate icon included in your approved binary. Leave empty to keep the original icon.
             </p>
           </div>

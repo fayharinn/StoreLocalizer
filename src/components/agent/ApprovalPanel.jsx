@@ -15,7 +15,7 @@ import { AGENT_TOOL_LIST, WRITE_TOOL_NAMES } from '@/services/agentTools'
 
 function Kbd({ children }) {
   return (
-    <kbd className="ml-1.5 rounded border border-border px-1 text-[9px] font-sans leading-[14px] opacity-70">
+    <kbd className="ml-1.5 rounded-sm border border-current/20 px-1 font-mono text-xs leading-4 opacity-70">
       {children}
     </kbd>
   )
@@ -56,44 +56,44 @@ export default function ApprovalPanel({ pending, alwaysAllow, onDecide, prettyJs
   }, [onDecide, remaining.length])
 
   return (
-    <div className="rounded-lg border border-amber-500/50 bg-amber-500/5 p-3 space-y-2.5">
-      <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400">
+    <div className="rounded-lg border border-highlight/30 bg-highlight/5 p-3 space-y-3">
+      <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-highlight-ink">
         <ShieldAlert className="h-4 w-4 shrink-0" />
         <span>
           The agent wants to run <span className="font-mono">{call.name}</span>
         </span>
         {batchCount > 1 && (
-          <Badge variant="outline" className="h-5 gap-1 border-amber-500/50 px-1.5 text-[10px] text-amber-600 dark:text-amber-400">
+          <Badge variant="warning" className="h-5 gap-1 px-1.5 text-xs tabular-nums">
             <Layers className="h-3 w-3" />
             {batch.index + 1} of {batch.calls.length} calls this turn
           </Badge>
         )}
       </div>
 
-      {description && <p className="text-[11px] text-muted-foreground">{description}</p>}
+      {description && <p className="text-xs text-muted-foreground">{description}</p>}
 
-      <pre className="text-[11px] font-mono bg-background/60 rounded-md p-2 overflow-x-auto max-h-36 overflow-y-auto whitespace-pre-wrap break-all">{prettyJson(call.args || {})}</pre>
+      <pre className="text-xs font-mono bg-card border border-border rounded-md p-2 overflow-x-auto max-h-36 overflow-y-auto whitespace-pre-wrap break-all">{prettyJson(call.args || {})}</pre>
 
       {remaining.length > 0 && (
-        <div className="rounded-md border border-border/60 bg-background/40 px-2.5 py-2">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-            <ChevronsRight className="h-3.5 w-3.5" />
+        <div className="rounded-md border border-border bg-card px-3 py-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
+            <ChevronsRight className="h-3.5 w-3.5 text-faint" />
             {remaining.length} more write {remaining.length > 1 ? 'actions' : 'action'} queued in this turn
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
             {remaining.slice(0, 6).map((c, i) => (
-              <span key={`${c.id}-${i}`} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+              <span key={`${c.id}-${i}`} className="rounded-sm bg-secondary px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                 {c.name}
               </span>
             ))}
             {remaining.length > 6 && (
-              <span className="px-1 py-0.5 text-[10px] text-muted-foreground">+{remaining.length - 6}</span>
+              <span className="px-1 py-0.5 text-xs tabular-nums text-faint">+{remaining.length - 6}</span>
             )}
           </div>
         </div>
       )}
 
-      {/* Reject actions on the left, grants on the right — the two groups wrap
+      {/* Reject actions on the left, grants on the right: the two groups wrap
           as a whole on narrow screens instead of orphaning the primary button. */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1">
@@ -126,7 +126,7 @@ export default function ApprovalPanel({ pending, alwaysAllow, onDecide, prettyJs
             title={`Run ${call.name} now and every time from now on — revoke it with /ask ${call.name}`}
             onClick={() => onDecide('always')}
           >
-            <ShieldCheck className="h-4 w-4 mr-1 text-emerald-500" />
+            <ShieldCheck className="h-4 w-4 mr-1 text-muted-foreground" />
             Always allow<Kbd>⇧A</Kbd>
           </Button>
           {remaining.length > 0 && (

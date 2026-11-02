@@ -49,29 +49,29 @@ const deviceOptions = [
     { id: 'iphone-5.5', name: 'iPhone 5.5"' },
   ]},
   { group: 'iPhone Duo', items: [
-    { id: 'iphone-duo-inner-landscape', name: 'iPhone Duo Inner (landscape)' },
-    { id: 'iphone-duo-inner-portrait', name: 'iPhone Duo Inner (portrait)' },
-    { id: 'iphone-duo-outer-portrait', name: 'iPhone Duo Outer (portrait)' },
-    { id: 'iphone-duo-outer-landscape', name: 'iPhone Duo Outer (landscape)' },
+    { id: 'iphone-duo-inner-landscape', name: 'iPhone Duo inner (landscape)' },
+    { id: 'iphone-duo-inner-portrait', name: 'iPhone Duo inner (portrait)' },
+    { id: 'iphone-duo-outer-portrait', name: 'iPhone Duo outer (portrait)' },
+    { id: 'iphone-duo-outer-landscape', name: 'iPhone Duo outer (landscape)' },
   ]},
   { group: 'iPad', items: [
     { id: 'ipad-12.9', name: 'iPad 12.9"' },
     { id: 'ipad-11', name: 'iPad 11"' },
   ]},
   { group: 'Android', items: [
-    { id: 'android-phone', name: 'Android Phone' },
-    { id: 'android-phone-hd', name: 'Android Phone HD' },
-    { id: 'android-tablet-7', name: 'Android Tablet 7"' },
-    { id: 'android-tablet-10', name: 'Android Tablet 10"' },
+    { id: 'android-phone', name: 'Android phone' },
+    { id: 'android-phone-hd', name: 'Android phone HD' },
+    { id: 'android-tablet-7', name: 'Android tablet 7"' },
+    { id: 'android-tablet-10', name: 'Android tablet 10"' },
   ]},
   { group: 'Web', items: [
     { id: 'web-og', name: 'Open Graph' },
-    { id: 'web-twitter', name: 'Twitter/X Card' },
-    { id: 'web-hero', name: 'Website Hero' },
-    { id: 'web-feature', name: 'Feature Graphic' },
+    { id: 'web-twitter', name: 'Twitter/X card' },
+    { id: 'web-hero', name: 'Website hero' },
+    { id: 'web-feature', name: 'Feature graphic' },
   ]},
   { group: 'Custom', items: [
-    { id: 'custom', name: 'Custom Size' },
+    { id: 'custom', name: 'Custom size' },
   ]},
 ];
 
@@ -128,6 +128,14 @@ const DownloadIcon = () => (
 const StarIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z" />
+  </svg>
+);
+
+const TitleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 7V4h16v3" />
+    <path d="M9 20h6" />
+    <path d="M12 4v16" />
   </svg>
 );
 
@@ -511,9 +519,9 @@ export default function LeftSidebar({
   })();
 
   const dimsLabel = outputDevice === 'custom'
-    ? `${customWidth} x ${customHeight}`
+    ? `${customWidth} × ${customHeight}`
     : currentDeviceDims
-      ? `${currentDeviceDims.width} x ${currentDeviceDims.height}`
+      ? `${currentDeviceDims.width} × ${currentDeviceDims.height}`
       : '';
 
   // ---------------------------------------------------------------------------
@@ -612,23 +620,23 @@ export default function LeftSidebar({
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => onOpenLanguages?.()}>
               <TranslateIcon />
-              Manage Translations
+              Manage translations
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleReplaceScreenshot(index)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16"/></svg>
-              Replace Screenshot
+              Replace screenshot
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleDuplicateScreenshot(index)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-              Duplicate Screenshot
+              Duplicate screenshot
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleTransferStyle(index)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-              Transfer Style
+              Transfer style
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleApplyStyleToAll(index)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-              Apply Style to All
+              Apply style to all
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -636,7 +644,7 @@ export default function LeftSidebar({
               onClick={() => handleDeleteScreenshot(index)}
             >
               <TrashIcon />
-              Delete Screenshot
+              Delete screenshot
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -653,9 +661,9 @@ export default function LeftSidebar({
         {/* ---- Header with undo/redo, language picker and AI indicator ---- */}
         <div className="sidebar-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <h2 style={{ marginBottom: 0 }}>Project</h2>
+            <h2 className="section-label" style={{ marginBottom: 0 }}>Project</h2>
             <button
-              className="project-btn"
+              className="project-btn icon-ghost"
               onClick={onUndo}
               disabled={!canUndo}
               title="Undo (Ctrl+Z)"
@@ -664,7 +672,7 @@ export default function LeftSidebar({
               <UndoIcon />
             </button>
             <button
-              className="project-btn"
+              className="project-btn icon-ghost"
               onClick={onRedo}
               disabled={!canRedo}
               title="Redo (Ctrl+Shift+Z)"
@@ -709,14 +717,14 @@ export default function LeftSidebar({
                     onClick={() => { setLanguageMenuOpen(false); onOpenLanguages?.(); }}
                   >
                     <EditLangIcon />
-                    Edit Languages...
+                    Edit languages
                   </button>
                   <button
                     className="language-menu-edit"
                     onClick={handleSetDefaultLanguage}
                   >
                     <StarIcon />
-                    <span>Set as Default Language</span>
+                    <span>Set as default language</span>
                   </button>
                   <div className="language-menu-divider" />
                   <button
@@ -724,7 +732,7 @@ export default function LeftSidebar({
                     onClick={() => { setLanguageMenuOpen(false); onOpenTranslateAll?.(); }}
                   >
                     <TranslateIcon />
-                    Translate All...
+                    Translate all
                   </button>
                 </div>
               )}
@@ -782,16 +790,16 @@ export default function LeftSidebar({
           </div>
 
           <div className="project-buttons">
-            <button className="project-btn" onClick={handleNewProject} title="New Project">
+            <button className="project-btn" onClick={handleNewProject} title="New project">
               <PlusIcon />
             </button>
-            <button className="project-btn" onClick={handleRenameProject} title="Rename Project">
+            <button className="project-btn" onClick={handleRenameProject} title="Rename project">
               <PencilIcon />
             </button>
             <button
               className="project-btn danger"
               onClick={() => setShowDeleteConfirm(true)}
-              title="Delete Project"
+              title="Delete project"
             >
               <TrashIcon />
             </button>
@@ -801,7 +809,7 @@ export default function LeftSidebar({
         <div className="divider" />
 
         {/* ---- Screenshots heading ---- */}
-        <h2>Screenshots</h2>
+        <h2 className="section-label">Screenshots</h2>
 
         {/* ---- Hidden file inputs ---- */}
         <input
@@ -864,7 +872,7 @@ export default function LeftSidebar({
             </div>
             <div className="screenshot-info">
               <span className="screenshot-name">
-                {screenshots.length === 0 ? 'Add your first screenshot' : 'Add Screenshots'}
+                {screenshots.length === 0 ? 'Add your first screenshot' : 'Add screenshots'}
               </span>
               <span className="screenshot-device upload-hint">or drag &amp; drop images</span>
             </div>
@@ -895,23 +903,23 @@ export default function LeftSidebar({
                   <rect x="3" y="14" width="7" height="7" rx="1" />
                   <rect x="14" y="14" width="7" height="7" rx="1" />
                 </svg>
-                Style Templates
+                Style templates
               </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Style Templates</DialogTitle>
+                <DialogTitle>Style templates</DialogTitle>
               </DialogHeader>
               <TemplatesPanel state={state} dispatch={dispatch} />
             </DialogContent>
           </Dialog>
           <button
-            className="action-btn action-btn-magic"
+            className="action-btn"
             onClick={onGenerateTitles}
-            title="Use AI to generate marketing headlines from your screenshots"
+            title="Write a headline and subheadline for each screenshot with AI"
           >
-            <StarIcon />
-            Generate Magical Titles
+            <TitleIcon />
+            Generate titles
           </button>
           <button
             className="action-btn"
@@ -919,7 +927,7 @@ export default function LeftSidebar({
             title="Translate all text to selected languages"
           >
             <TranslateIcon />
-            Translate All Languages
+            Translate all languages
           </button>
         </div>
       </div>
@@ -958,7 +966,7 @@ export default function LeftSidebar({
                             {item.id === 'custom'
                               ? 'Set dimensions'
                               : deviceDimensions[item.id]
-                                ? `${deviceDimensions[item.id].width} x ${deviceDimensions[item.id].height}`
+                                ? `${deviceDimensions[item.id].width} × ${deviceDimensions[item.id].height}`
                                 : ''}
                           </span>
                         </div>
@@ -1009,7 +1017,7 @@ export default function LeftSidebar({
               : 'Export all screenshots as ZIP'}
           >
             <DownloadIcon />
-            Export All{screenshots.length > 0 ? ` (${screenshots.length}${projectLanguages.length > 1 ? ` × ${projectLanguages.length}` : ''})` : ''}
+            Export all{screenshots.length > 0 ? ` (${screenshots.length}${projectLanguages.length > 1 ? ` × ${projectLanguages.length}` : ''})` : ''}
           </button>
         </div>
       </div>
@@ -1022,7 +1030,7 @@ export default function LeftSidebar({
       {showProjectModal && (
         <div className="modal-overlay visible" onClick={() => setShowProjectModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{projectModalMode === 'new' ? 'New Project' : 'Rename Project'}</h3>
+            <h3 className="modal-title">{projectModalMode === 'new' ? 'New project' : 'Rename project'}</h3>
             <input
               type="text"
               className="modal-input"
@@ -1036,10 +1044,10 @@ export default function LeftSidebar({
               autoFocus
             />
             <div className="modal-buttons">
-              <button className="modal-btn secondary" onClick={() => setShowProjectModal(false)}>
+              <button className="modal-btn modal-btn-cancel" onClick={() => setShowProjectModal(false)}>
                 Cancel
               </button>
-              <button className="modal-btn primary" onClick={handleProjectModalSubmit}>
+              <button className="modal-btn modal-btn-primary" onClick={handleProjectModalSubmit}>
                 {projectModalMode === 'new' ? 'Create' : 'Rename'}
               </button>
             </div>
@@ -1051,16 +1059,16 @@ export default function LeftSidebar({
       {showDeleteConfirm && (
         <div className="modal-overlay visible" onClick={() => setShowDeleteConfirm(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Delete Project</h3>
-            <p>
+            <h3 className="modal-title">Delete project</h3>
+            <p className="modal-message">
               Are you sure you want to delete &ldquo;{currentProject?.name || 'this project'}&rdquo;?
               This action cannot be undone.
             </p>
             <div className="modal-buttons">
-              <button className="modal-btn secondary" onClick={() => setShowDeleteConfirm(false)}>
+              <button className="modal-btn modal-btn-cancel" onClick={() => setShowDeleteConfirm(false)}>
                 Cancel
               </button>
-              <button className="modal-btn danger" onClick={handleDeleteProject}>
+              <button className="modal-btn modal-btn-confirm" onClick={handleDeleteProject}>
                 Delete
               </button>
             </div>

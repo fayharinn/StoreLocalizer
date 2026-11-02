@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronRight, FlaskConical, Images, Loader2, Pencil, Plus, RefreshCw, Rocket, Trash2, X } from 'lucide-react'
+import { ChevronRight, FlaskConical, Loader2, Pencil, Play, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import { ASC_LOCALES } from '@/services/appStoreConnectService'
 import {
   EXPERIMENT_STATES,
@@ -25,7 +25,7 @@ function formatDate(iso) {
 }
 
 function stateBadge(experiment) {
-  if (isExperimentRunning(experiment)) return { label: 'Running', variant: 'default' }
+  if (isExperimentRunning(experiment)) return { label: 'Running', variant: 'success' }
   return { label: EXPERIMENT_STATES[experiment.state] || experiment.state, variant: 'secondary' }
 }
 
@@ -45,19 +45,14 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
 
   return (
     <>
-      <Card id="asc-ppo" className="scroll-mt-44 border-border/50 shadow-sm">
+      <Card id="asc-ppo" className="scroll-mt-44">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10">
-                <FlaskConical className="h-5 w-5 text-amber-500" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Product Page Optimization</CardTitle>
-                <CardDescription>
-                  A/B test icons, screenshots and app previews of {selectedApp.name} against the original product page
-                </CardDescription>
-              </div>
+            <div>
+              <CardTitle className="text-base font-medium">Product Page Optimization</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground">
+                A/B test icons, screenshots and app previews of {selectedApp.name} against the original product page
+              </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="h-9" onClick={refreshExperiments} disabled={isLoadingExperiments}>
@@ -74,12 +69,12 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
         <CardContent className="space-y-6">
           {isLoadingExperiments ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-              Loading tests...
+              <Loader2 className="mr-3 h-5 w-5 animate-spin text-faint" />
+              Loading tests
             </div>
           ) : experiments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <FlaskConical className="mb-3 h-10 w-10 opacity-30" />
+              <FlaskConical className="mb-3 h-6 w-6 text-faint" />
               <p className="font-medium">No product page tests yet</p>
               <p className="text-sm">Find out which icon or screenshots convert best before changing your main page</p>
             </div>
@@ -97,34 +92,30 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
                     tabIndex={0}
                     onClick={() => handleSelectExperiment(experiment)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSelectExperiment(experiment)}
-                    className={`group w-full cursor-pointer rounded-xl border p-4 transition-all
+                    className={`group w-full cursor-pointer rounded-lg border px-4 py-3 transition-colors
                       ${isSelected
-                        ? 'border-amber-500/50 bg-amber-500/[0.04] shadow-sm'
-                        : 'border-border/50 bg-background hover:border-amber-500/30 hover:bg-muted/40'}`}
+                        ? 'border-highlight/60 bg-muted/30'
+                        : 'border-border bg-background hover:bg-muted/40'}`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
-                        ${isSelected ? 'bg-amber-500/15' : 'bg-muted/60 group-hover:bg-amber-500/10'}`}>
-                        <FlaskConical className={`h-5 w-5 ${isSelected ? 'text-amber-500' : 'text-muted-foreground'}`} />
-                      </div>
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
-                          <span className="truncate font-semibold">{experiment.name}</span>
-                          <Badge variant={badge.variant} className="h-4 px-1.5 text-[10px]">{badge.label}</Badge>
+                          <span className="truncate font-medium">{experiment.name}</span>
+                          <Badge variant={badge.variant} className="h-5 px-1.5 text-xs">{badge.label}</Badge>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-3 text-xs tabular-nums text-muted-foreground">
                           <span>{experiment.platform}</span>
-                          <span className="text-muted-foreground/40">·</span>
+                          <span className="text-faint">·</span>
                           <span>{experiment.trafficProportion}% of traffic</span>
                           {start && (
                             <>
-                              <span className="text-muted-foreground/40">·</span>
+                              <span className="text-faint">·</span>
                               <span>{start}{end ? ` → ${end}` : ''}</span>
                             </>
                           )}
                           {experiment.reviewRequired && !experiment.startDate && (
                             <>
-                              <span className="text-muted-foreground/40">·</span>
+                              <span className="text-faint">·</span>
                               <span>needs App Review</span>
                             </>
                           )}
@@ -134,7 +125,7 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
                         {canStartExperiment(experiment) && (
                           <Button size="sm" variant="outline" className="h-8"
                             onClick={(e) => { e.stopPropagation(); setStartConfirm({ open: true, experiment, isStarting: false }) }}>
-                            <Rocket className="mr-1.5 h-3.5 w-3.5" />
+                            <Play className="mr-1.5 h-3.5 w-3.5" />
                             Start
                           </Button>
                         )}
@@ -148,8 +139,8 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
                           onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ open: true, kind: 'experiment', target: experiment, isDeleting: false }) }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                        <ChevronRight className={`ml-1 h-5 w-5 transition-transform
-                          ${isSelected ? 'rotate-90 text-amber-500' : 'text-muted-foreground/50 group-hover:translate-x-0.5 group-hover:text-amber-500'}`} />
+                        <ChevronRight className={`ml-1 h-4 w-4 transition-transform
+                          ${isSelected ? 'rotate-90 text-foreground' : 'text-faint group-hover:text-foreground'}`} />
                       </div>
                     </div>
                   </div>
@@ -159,11 +150,11 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
           )}
 
           {selectedExperiment && (
-            <div className="space-y-5 rounded-xl border border-border/50 bg-muted/20 p-5">
+            <div className="space-y-5 rounded-xl border border-border bg-muted/20 p-5">
               {isLoadingDetail ? (
                 <div className="flex items-center justify-center py-6 text-muted-foreground">
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  <span className="text-sm">Loading treatments…</span>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin text-faint" />
+                  <span className="text-sm">Loading treatments</span>
                 </div>
               ) : (
                 <>
@@ -178,7 +169,7 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
                           type="button"
                           onClick={() => handleSelectTreatment(t.id)}
                           className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors
-                            ${active ? 'border-amber-500/50 bg-amber-500/10 font-semibold' : 'border-border/50 bg-background hover:bg-muted/50'}`}
+                            ${active ? 'border-foreground/30 bg-secondary font-medium text-foreground' : 'border-border bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
                         >
                           {iconUrl && <img src={iconUrl} alt="" className="h-5 w-5 rounded" />}
                           {t.name}
@@ -207,12 +198,12 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
                   )}
 
                   {!activeTreatment ? (
-                    <p className="text-sm italic text-muted-foreground">Add a treatment to start.</p>
+                    <p className="text-sm text-muted-foreground">Add a treatment to start</p>
                   ) : (
                     <div className="space-y-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <h4 className="text-sm font-semibold">{activeTreatment.name}</h4>
+                          <h4 className="text-sm font-medium">{activeTreatment.name}</h4>
                           <p className="text-xs text-muted-foreground">
                             Icon: {activeTreatment.appIconName ? <span className="font-mono">{activeTreatment.appIconName}</span> : 'original'}
                           </p>
@@ -236,28 +227,28 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-xs font-medium text-muted-foreground">
-                            Locales in this treatment {isLoadingLocalizations && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
+                            Locales in this treatment {isLoadingLocalizations && <Loader2 className="ml-1 inline h-3 w-3 animate-spin text-faint" />}
                           </span>
                           {editable && missingLocales.length > 0 && (
                             <Select value="" onValueChange={handleAddLocale}>
-                              <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="+ Add locale" /></SelectTrigger>
+                              <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Add locale" /></SelectTrigger>
                               <SelectContent>
                                 {missingLocales.map(l => (
-                                  <SelectItem key={l.code} value={l.code}>{l.flag} {l.name}</SelectItem>
+                                  <SelectItem key={l.code} value={l.code}>{l.flag} {l.name} <span className="keycap">{l.code}</span></SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
                           )}
                         </div>
                         {treatmentLocalizations.length === 0 ? (
-                          <p className="text-xs italic text-muted-foreground">No locales yet — add one, or drop a folder of localized screenshots below.</p>
+                          <p className="text-xs text-muted-foreground">No locales yet — add one, or drop a folder of localized screenshots below.</p>
                         ) : (
                           <div className="flex flex-wrap gap-1.5">
                             {treatmentLocalizations.map(loc => (
                               <Badge key={loc.id} variant="outline" className="gap-1 py-1 pl-2 pr-1 text-xs">
-                                {ASC_LOCALES.find(l => l.code === loc.locale)?.flag || '🌐'} {loc.locale}
+                                {ASC_LOCALES.find(l => l.code === loc.locale)?.flag || '🌐'} <span className="font-mono">{loc.locale}</span>
                                 {editable && (
-                                  <button type="button" onClick={() => handleDeleteLocalization(loc)} className="rounded p-0.5 hover:bg-muted" title={`Remove ${loc.locale}`}>
+                                  <button type="button" onClick={() => handleDeleteLocalization(loc)} className="rounded p-0.5 text-faint hover:bg-muted hover:text-foreground" title={`Remove ${loc.locale}`}>
                                     <X className="h-3 w-3" />
                                   </button>
                                 )}
@@ -267,11 +258,8 @@ export default function ProductPageOptimizationCard({ selectedApp, selectedVersi
                         )}
                       </div>
 
-                      <div className="space-y-3 border-t border-border/50 pt-5">
-                        <h4 className="flex items-center gap-2 text-sm font-semibold">
-                          <Images className="h-4 w-4 text-muted-foreground" />
-                          Treatment media
-                        </h4>
+                      <div className="space-y-3 border-t border-border pt-5">
+                        <h4 className="text-sm font-medium">Treatment media</h4>
                         <LocalizedMediaPanel
                           media={media}
                           library={assetLibrary}

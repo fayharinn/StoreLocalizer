@@ -2,7 +2,8 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Primary Meta Tags -->
@@ -99,65 +100,65 @@
     </script>
 
     <!-- Theme Color - Dynamic based on theme -->
-    <meta name="theme-color" content="#7c3aed" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#8b5cf6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141415" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     
     <!-- Splash styles (replaced by React on mount) -->
     <style>
-      body { margin: 0; background: #0a0a0a; }
+      body { margin: 0; background: #141415; }
+      html.light body { background: #fafafa; }
+      /*
+       * The splash below is the page for crawlers and browsers without JavaScript.
+       * With JavaScript it stays hidden, so the app does not appear to jump from
+       * another page: only the background shows until React mounts, then a
+       * spinner and a reload link if loading takes unusually long.
+       */
+      html.js .sl-container { display: none; }
+      html.js .sl-splash { min-height: 100vh; justify-content: center; padding: 0; background: transparent; }
+      html.js .sl-loading { margin-top: 0; opacity: 0; animation: sl-reveal 0.3s ease 1.5s forwards; }
       .sl-splash {
         min-height: 100vh; box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        color: #e5e5e5;
-        background:
-          radial-gradient(600px 300px at 20% 0%, rgba(124, 58, 237, 0.18), transparent 70%),
-          radial-gradient(500px 260px at 85% 10%, rgba(139, 92, 246, 0.12), transparent 70%),
-          #0a0a0a;
+        font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #ededed;
+        background: #141415;
         display: flex; flex-direction: column; align-items: center;
         padding: 72px 20px 40px;
       }
-      .sl-splash a { color: #a78bfa; text-decoration: none; }
-      .sl-splash a:hover { text-decoration: underline; }
+      .sl-splash a { color: #ededed; text-decoration: underline; text-decoration-color: rgba(237, 237, 237, 0.3); text-underline-offset: 4px; }
+      .sl-splash a:hover { text-decoration-color: #ededed; }
       .sl-container { width: 100%; max-width: 880px; }
-      .sl-badge {
-        display: inline-block; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em;
-        color: #c4b5fd; background: rgba(124, 58, 237, 0.15);
-        border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 999px;
-        padding: 5px 14px; margin-bottom: 20px;
-      }
+      .sl-badge { display: block; font-size: 0.85rem; color: #85858b; margin-bottom: 16px; }
       .sl-title {
-        font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.15; margin: 0 0 16px; font-weight: 800;
-        background: linear-gradient(90deg, #f5f3ff, #a78bfa);
-        -webkit-background-clip: text; background-clip: text; color: transparent;
+        font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.1; margin: 0 0 16px; font-weight: 500;
+        letter-spacing: -0.02em; color: #ededed;
       }
-      .sl-lead { font-size: 1.05rem; line-height: 1.65; color: #a3a3a3; margin: 0 0 40px; max-width: 640px; }
+      .sl-lead { font-size: 1.05rem; line-height: 1.65; color: #a1a1a6; margin: 0 0 40px; max-width: 640px; }
       .sl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 0 0 44px; padding: 0; list-style: none; }
       .sl-card {
-        background: rgba(255, 255, 255, 0.03); border: 1px solid #262626; border-radius: 12px;
-        padding: 16px 18px; font-size: 0.92rem; line-height: 1.55; color: #a3a3a3;
-        transition: border-color 0.2s;
+        background: #19191b; border: 1px solid rgba(237, 237, 237, 0.08); border-radius: 12px;
+        padding: 16px 20px; font-size: 0.92rem; line-height: 1.55; color: #a1a1a6;
+        transition: border-color 150ms cubic-bezier(0.22, 1, 0.36, 1);
       }
-      .sl-card:hover { border-color: rgba(139, 92, 246, 0.5); }
-      .sl-card a { display: block; font-weight: 600; font-size: 0.98rem; margin-bottom: 4px; }
-      .sl-h2 { font-size: 1.35rem; margin: 0 0 18px; font-weight: 700; }
+      .sl-card:hover { border-color: rgba(237, 237, 237, 0.18); }
+      .sl-card a { display: block; font-weight: 500; font-size: 0.98rem; margin-bottom: 4px; text-decoration: none; }
+      .sl-h2 { font-size: 1.35rem; margin: 0 0 16px; font-weight: 500; }
       .sl-faq { margin: 0 0 20px; }
-      .sl-faq h3 { font-size: 1rem; margin: 0 0 5px; font-weight: 600; color: #e5e5e5; }
-      .sl-faq p { line-height: 1.6; color: #a3a3a3; margin: 0; font-size: 0.95rem; }
-      .sl-footer { border-top: 1px solid #262626; margin-top: 24px; padding-top: 20px; color: #737373; font-size: 0.9rem; }
-      .sl-loading { display: flex; align-items: center; gap: 10px; color: #737373; font-size: 0.85rem; margin-top: 48px; }
+      .sl-faq h3 { font-size: 1rem; margin: 0 0 4px; font-weight: 500; color: #ededed; }
+      .sl-faq p { line-height: 1.6; color: #a1a1a6; margin: 0; font-size: 0.95rem; }
+      .sl-footer { border-top: 1px solid rgba(237, 237, 237, 0.08); margin-top: 24px; padding-top: 20px; color: #85858b; font-size: 0.9rem; }
+      .sl-loading { display: flex; align-items: center; gap: 12px; color: #85858b; font-size: 0.85rem; margin-top: 48px; }
       .sl-spinner {
-        width: 16px; height: 16px; border: 2px solid #262626; border-top-color: #8b5cf6;
+        width: 16px; height: 16px; border: 2px solid #2a2a2d; border-top-color: #f5c542;
         border-radius: 50%; animation: sl-spin 0.8s linear infinite;
       }
       .sl-reload {
-        display: inline-block; margin-top: 16px; font-size: 0.9rem; font-weight: 600;
-        color: #c4b5fd !important; background: rgba(124, 58, 237, 0.15);
-        border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 999px;
-        padding: 8px 20px; opacity: 0; pointer-events: none;
+        display: inline-block; margin-top: 16px; font-size: 0.9rem; font-weight: 500;
+        color: #141415 !important; background: #ededed; text-decoration: none !important;
+        border-radius: 8px; padding: 8px 16px; opacity: 0; pointer-events: none;
         animation: sl-reveal 0.5s ease 8s forwards;
       }
-      .sl-reload:hover { text-decoration: none !important; border-color: rgba(139, 92, 246, 0.7); }
+      .sl-reload:hover { background: #d6d6d6; }
       @keyframes sl-spin { to { transform: rotate(360deg); } }
       @keyframes sl-reveal { to { opacity: 1; pointer-events: auto; } }
     </style>
@@ -186,6 +187,7 @@
         const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', isDark);
         document.documentElement.classList.toggle('light', !isDark);
+        document.documentElement.classList.add('js');
       })();
     </script>
   </head>
