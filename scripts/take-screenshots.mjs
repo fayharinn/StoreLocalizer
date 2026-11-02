@@ -11,6 +11,10 @@ import { fileURLToPath } from 'url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, 'docs', 'screenshots')
 const APP_URL = 'http://localhost:5173'
+
+// Each page has its own path (src/lib/routes.js); "/" is the landing page
+const PAGE_PATHS = { home: 'home', appstore: 'appstoreconnect', googleplay: 'googleplay', screenshots: 'screenshots', agent: 'agent', subscriptions: 'subscriptions', xcstrings: 'xcstrings' }
+const pageUrl = (page) => `${APP_URL}/${PAGE_PATHS[page]}`
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
 mkdirSync(OUT, { recursive: true })
@@ -217,12 +221,10 @@ async function preparePage(browser, { page: appPage, theme = 'dark' }) {
   const page = await browser.newPage()
   await page.setViewport({ width: 1600, height: 1000, deviceScaleFactor: 2 })
   await page.evaluateOnNewDocument((activePage, themeValue, provider) => {
-    sessionStorage.setItem('xcstrings-localizer-welcome-shown', 'true')
     localStorage.setItem('localizer-theme', themeValue)
-    localStorage.setItem('xcstrings-localizer-active-page', activePage)
     localStorage.setItem('xcstrings-localizer-provider-config', provider)
   }, appPage, theme, DEMO_PROVIDER)
-  await page.goto(APP_URL, { waitUntil: 'networkidle2' })
+  await page.goto(pageUrl(appPage), { waitUntil: 'networkidle2' })
   await sleep(1200)
   return page
 }
@@ -271,11 +273,10 @@ async function demoShot(browser, scenario, name) {
   const page = await browser.newPage()
   await page.setViewport({ width: 1600, height: 1000, deviceScaleFactor: 2 })
   await page.evaluateOnNewDocument((provider) => {
-    sessionStorage.setItem('xcstrings-localizer-welcome-shown', 'true')
     localStorage.setItem('localizer-theme', 'dark')
     localStorage.setItem('xcstrings-localizer-provider-config', provider)
   }, DEMO_PROVIDER)
-  await page.goto(`${APP_URL}/?demo=${scenario}`, { waitUntil: 'networkidle2' })
+  await page.goto(`${pageUrl('home')}?demo=${scenario}`, { waitUntil: 'networkidle2' })
   await sleep(1500)
   await clipShot(page, '[role="dialog"]', name)
 }
@@ -380,16 +381,14 @@ async function prepareConnectedAscPage(browser, activePage = 'appstore') {
     return req.continue()
   })
   await page.evaluateOnNewDocument((provider, pageId) => {
-    sessionStorage.setItem('xcstrings-localizer-welcome-shown', 'true')
     localStorage.setItem('localizer-theme', 'dark')
-    localStorage.setItem('xcstrings-localizer-active-page', pageId)
     localStorage.setItem('xcstrings-localizer-provider-config', provider)
     localStorage.setItem('asc-localizer-config', JSON.stringify({ keyId: 'DEMO4KEY42', issuerId: 'demo-issuer' }))
     sessionStorage.setItem('asc-token-cache', JSON.stringify({ token: 'demo', expiry: Date.now() + 15 * 60 * 1000, credHash: 'DEMO4KEY42:demo-issuer' }))
     sessionStorage.setItem('asc-selected-app', JSON.stringify({ id: '6448120371' }))
     sessionStorage.setItem('asc-selected-version', JSON.stringify({ id: 'v240' }))
   }, DEMO_PROVIDER, activePage)
-  await page.goto(APP_URL, { waitUntil: 'networkidle2' })
+  await page.goto(pageUrl(activePage), { waitUntil: 'networkidle2' })
   await sleep(2500)
   return page
 }
@@ -424,7 +423,6 @@ try {
     await page.setViewport({ width: 1600, height: 1000, deviceScaleFactor: 2 })
     await page.evaluateOnNewDocument(() => {
       localStorage.setItem('localizer-theme', 'dark')
-      sessionStorage.removeItem('xcstrings-localizer-welcome-shown')
     })
     await page.goto(APP_URL, { waitUntil: 'networkidle2' })
     await sleep(1200)

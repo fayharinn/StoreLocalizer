@@ -91,11 +91,9 @@ try {
       'xcstrings-localizer-provider-config',
       JSON.stringify({ provider: 'anthropic', apiKeys: { anthropic: 'sk-ant-demo' }, models: { anthropic: 'claude-sonnet-5-5' } })
     )
-    window.localStorage.setItem('xcstrings-localizer-active-page', 'agent')
     window.localStorage.setItem('localizer-theme', 'dark')
-    window.sessionStorage.setItem('xcstrings-localizer-welcome-shown', 'true')
   }, seedMessages)
-  await page.reload({ waitUntil: 'networkidle0' })
+  await page.goto(`${APP_URL}/agent`, { waitUntil: 'networkidle0' })
   await sleep(2500)
 
   const el = await page.$('main')

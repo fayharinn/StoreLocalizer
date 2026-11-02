@@ -1,31 +1,49 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { testApiConnection, PROVIDERS } from '../services/translationService'
 import {
   PROVIDER_CONFIG_KEY,
   ASC_CONFIG_KEY,
   ASTRO_CONFIG_KEY,
   APPCOMPETE_CONFIG_KEY,
-  ACTIVE_PAGE_KEY,
-  WELCOME_SHOWN_KEY
 } from '../constants'
+import { pageFromPath, pathFor, PAGE_TITLES } from '../lib/routes'
+
+// index.html's title, kept for the landing page
+const LANDING_TITLE = typeof document !== 'undefined' ? document.title : 'StoreLocalizer'
 
 export function useAppState(addLog) {
-  const [showWelcome, setShowWelcome] = useState(() => {
-    return !sessionStorage.getItem(WELCOME_SHOWN_KEY)
-  })
+  // The URL is the source of truth: null is the landing page, otherwise a page id
+  const [route, setRoute] = useState(() => pageFromPath(window.location.pathname))
 
-  const handleWelcomeComplete = () => {
-    sessionStorage.setItem(WELCOME_SHOWN_KEY, 'true')
-    setShowWelcome(false)
-  }
-
-  const [activePage, setActivePage] = useState(() => {
-    return localStorage.getItem(ACTIVE_PAGE_KEY) || 'home'
-  })
-
+  // Back and forward buttons
   useEffect(() => {
-    localStorage.setItem(ACTIVE_PAGE_KEY, activePage)
-  }, [activePage])
+    const onPopState = () => setRoute(pageFromPath(window.location.pathname))
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
+  // An unknown path (or "/" in the desktop app) is rewritten to the page it shows
+  useEffect(() => {
+    const path = pathFor(route)
+    if (window.location.pathname !== path) {
+      window.history.replaceState({ page: route }, '', path + window.location.search + window.location.hash)
+    }
+    document.title = route ? `${PAGE_TITLES[route]} · StoreLocalizer` : LANDING_TITLE
+  }, [route])
+
+  // Compares with the address bar, so two quick calls never stack duplicate entries
+  const setActivePage = useCallback((page) => {
+    const path = pathFor(page)
+    if (window.location.pathname !== path) {
+      window.history.pushState({ page }, '', path)
+      window.scrollTo(0, 0)
+    }
+    setRoute(page)
+  }, [])
+
+  const showWelcome = route === null
+  const activePage = route || 'home'
+  const handleWelcomeComplete = () => setActivePage('home')
 
   const [providerConfig, setProviderConfig] = useState(() => {
     const saved = localStorage.getItem(PROVIDER_CONFIG_KEY)

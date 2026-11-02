@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Languages, Search, DollarSign, Image, Bot, ShieldCheck, Copy, Check, ArrowRight } from 'lucide-react'
 import { LogoMark } from '@/components/LogoMark'
+import { pathFor } from '@/lib/routes'
 import { AppStoreIcon, GooglePlayIcon } from '@/components/StoreIcons'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -123,11 +124,22 @@ function ListingPreview() {
 export default function WelcomeScreen({ onComplete }) {
   const [exiting, setExiting] = useState(false)
   const [copied, setCopied] = useState(false)
+  const startedRef = useRef(false)
 
   const handleStart = useCallback(() => {
+    // Enter on a focused link fires both the key handler and the click
+    if (startedRef.current) return
+    startedRef.current = true
     setExiting(true)
     setTimeout(onComplete, 300)
   }, [onComplete])
+
+  // Plain clicks fade into the app; Cmd or middle click opens it in a new tab
+  const openApp = (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    e.preventDefault()
+    handleStart()
+  }
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Enter') handleStart() }
@@ -169,13 +181,14 @@ export default function WelcomeScreen({ onComplete }) {
                 StoreLocalizer connects to App Store Connect and the Google Play Console with your own keys, translates your listings with the AI provider you choose, builds screenshots for each locale, and lets an agent handle the repetitive parts.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-3">
-                <button
-                  onClick={handleStart}
+                <a
+                  href={pathFor('home')}
+                  onClick={openApp}
                   className="inline-flex h-12 items-center gap-2 rounded-lg bg-primary px-5 text-[15px] font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
                 >
                   Open StoreLocalizer
                   <ArrowRight className="h-4 w-4" />
-                </button>
+                </a>
                 <a
                   href={GITHUB_URL}
                   target="_blank"
@@ -266,13 +279,14 @@ export default function WelcomeScreen({ onComplete }) {
                 Bring an App Store Connect key or a Google Play service account, and an API key from the AI provider you already use.
               </p>
             </div>
-            <button
-              onClick={handleStart}
+            <a
+              href={pathFor('home')}
+              onClick={openApp}
               className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
             >
               Open StoreLocalizer
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </a>
           </div>
 
           <div className="mt-16 flex flex-wrap items-center gap-6 text-sm text-faint">

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { ChevronDown, Cpu, ExternalLink, Languages, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Images, Library, CalendarRange, PanelsTopLeft, FlaskConical, Moon, Sun, Monitor, DollarSign, Loader2, Search, Bot, House, Package } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 import { LogoMark } from './LogoMark'
+import { pathFor } from '@/lib/routes'
 import { AppStoreAccounts, GooglePlayAccounts } from './AccountSections'
 import { AppStoreIcon, GooglePlayIcon } from './StoreIcons'
 import {
@@ -80,8 +81,8 @@ function NavMenu({ items, activePage, onPageChange, subNav = {} }) {
         return (
           <SidebarMenuItem key={id}>
             <SidebarMenuButton
+              asChild
               isActive={active}
-              onClick={() => onPageChange(id)}
               tooltip={tooltip}
               className={`relative h-9 gap-2.5 rounded-md px-3 text-sm transition-colors duration-150 ${
                 active
@@ -89,14 +90,25 @@ function NavMenu({ items, activePage, onPageChange, subNav = {} }) {
                   : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60'
               }`}
             >
-              {/* Left accent bar marks the active page */}
-              <span
-                className={`absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-highlight transition-opacity duration-150 ${
-                  active ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-              <Icon className={`h-4 w-4 ${active ? 'text-foreground' : 'text-faint'}`} />
-              <span>{label}</span>
+              {/* A real link: Cmd or middle click opens the page in a new tab */}
+              <a
+                href={pathFor(id)}
+                aria-current={active ? 'page' : undefined}
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+                  e.preventDefault()
+                  onPageChange(id)
+                }}
+              >
+                {/* Left accent bar marks the active page */}
+                <span
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-highlight transition-opacity duration-150 ${
+                    active ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+                <Icon className={`h-4 w-4 ${active ? 'text-foreground' : 'text-faint'}`} />
+                <span>{label}</span>
+              </a>
             </SidebarMenuButton>
             {active && subNav[id]}
           </SidebarMenuItem>
@@ -355,13 +367,21 @@ export function AppSidebar({
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border p-2">
-        <div className="flex h-12 items-center gap-3 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+        <a
+          href={pathFor('home')}
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+            e.preventDefault()
+            onPageChange('home')
+          }}
+          className="flex h-12 items-center gap-3 rounded-md px-2 hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+        >
           <LogoMark className="h-7 w-7 shrink-0" />
           <div className="flex min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
             <span className="text-[15px] font-medium leading-none">StoreLocalizer</span>
             <span className="text-xs leading-4 text-faint truncate">App Store & Google Play</span>
           </div>
-        </div>
+        </a>
       </SidebarHeader>
 
       <SidebarContent className="px-2">
