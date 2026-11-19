@@ -228,6 +228,12 @@ Issues and pull requests are welcome. Run `bun run lint` before you open one. Th
         </a>
       </td>
       <td align="center">
+        <a href="https://github.com/SamHofmannOfficial">
+          <img src="https://avatars.githubusercontent.com/u/268283489?v=4&s=100" width="72" alt="SamHofmannOfficial" /><br />
+          <sub><b>SamHofmannOfficial</b></sub>
+        </a>
+      </td>
+      <td align="center">
         <a href="https://github.com/mashegoindustries">
           <img src="https://avatars.githubusercontent.com/u/16622091?v=4&s=100" width="72" alt="mashegoindustries" /><br />
           <sub><b>mashegoindustries</b></sub>
