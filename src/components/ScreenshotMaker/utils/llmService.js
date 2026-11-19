@@ -20,6 +20,20 @@ export function parseDataUrl(dataUrl) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Join the text blocks of an Anthropic Messages API reply.
+ * Newer Claude models (e.g. Haiku 5.5, Sonnet 5.5) think by default, so a
+ * thinking block can come before the answer and content[0] has no text.
+ * @param {object} data - Parsed /v1/messages response
+ * @returns {string}
+ */
+function anthropicText(data) {
+  return (data.content || [])
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
+    .join('');
+}
+
+/**
  * Translate text using Anthropic Claude API
  * @param {string} apiKey - Anthropic API key
  * @param {string} prompt - Text prompt
@@ -52,7 +66,7 @@ export async function translateWithAnthropic(apiKey, prompt, model) {
   }
 
   const data = await response.json();
-  return data.content[0].text;
+  return anthropicText(data);
 }
 
 /**
@@ -294,7 +308,7 @@ export async function generateTitlesWithAnthropic(apiKey, images, prompt, model)
   }
 
   const data = await response.json();
-  return data.content[0].text;
+  return anthropicText(data);
 }
 
 /**

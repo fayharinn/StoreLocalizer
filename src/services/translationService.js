@@ -431,7 +431,8 @@ async function callAnthropic(apiKey, model, systemMessage, userMessage) {
 
   const result = await response.json()
   if (result.error) throw new Error(result.error.message)
-  return result.content[0].text
+  // Thinking models can put a thinking block first; only text blocks carry the answer.
+  return (result.content || []).filter((block) => block.type === 'text').map((block) => block.text).join('')
 }
 
 // Google Gemini API (generateContent). API key goes in a header, never in the URL.

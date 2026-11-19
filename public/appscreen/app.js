@@ -3700,7 +3700,8 @@ async function translateWithAnthropic(apiKey, prompt) {
     }
 
     const data = await response.json();
-    return data.content[0].text;
+    // Thinking models can put a thinking block first; only text blocks carry the answer.
+    return (data.content || []).filter((block) => block.type === 'text').map((block) => block.text).join('');
 }
 
 async function translateWithOpenAI(apiKey, prompt) {

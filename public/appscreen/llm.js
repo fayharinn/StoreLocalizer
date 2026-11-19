@@ -12,11 +12,11 @@ const llmProviders = {
         storageKey: 'claudeApiKey',
         modelStorageKey: 'anthropicModel',
         models: [
-            { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 ($)' },
-            { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5 ($$)' },
-            { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5 ($$$)' },
+            { id: 'claude-haiku-5-5', name: 'Claude Haiku 5.5 ($)' },
+            { id: 'claude-sonnet-5-5', name: 'Claude Sonnet 5.5 ($$)' },
+            { id: 'claude-opus-5-5', name: 'Claude Opus 5.5 ($$$)' },
         ],
-        defaultModel: 'claude-sonnet-4-6'
+        defaultModel: 'claude-haiku-5-5'
     },
     openai: {
         name: 'OpenAI (GPT)',
