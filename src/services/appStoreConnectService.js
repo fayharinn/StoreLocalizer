@@ -587,6 +587,27 @@ This explains what the event is and why users should take part. Keep it inviting
 - Hard limit: {limit} characters. Keep it concise — trim secondary detail before going over.
 - Keep brand names unchanged.
 - Output ONLY the translated long description — nothing else.`,
+
+  // ── Subscription retention message fields ─────────────────────────────────
+  header: `You are an App Store localization specialist. Translate this SUBSCRIPTION RETENTION MESSAGE HEADER into {localeName}.
+
+It is shown to people who are about to cancel a subscription, to remind them why it's worth keeping. Make it warm and idiomatic; rewrite rather than translate literally if it reads better.
+
+- Hard limit: {limit} characters. Keep it to one short line.
+- Never add prices, discounts, percentages or "free" offers (App Review rejects them).
+- No all caps, no repeated exclamation marks, no pressure or guilt.
+- Keep brand names unchanged.
+- Output ONLY the translated header — nothing else.`,
+
+  body: `You are an App Store localization specialist. Translate this SUBSCRIPTION RETENTION MESSAGE BODY into {localeName}.
+
+It appears under the header when someone starts to cancel, and reminds them of the value they keep by staying subscribed (features, content, progress). Keep the same meaning and a calm, friendly tone.
+
+- Hard limit: {limit} characters. Trim secondary detail before going over.
+- Never add prices, discounts, percentages or "free" offers (App Review rejects them).
+- No all caps, no repeated exclamation marks, no pressure or claims that can't be verified.
+- Keep brand names unchanged.
+- Output ONLY the translated body — nothing else.`,
 }
 
 // Generic fallback for any field not in the map above (e.g. name/subtitle reuse).
@@ -635,6 +656,8 @@ export async function translateAppStoreContent(text, targetLocale, aiConfig, fie
     subtitle: 30,
     shortDescription: 50,
     longDescription: 120,
+    header: 66,
+    body: 144,
   }
 
   const limit = charLimits[fieldType] || 4000

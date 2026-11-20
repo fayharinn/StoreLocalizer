@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { ChevronDown, Cpu, ExternalLink, Languages, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Images, Library, CalendarRange, PanelsTopLeft, FlaskConical, Moon, Sun, Monitor, DollarSign, Loader2, Search, Bot, House, Package } from 'lucide-react'
+import { ChevronDown, Cpu, ExternalLink, Languages, CheckCircle2, AlertCircle, Link2, AppWindow, Layers, TrendingUp, Terminal, Image, Images, Library, CalendarRange, PanelsTopLeft, FlaskConical, HeartHandshake, Moon, Sun, Monitor, DollarSign, Loader2, Search, Bot, House, Package } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 import { LogoMark } from './LogoMark'
 import { pathFor } from '@/lib/routes'
@@ -299,6 +299,13 @@ export function AppSidebar({
       >
         <FlaskConical className="h-3.5 w-3.5" />
         <span>Page Optimization</span>
+      </button>
+      <button
+        onClick={() => goToAscSection('asc-retention')}
+        className="flex h-8 min-w-0 items-center gap-2.5 w-full px-2 rounded-md text-[13px] text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60 transition-colors [&>svg]:shrink-0 [&>svg]:text-faint [&>span]:truncate"
+      >
+        <HeartHandshake className="h-3.5 w-3.5" />
+        <span>Retention messages</span>
       </button>
       <button
         onClick={() => goToAscSection('asc-translation')}

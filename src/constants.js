@@ -16,6 +16,7 @@ export function isLocalEnvironment() {
 export const EVENT_TRANSLATION_PROMPTS_KEY = 'asc-events-translation-prompts'
 export const VERSION_TRANSLATION_PROMPTS_KEY = 'asc-version-translation-prompts'
 export const CPP_TRANSLATION_PROMPTS_KEY = 'asc-cpp-translation-prompts'
+export const RETENTION_TRANSLATION_PROMPTS_KEY = 'asc-retention-translation-prompts'
 // Legacy keys (single string) migrated by useAscTranslationPrompt
 export const LEGACY_EVENT_PROMPT_KEY = 'asc-events-translation-prompt'
 export const LEGACY_SHARED_PROMPT_KEY = 'asc-translation-prompt'

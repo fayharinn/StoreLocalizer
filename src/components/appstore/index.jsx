@@ -26,12 +26,14 @@ import useAssetLibrary from '@/hooks/useAssetLibrary'
 import useLocalizedMedia from '@/hooks/useLocalizedMedia'
 import useCustomProductPages from '@/hooks/useCustomProductPages'
 import useProductPageExperiments from '@/hooks/useProductPageExperiments'
+import useRetentionMessages from '@/hooks/useRetentionMessages'
 import useBuildUpload from '@/hooks/useBuildUpload'
 import { selectScreenshotTargetGroups } from '@/services/appAssetLibraryService'
 import {
   EVENT_TRANSLATION_PROMPTS_KEY,
   VERSION_TRANSLATION_PROMPTS_KEY,
   CPP_TRANSLATION_PROMPTS_KEY,
+  RETENTION_TRANSLATION_PROMPTS_KEY,
   LEGACY_EVENT_PROMPT_KEY,
   LEGACY_SHARED_PROMPT_KEY,
   isLocalEnvironment,
@@ -52,6 +54,11 @@ const VERSION_PROMPT_FIELDS = [
 
 const CPP_PROMPT_FIELDS = [
   { key: 'promotionalText', label: 'Promotional text' },
+]
+
+const RETENTION_PROMPT_FIELDS = [
+  { key: 'header', label: 'Header' },
+  { key: 'body', label: 'Body' },
 ]
 
 const COPY_FIELD_LABELS = {
@@ -75,6 +82,7 @@ import AssetLibraryCard from './AssetLibraryCard'
 import ProductPageMediaCard from './ProductPageMediaCard'
 import CustomProductPagesCard from './CustomProductPagesCard'
 import ProductPageOptimizationCard from './ProductPageOptimizationCard'
+import RetentionMessagesCard from './RetentionMessagesCard'
 import ActivityLogCard from './ActivityLogCard'
 import BuildUploadCard from './BuildUploadCard'
 
@@ -99,6 +107,7 @@ const SECTION_TABS = {
   'asc-events': 'growth',
   'asc-cpp': 'growth',
   'asc-ppo': 'growth',
+  'asc-retention': 'growth',
   'asc-builds': 'builds',
   'asc-logs': 'activity',
 }
@@ -166,6 +175,9 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
   const cppPrompt = useAscTranslationPrompt(CPP_TRANSLATION_PROMPTS_KEY, {
     fields: CPP_PROMPT_FIELDS.map(f => f.key),
   })
+  const retentionPrompt = useAscTranslationPrompt(RETENTION_TRANSLATION_PROMPTS_KEY, {
+    fields: RETENTION_PROMPT_FIELDS.map(f => f.key),
+  })
   const hook = useAppStoreConnect({ credentials, onCredentialsChange, aiConfig, astroConfig, appCompeteConfig, translationPrompts: versionPrompt.prompts })
   // iOS 27 App Asset Library — shared by every media surface below
   const assetLibrary = useAssetLibrary({ credentials, selectedApp: hook.selectedApp })
@@ -176,6 +188,13 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
     assetLibrary,
     aiConfig,
     translationPrompts: cppPrompt.prompts,
+    defaultLocale: hook.sourceLocale,
+  })
+  const retentionHook = useRetentionMessages({
+    credentials,
+    selectedApp: hook.selectedApp,
+    aiConfig,
+    translationPrompts: retentionPrompt.prompts,
     defaultLocale: hook.sourceLocale,
   })
   const buildHook = useBuildUpload({ credentials, selectedApp: hook.selectedApp })
@@ -472,7 +491,18 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
                   onPreviewAsset={handlePreviewAsset}
                 />
               )}
-                {!hook.selectedApp && <TabEmpty text="Select an app to manage events and product pages." />}
+
+              {hook.selectedApp && (
+                <RetentionMessagesCard
+                  selectedApp={hook.selectedApp}
+                  retentionHook={retentionHook}
+                  aiConfig={aiConfig}
+                  defaultLocale={hook.sourceLocale}
+                  promptIsCustom={retentionPrompt.anyCustom}
+                  onEditPrompt={() => retentionPrompt.setPromptDialog({ open: true, field: 'header' })}
+                />
+              )}
+                {!hook.selectedApp && <TabEmpty text="Select an app to manage events, product pages and retention messages." />}
               </>
             )}
           </TabsContent>
@@ -805,6 +835,23 @@ export default function AppStoreConnect({ credentials, onCredentialsChange, aiCo
           onReset={cppPrompt.reset}
           onResetAll={cppPrompt.resetAll}
           onClose={() => cppPrompt.setPromptDialog({ open: false, field: 'promotionalText' })}
+        />
+      )}
+
+      {retentionPrompt.promptDialog.open && (
+        <TranslationPromptDialog
+          open
+          title="Retention message prompts"
+          description="One prompt per field for subscription retention messages (header 66 chars, body 144)."
+          fields={RETENTION_PROMPT_FIELDS}
+          initialField={retentionPrompt.promptDialog.field}
+          getPrompt={retentionPrompt.getPromptFor}
+          getDefault={retentionPrompt.getDefaultFor}
+          isCustom={retentionPrompt.isCustom}
+          onSave={retentionPrompt.setPrompt}
+          onReset={retentionPrompt.reset}
+          onResetAll={retentionPrompt.resetAll}
+          onClose={() => retentionPrompt.setPromptDialog({ open: false, field: 'header' })}
         />
       )}
 
